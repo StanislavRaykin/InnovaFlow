@@ -1,0 +1,22 @@
+<Project Sdk="Aspire.AppHost.Sdk/13.5.0">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Gateway\Gateway.csproj" />
+    <ProjectReference Include="..\Identity\Identity.csproj" />
+    <ProjectReference Include="..\Projects\Projects.csproj" />
+    <ProjectReference Include="..\Analysis.Api\Analysis.Api.csproj" />
+    <ProjectReference Include="..\Analysis.Worker\Analysis.Worker.csproj" />
+    <ProjectReference Include="..\Notifier\Notifier.csproj" />
+    <ProjectReference Include="..\Client\Client.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AspireUseCliBundle>true</AspireUseCliBundle>
+    <UserSecretsId>9711a2b3-ee23-4092-9e13-e9843644b06a</UserSecretsId>
+  </PropertyGroup>
+
+</Project>
