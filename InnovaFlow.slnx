@@ -1,17 +1,19 @@
 <Solution>
   <Folder Name="/src/">
-    <Project Path="src/Analysis.Api/Analysis.Api.csproj"/>
-    <Project Path="src/Analysis.Worker/Analysis.Worker.csproj"/>
-    <Project Path="src/AppHost/AppHost.csproj"/>
-    <Project Path="src/Client/Client.csproj"/>
-    <Project Path="src/Contracts/Contracts.csproj"/>
-    <Project Path="src/Gateway/Gateway.csproj"/>
-    <Project Path="src/Identity/Identity.csproj"/>
-    <Project Path="src/Notifier/Notifier.csproj"/>
-    <Project Path="src/Projects/Projects.csproj"/>
-    <Project Path="src/ServiceDefaults/ServiceDefaults.csproj"/>
+    <Project Path="src/Analysis.Api/Analysis.Api.csproj" />
+    <Project Path="src/Analysis.Data/Analysis.Data.csproj" />
+    <Project Path="src/Analysis.Worker/Analysis.Worker.csproj" />
+    <Project Path="src/AppHost/AppHost.csproj" />
+    <Project Path="src/Client/Client.csproj" />
+    <Project Path="src/Contracts/Contracts.csproj" />
+    <Project Path="src/Gateway/Gateway.csproj" />
+    <Project Path="src/Identity/Identity.csproj" />
+    <Project Path="src/Notifier/Notifier.csproj" />
+    <Project Path="src/Projects.Data/Projects.Data.csproj" />
+    <Project Path="src/Projects/Projects.csproj" />
+    <Project Path="src/ServiceDefaults/ServiceDefaults.csproj" />
   </Folder>
   <Folder Name="/Solution Items/">
-    <File Path=".gitignore"/>
+    <File Path=".gitignore" />
   </Folder>
 </Solution>
