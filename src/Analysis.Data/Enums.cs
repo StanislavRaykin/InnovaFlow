@@ -1,28 +1,34 @@
 namespace InnovaFlow.Analysis.Data;
 
-/// <summary>
-/// Lifecycle of a single node. Stored as text so rows are readable in pgAdmin
-/// during a demo. Skipped and NotApplicable are deliberately distinct:
-///   Skipped        - a dependency failed, so this node never ran
-///   NotApplicable  - a predicate excluded it (e.g. brand analysis on a non-brand idea)
-/// </summary>
-public enum NodeState
+public enum AnalysisStatus { Pending, Running, Completed, Failed }
+
+public enum RiskSeverity { Low, Medium, High, Critical }
+
+public enum Priority { Low, Medium, High }
+
+/// <summary>The twelve DAG nodes. The value is also the queue-visible name.</summary>
+public enum NodeType
 {
-    Pending,
-    Ready,
-    Running,
-    Succeeded,
-    Failed,
-    Skipped,
-    NotApplicable,
-    Cancelled
+    Classification,
+    Market,
+    Competitors,
+    Audience,
+    Personas,
+    Innovation,
+    Business,
+    Brand,
+    Feasibility,
+    Risks,
+    Opportunities,
+    Recommendations
 }
 
-public enum JobState
+/// <summary>
+/// The six dimensions on the dashboard. Innovation is a score row like the
+/// rest - AnalysisScore.Explanation carries the reasoning text, so it needs no
+/// table of its own.
+/// </summary>
+public enum ScoreType
 {
-    Running,
-    Completed,
-    PartiallyCompleted,
-    Failed,
-    Cancelled
+    Market, Innovation, Feasibility, Scalability, Competition, Risk
 }

@@ -1,35 +1,30 @@
 namespace InnovaFlow.Analysis.Data;
 
-// Classes, not records - EF tracks by identity and mutates in place.
 public class Analysis
 {
     public Guid Id { get; set; }
 
     /// <summary>Owned by the Projects service. No FK - different schema.</summary>
     public Guid IdeaId { get; set; }
-    public Guid? IdeaVersionId { get; set; }
-
-    public JobState State { get; set; } = JobState.Running;
 
     /// <summary>
-    /// Flattened authorization result, resolved by Projects at job creation.
-    /// AI Analysis never reads membership tables; it only checks containment.
-    /// Kept fresh by consuming MembershipChanged events.
+    /// The immutable snapshot this run analysed. Also lives in the projects
+    /// schema, so also no FK. Without it, comparing analysis #1 against #3 is
+    /// comparing results against text that may since have changed.
     /// </summary>
-    public Guid[] AuthorizedUserIds { get; set; } = [];
+    public Guid IdeaVersionId { get; set; }
 
-    /// <summary>Who pressed the button. Used for notification targeting.</summary>
-    public Guid RequestedBy { get; set; }
+    public AnalysisStatus Status { get; set; } = AnalysisStatus.Pending;
 
-    /// <summary>Deduplicates double-submits. Unique when present.</summary>
-    public string? IdempotencyKey { get; set; }
+    public DateTimeOffset? StartedAt { get; set; }
+    public DateTimeOffset? CompletedAt { get; set; }
 
     public decimal? OverallScore { get; set; }
     public string? Summary { get; set; }
+    public string? ErrorMessage { get; set; }
 
-    public DateTimeOffset StartedAt { get; set; } = DateTimeOffset.UtcNow;
-    public DateTimeOffset? CompletedAt { get; set; }
-    public DateTimeOffset? DeletedAt { get; set; }
-
-    public List<AIRequest> Nodes { get; set; } = [];
+    public List<AnalysisScore> Scores { get; set; } = [];
+    public List<Recommendation> Recommendations { get; set; } = [];
+    public List<Source> Sources { get; set; } = [];
+    public List<AIRequest> Requests { get; set; } = [];
 }

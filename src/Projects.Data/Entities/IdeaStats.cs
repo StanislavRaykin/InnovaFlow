@@ -1,8 +1,8 @@
 namespace InnovaFlow.Projects.Data;
 
 /// <summary>
-/// Read model maintained by consuming JobFinished. Exists because Projects
-/// cannot query the analysis schema - the event carries the counts instead.
+/// Denormalised counters for the dashboard, updated from analysis events
+/// consumed off RabbitMQ. Avoids a cross-service query on every page load.
 /// </summary>
 public class IdeaStats
 {

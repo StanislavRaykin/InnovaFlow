@@ -7,5 +7,5 @@ public class TeamMember
 
     public Guid UserId { get; set; }
     public MemberRole Role { get; set; }
-    public DateTimeOffset JoinedAt { get; set; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset JoinedAt { get; set; }
 }

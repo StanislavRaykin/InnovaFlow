@@ -2,127 +2,343 @@ using Microsoft.EntityFrameworkCore;
 
 namespace InnovaFlow.Analysis.Data;
 
-public class AnalysisDbContext(
-    DbContextOptions<AnalysisDbContext> options,
-    ICurrentUser currentUser) : DbContext(options)
+/// <summary>
+/// No query filter anywhere in this context. Access is decided by the Projects
+/// service before an analysis is ever requested, and the Worker runs with no
+/// user at all - filtering here would only give a false sense of enforcement.
+/// Analysis.Api must check membership through Projects before returning results.
+/// </summary>
+public class AnalysisDbContext(DbContextOptions<AnalysisDbContext> options) : DbContext(options)
 {
     public DbSet<Analysis> Analyses => Set<Analysis>();
-    public DbSet<AIRequest> AIRequests => Set<AIRequest>();
-    public DbSet<OutboxMessage> Outbox => Set<OutboxMessage>();
-    public DbSet<ProcessedMessage> ProcessedMessages => Set<ProcessedMessage>();
+    public DbSet<AnalysisScore> Scores => Set<AnalysisScore>();
+
+    public DbSet<MarketAnalysis> MarketAnalyses => Set<MarketAnalysis>();
+    public DbSet<Competitor> Competitors => Set<Competitor>();
+    public DbSet<AudienceAnalysis> AudienceAnalyses => Set<AudienceAnalysis>();
+    public DbSet<Persona> Personas => Set<Persona>();
+    public DbSet<RiskAnalysis> RiskAnalyses => Set<RiskAnalysis>();
+    public DbSet<Risk> Risks => Set<Risk>();
+    public DbSet<OpportunityAnalysis> OpportunityAnalyses => Set<OpportunityAnalysis>();
+    public DbSet<Opportunity> Opportunities => Set<Opportunity>();
+    public DbSet<FeasibilityAnalysis> FeasibilityAnalyses => Set<FeasibilityAnalysis>();
+    public DbSet<BusinessAnalysis> BusinessAnalyses => Set<BusinessAnalysis>();
+    public DbSet<BrandAnalysis> BrandAnalyses => Set<BrandAnalysis>();
+
+    public DbSet<Recommendation> Recommendations => Set<Recommendation>();
+    public DbSet<Source> Sources => Set<Source>();
+    public DbSet<AIRequest> Requests => Set<AIRequest>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
-        b.HasDefaultSchema("analysis");
+        b.HasDefaultSchema("Analysis");
 
         // -------------------------------------------------------------------
-        // Analysis
+        // Job
         // -------------------------------------------------------------------
+
         b.Entity<Analysis>(e =>
         {
             e.ToTable("Analyses");
             e.HasKey(x => x.Id);
             e.Property(x => x.Id).HasDefaultValueSql("gen_random_uuid()");
 
-            e.Property(x => x.State).HasConversion<string>().HasMaxLength(32);
-            e.Property(x => x.AuthorizedUserIds).HasColumnType("uuid[]");
+            e.Property(x => x.Status).HasConversion<string>().HasMaxLength(32);
             e.Property(x => x.OverallScore).HasPrecision(5, 2);
-            e.Property(x => x.IdempotencyKey).HasMaxLength(128);
 
             e.HasIndex(x => x.IdeaId);
-            e.HasIndex(x => x.IdempotencyKey)
-             .IsUnique()
-             .HasFilter("idempotency_key IS NOT NULL");
+            e.HasIndex(x => x.IdeaVersionId);
 
-            // Containment lookups (authorized_user_ids @> ARRAY[:userId])
-            e.HasIndex(x => x.AuthorizedUserIds).HasMethod("gin");
+            // The dashboard asks for the newest analysis of an idea constantly.
+            e.HasIndex(x => new { x.IdeaId, x.StartedAt })
+             .HasDatabaseName("IX_Analyses_IdeaId_StartedAt");
+        });
 
-            // Soft delete + authorization, enforced at the context level so a
-            // forgotten .Where() in a handler cannot leak another user's job.
-            e.HasQueryFilter(x =>
-                x.DeletedAt == null &&
-                (currentUser.IsSystem ||
-                 (currentUser.Id != null && x.AuthorizedUserIds.Contains(currentUser.Id.Value))));
+        b.Entity<AnalysisScore>(e =>
+        {
+            e.ToTable("AnalysisScores");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).HasDefaultValueSql("gen_random_uuid()");
 
-            e.HasMany(x => x.Nodes)
-             .WithOne(n => n.Analysis)
-             .HasForeignKey(n => n.AnalysisId)
+            e.Property(x => x.ScoreType).HasConversion<string>().HasMaxLength(32);
+            e.Property(x => x.Score).HasPrecision(5, 2);
+
+            // One score per dimension per run - a rerun replaces, never appends.
+            e.HasIndex(x => new { x.AnalysisId, x.ScoreType }).IsUnique();
+
+            e.HasOne(x => x.Analysis)
+             .WithMany(a => a.Scores)
+             .HasForeignKey(x => x.AnalysisId)
              .OnDelete(DeleteBehavior.Cascade);
         });
 
         // -------------------------------------------------------------------
-        // AIRequest
+        // Single-row node results
+        //
+        // Each has a unique AnalysisId: one result per node per run, which is
+        // what stops a rerun from duplicating them.
         // -------------------------------------------------------------------
+
+        b.Entity<MarketAnalysis>(e =>
+        {
+            e.ToTable("MarketAnalyses");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).HasDefaultValueSql("gen_random_uuid()");
+            e.Property(x => x.MarketSize).HasMaxLength(200);
+            e.Property(x => x.MarketTrend).HasMaxLength(200);
+            e.Property(x => x.MarketOpportunity).HasPrecision(5, 2);
+            e.Property(x => x.CreatedAt).HasDefaultValueSql("now()");
+
+            e.HasIndex(x => x.AnalysisId).IsUnique();
+
+            e.HasOne(x => x.Analysis).WithMany()
+             .HasForeignKey(x => x.AnalysisId)
+             .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        b.Entity<AudienceAnalysis>(e =>
+        {
+            e.ToTable("AudienceAnalyses");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).HasDefaultValueSql("gen_random_uuid()");
+
+            e.HasIndex(x => x.AnalysisId).IsUnique();
+
+            e.HasOne(x => x.Analysis).WithMany()
+             .HasForeignKey(x => x.AnalysisId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasMany(x => x.Personas)
+             .WithOne(p => p.AudienceAnalysis)
+             .HasForeignKey(p => p.AudienceAnalysisId)
+             .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        b.Entity<RiskAnalysis>(e =>
+        {
+            e.ToTable("RiskAnalyses");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).HasDefaultValueSql("gen_random_uuid()");
+            e.Property(x => x.RiskScore).HasPrecision(5, 2);
+
+            e.HasIndex(x => x.AnalysisId).IsUnique();
+
+            e.HasOne(x => x.Analysis).WithMany()
+             .HasForeignKey(x => x.AnalysisId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasMany(x => x.Risks)
+             .WithOne(r => r.RiskAnalysis)
+             .HasForeignKey(r => r.RiskAnalysisId)
+             .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        b.Entity<OpportunityAnalysis>(e =>
+        {
+            e.ToTable("OpportunityAnalyses");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).HasDefaultValueSql("gen_random_uuid()");
+            e.Property(x => x.OpportunityScore).HasPrecision(5, 2);
+
+            e.HasIndex(x => x.AnalysisId).IsUnique();
+
+            e.HasOne(x => x.Analysis).WithMany()
+             .HasForeignKey(x => x.AnalysisId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasMany(x => x.Opportunities)
+             .WithOne(o => o.OpportunityAnalysis)
+             .HasForeignKey(o => o.OpportunityAnalysisId)
+             .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        b.Entity<FeasibilityAnalysis>(e =>
+        {
+            e.ToTable("FeasibilityAnalyses");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).HasDefaultValueSql("gen_random_uuid()");
+            e.Property(x => x.TechnicalScore).HasPrecision(5, 2);
+            e.Property(x => x.ResourceScore).HasPrecision(5, 2);
+            e.Property(x => x.ComplexityScore).HasPrecision(5, 2);
+
+            e.HasIndex(x => x.AnalysisId).IsUnique();
+
+            e.HasOne(x => x.Analysis).WithMany()
+             .HasForeignKey(x => x.AnalysisId)
+             .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        b.Entity<BusinessAnalysis>(e =>
+        {
+            e.ToTable("BusinessAnalyses");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).HasDefaultValueSql("gen_random_uuid()");
+            e.Property(x => x.BusinessModel).HasMaxLength(150);
+            e.Property(x => x.RevenueModel).HasMaxLength(150);
+            e.Property(x => x.RevenuePotential).HasPrecision(5, 2);
+
+            e.HasIndex(x => x.AnalysisId).IsUnique();
+
+            e.HasOne(x => x.Analysis).WithMany()
+             .HasForeignKey(x => x.AnalysisId)
+             .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        b.Entity<BrandAnalysis>(e =>
+        {
+            e.ToTable("BrandAnalyses");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).HasDefaultValueSql("gen_random_uuid()");
+            e.Property(x => x.Positioning).HasMaxLength(500);
+            e.Property(x => x.CommunicationStyle).HasMaxLength(500);
+
+            e.Property(x => x.CoreValues).HasColumnType("jsonb");
+            e.Property(x => x.NameSuggestions).HasColumnType("jsonb");
+            e.Property(x => x.Slogans).HasColumnType("jsonb");
+
+            e.HasIndex(x => x.AnalysisId).IsUnique();
+
+            e.HasOne(x => x.Analysis).WithMany()
+             .HasForeignKey(x => x.AnalysisId)
+             .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // -------------------------------------------------------------------
+        // Multi-row node results
+        //
+        // No unique constraint is possible here, so the Worker must delete by
+        // parent id before inserting when a node reruns.
+        // -------------------------------------------------------------------
+
+        b.Entity<Competitor>(e =>
+        {
+            e.ToTable("Competitors");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).HasDefaultValueSql("gen_random_uuid()");
+
+            e.Property(x => x.Name).HasMaxLength(200).IsRequired();
+            e.Property(x => x.WebsiteUrl).HasMaxLength(500);
+            e.Property(x => x.Industry).HasMaxLength(100);
+            e.Property(x => x.PricingModel).HasMaxLength(150);
+            e.Property(x => x.SimilarityScore).HasPrecision(5, 2);
+
+            e.Property(x => x.Strengths).HasColumnType("jsonb");
+            e.Property(x => x.Weaknesses).HasColumnType("jsonb");
+
+            e.HasIndex(x => x.AnalysisId);
+
+            e.HasOne(x => x.Analysis).WithMany()
+             .HasForeignKey(x => x.AnalysisId)
+             .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        b.Entity<Persona>(e =>
+        {
+            e.ToTable("Personas");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).HasDefaultValueSql("gen_random_uuid()");
+
+            e.Property(x => x.Name).HasMaxLength(150).IsRequired();
+            e.Property(x => x.AgeRange).HasMaxLength(50);
+            e.Property(x => x.Occupation).HasMaxLength(150);
+
+            e.Property(x => x.Goals).HasColumnType("jsonb");
+            e.Property(x => x.PainPoints).HasColumnType("jsonb");
+            e.Property(x => x.Behaviors).HasColumnType("jsonb");
+
+            e.HasIndex(x => x.AudienceAnalysisId);
+        });
+
+        b.Entity<Risk>(e =>
+        {
+            e.ToTable("Risks");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).HasDefaultValueSql("gen_random_uuid()");
+
+            e.Property(x => x.Type).HasMaxLength(50).IsRequired();
+            e.Property(x => x.Title).HasMaxLength(200).IsRequired();
+            e.Property(x => x.Severity).HasConversion<string>().HasMaxLength(16);
+            e.Property(x => x.Probability).HasPrecision(5, 2);
+            e.Property(x => x.Impact).HasPrecision(5, 2);
+
+            e.HasIndex(x => x.RiskAnalysisId);
+
+            // The dashboard surfaces the single worst risk.
+            e.HasIndex(x => new { x.RiskAnalysisId, x.Severity });
+        });
+
+        b.Entity<Opportunity>(e =>
+        {
+            e.ToTable("Opportunities");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).HasDefaultValueSql("gen_random_uuid()");
+
+            e.Property(x => x.Title).HasMaxLength(200).IsRequired();
+            e.Property(x => x.PotentialImpact).HasMaxLength(100);
+            e.Property(x => x.Difficulty).HasMaxLength(100);
+
+            e.HasIndex(x => x.OpportunityAnalysisId);
+        });
+
+        b.Entity<Recommendation>(e =>
+        {
+            e.ToTable("Recommendations");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).HasDefaultValueSql("gen_random_uuid()");
+
+            e.Property(x => x.Title).HasMaxLength(200).IsRequired();
+            e.Property(x => x.Priority).HasConversion<string>().HasMaxLength(16);
+            e.Property(x => x.Category).HasMaxLength(100);
+
+            e.HasIndex(x => x.AnalysisId);
+
+            e.HasOne(x => x.Analysis)
+             .WithMany(a => a.Recommendations)
+             .HasForeignKey(x => x.AnalysisId)
+             .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        b.Entity<Source>(e =>
+        {
+            e.ToTable("Sources");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).HasDefaultValueSql("gen_random_uuid()");
+
+            e.Property(x => x.Title).HasMaxLength(300).IsRequired();
+            e.Property(x => x.Url).HasMaxLength(1000);
+            e.Property(x => x.SourceType).HasMaxLength(50);
+            e.Property(x => x.RelevanceScore).HasPrecision(5, 2);
+            e.Property(x => x.RetrievedAt).HasDefaultValueSql("now()");
+
+            e.HasIndex(x => x.AnalysisId);
+
+            e.HasOne(x => x.Analysis)
+             .WithMany(a => a.Sources)
+             .HasForeignKey(x => x.AnalysisId)
+             .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // -------------------------------------------------------------------
+        // Provider call log
+        // -------------------------------------------------------------------
+
         b.Entity<AIRequest>(e =>
         {
             e.ToTable("AIRequests");
             e.HasKey(x => x.Id);
             e.Property(x => x.Id).HasDefaultValueSql("gen_random_uuid()");
 
-            e.Property(x => x.NodeKey).HasMaxLength(64).IsRequired();
-            e.Property(x => x.State).HasConversion<string>().HasMaxLength(32);
-            e.Property(x => x.DependsOn).HasColumnType("text[]");
-            e.Property(x => x.InputHash).HasMaxLength(64);
-            e.Property(x => x.ResultJson).HasColumnType("jsonb");
-            e.Property(x => x.Model).HasMaxLength(64);
-            e.Property(x => x.SkippedBecause).HasMaxLength(64);
+            e.Property(x => x.AgentType).HasConversion<string>().HasMaxLength(40);
+            e.Property(x => x.Status).HasMaxLength(32).IsRequired();
+            e.Property(x => x.Model).HasMaxLength(100);
+            e.Property(x => x.StartedAt).HasDefaultValueSql("now()");
 
-            // xmin - optimistic concurrency. Two workers cannot both take a node
-            // out of Ready; the loser gets a DbUpdateConcurrencyException.
-            e.Property(x => x.Version).IsRowVersion();
+            e.HasIndex(x => x.AnalysisId);
 
-            // Database-level idempotency: a redelivered creation message
-            // physically cannot insert a duplicate node.
-            e.HasIndex(x => new { x.AnalysisId, x.NodeKey }).IsUnique();
-
-            // Partial index - only rows the dispatcher actually scans.
-            e.HasIndex(x => x.State)
-             .HasFilter("state = 'Ready'");
-
-            // Partial index - only rows the lease janitor scans.
-            e.HasIndex(x => x.LeaseExpiresAt)
-             .HasFilter("state = 'Running'");
-
-            e.HasIndex(x => x.InputHash);
-
-            // Inherit the parent's visibility rules.
-            e.HasQueryFilter(x =>
-                x.Analysis.DeletedAt == null &&
-                (currentUser.IsSystem ||
-                 (currentUser.Id != null &&
-                  x.Analysis.AuthorizedUserIds.Contains(currentUser.Id.Value))));
+            e.HasOne(x => x.Analysis)
+             .WithMany(a => a.Requests)
+             .HasForeignKey(x => x.AnalysisId)
+             .OnDelete(DeleteBehavior.Cascade);
         });
-
-        // -------------------------------------------------------------------
-        // Outbox
-        // -------------------------------------------------------------------
-        b.Entity<OutboxMessage>(e =>
-        {
-            e.ToTable("Outbox");
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).UseIdentityAlwaysColumn();
-            e.Property(x => x.MessageType).HasMaxLength(128).IsRequired();
-            e.Property(x => x.Payload).HasColumnType("jsonb").IsRequired();
-
-            // The dispatcher's only query: unpublished, oldest first.
-            e.HasIndex(x => x.Id).HasFilter("published_at IS NULL");
-        });
-
-        b.Entity<ProcessedMessage>(e =>
-        {
-            e.ToTable("ProcessedMessages");
-            e.HasKey(x => new { x.MessageId, x.Consumer });
-            e.Property(x => x.Consumer).HasMaxLength(64);
-        });
-
-        // snake_case everything so hand-written SQL and EF agree.
-        foreach (var entity in b.Model.GetEntityTypes())
-            foreach (var prop in entity.GetProperties())
-                prop.SetColumnName(ToSnakeCase(prop.Name));
     }
-
-    private static string ToSnakeCase(string name) =>
-        string.Concat(name.Select((c, i) =>
-            i > 0 && char.IsUpper(c) ? "_" + char.ToLowerInvariant(c)
-                                     : char.ToLowerInvariant(c).ToString()));
 }
