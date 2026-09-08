@@ -2,7 +2,7 @@ using InnovaFlow.Notifier.Data;
 using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
-string cs = builder.Configuration.GetConnectionString("innovaflow")!;
+string cs = builder.Configuration.GetConnectionString("InnovaFlow")!;
 builder.Services.AddDbContext<NotifierDbContext>(o =>
     o.UseNpgsql(cs, npg => npg.MigrationsHistoryTable("__EFMigrationsHistory", "Notifier")));
 

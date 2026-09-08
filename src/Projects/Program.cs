@@ -1,25 +1,27 @@
 using InnovaFlow.Projects.Data;
 using Microsoft.EntityFrameworkCore;
+using Projects.Data;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-string cs = builder.Configuration.GetConnectionString("innovaflow")!;
-builder.Services.AddDbContext<ProjectsDbContext>(o =>
-    o.UseNpgsql(cs, npg => npg.MigrationsHistoryTable("__EFMigrationsHistory", "Projects")));
+builder.AddServiceDefaults();
 
+
+string cs = builder.Configuration.GetConnectionString("innovaflow")!;
+builder.Services.AddProjectsData<SystemUser>(cs);
 var app = builder.Build();
 
 
 // migrations
 if (app.Configuration.GetValue<bool>("RunMigrationsOnStartup"))
 {
-    using var scope = app.Services.CreateScope();
-    await scope.ServiceProvider.GetRequiredService<ProjectsDbContext>()
-               .Database.MigrateAsync();
-}
 
+    using var scope = app.Services.CreateScope();
+    await scope.ServiceProvider.GetRequiredService<ProjectsDbContext>().Database.MigrateAsync();
+    
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
