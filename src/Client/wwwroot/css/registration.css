@@ -1,0 +1,34 @@
+
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #0b1120; /* Dark background matching the image */
+      background-image: linear-gradient(to right, #0f172a 1px, transparent 1px);
+      background-size: 50px 100%;
+    }
+
+    .glow-effect {
+      box-shadow: 0 0 30px rgba(74, 222, 128, 0.2);
+    }
+    
+    .glow-border {
+      border: 1px solid rgba(74, 222, 128, 0.3);
+      box-shadow: inset 0 0 10px rgba(74, 222, 128, 0.1), 0 0 15px rgba(74, 222, 128, 0.1);
+    }
+
+    .input-icon-wrapper {
+      position: relative;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #64748b; /* slate-500 */
+    }
+
+    .custom-input {
+      padding-left: 2.5rem; /* Space for icon */
+    }

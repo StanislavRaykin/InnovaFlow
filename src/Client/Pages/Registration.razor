@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+
+<html lang="bg"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Регистрация - InnovaFlow</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link rel="stylesheet" href="~/css/registration_css.css"  />
+<script src="~/js/registration_js.js"></script>
+</head>
+
+<body class="min-h-screen flex items-center justify-center text-white p-4">
+<!-- BEGIN: RegistrationCard -->
+<main class="w-full max-w-md">
+<div class="bg-innova-dark glow-border rounded-xl p-8 relative overflow-hidden" data-purpose="registration-container">
+<!-- Subtle top glow -->
+<div class="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-innova-mint blur-xl opacity-50"></div>
+<!-- BEGIN: HeaderSection -->
+<header class="text-center mb-8 flex flex-col items-center">
+<!-- Logo Icon -->
+<div class="w-12 h-12 rounded-full bg-gray-800 border border-innova-mint flex items-center justify-center mb-4 glow-effect">
+<svg class="h-6 w-6 text-innova-mint" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<!-- Brand Name -->
+<h1 class="text-3xl font-bold tracking-wider mb-1">InnovaFlow</h1>
+<p class="text-xs tracking-[0.2em] text-innova-mint uppercase">InnovaFlow</p>
+</header>
+<!-- END: HeaderSection -->
+<!-- BEGIN: RegistrationForm -->
+<section>
+<h2 class="text-xl font-semibold mb-6">Регистрация</h2>
+<form action="#" class="space-y-4" method="POST">
+<!-- Full Name Input -->
+<div>
+<label class="block text-sm font-medium text-gray-300 mb-1" for="fullname">Пълно име</label>
+<div class="input-icon-wrapper">
+<svg class="h-5 w-5 input-icon" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<input class="custom-input w-full bg-white text-gray-900 rounded-md border-0 py-2.5 shadow-sm focus:ring-2 focus:ring-innova-mint text-sm" id="fullname" name="fullname" placeholder="Иван Иванов" required="" type="text"/>
+</div>
+</div>
+<!-- Email Input -->
+<div>
+<label class="block text-sm font-medium text-gray-300 mb-1" for="email">Имейл</label>
+<div class="input-icon-wrapper">
+<svg class="h-5 w-5 input-icon" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<input class="custom-input w-full bg-white text-gray-900 rounded-md border-0 py-2.5 shadow-sm focus:ring-2 focus:ring-innova-mint text-sm" id="email" name="email" placeholder="admin@node.bg" required="" type="email"/>
+</div>
+</div>
+<!-- Password Input -->
+<div>
+<label class="block text-sm font-medium text-gray-300 mb-1" for="password">Парола</label>
+<div class="input-icon-wrapper">
+<svg class="h-5 w-5 input-icon" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<input class="custom-input w-full bg-white text-gray-900 rounded-md border-0 py-2.5 shadow-sm focus:ring-2 focus:ring-innova-mint text-sm" id="password" name="password" placeholder="••••••••" required="" type="password"/>
+</div>
+</div>
+<!-- Confirm Password Input -->
+<div>
+<label class="block text-sm font-medium text-gray-300 mb-1" for="confirm-password">Потвърди парола</label>
+<div class="input-icon-wrapper">
+<svg class="h-5 w-5 input-icon" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<input class="custom-input w-full bg-white text-gray-900 rounded-md border-0 py-2.5 shadow-sm focus:ring-2 focus:ring-innova-mint text-sm" id="confirm-password" name="confirm-password" placeholder="••••••••" required="" type="password"/>
+</div>
+</div>
+<!-- Terms Checkbox -->
+<div class="flex items-start mt-4">
+<div class="flex h-5 items-center">
+<input class="h-4 w-4 rounded border-gray-600 bg-gray-700 text-innova-mint focus:ring-innova-mint focus:ring-offset-gray-900" id="terms" name="terms" required="" type="checkbox"/>
+</div>
+<div class="ml-3 text-xs">
+<label class="text-gray-400" for="terms">
+                Съгласявам се с <a class="text-innova-mint hover:underline" href="#">Правилата за ползване</a> и <a class="text-innova-mint hover:underline" href="#">Политиката за сигурност</a>.
+              </label>
+</div>
+</div>
+<!-- Submit Button -->
+<div class="pt-4">
+<button class="w-full flex justify-center items-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-gray-900 bg-innova-mint hover:bg-innova-mint-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-innova-mint transition-colors" type="submit">
+<svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+              РЕГИСТРАЦИЯ
+            </button>
+</div>
+</form>
+</section>
+<!-- END: RegistrationForm -->
+<!-- BEGIN: FooterLinks -->
+<footer class="mt-6 text-center text-xs">
+<p class="text-gray-400">
+          Вече имате активен възел? <a class="text-innova-mint hover:underline font-medium" href="#">Удостоверяване</a>
+</p>
+</footer>
+<!-- END: FooterLinks -->
+</div>
+</main>
+<!-- END: RegistrationCard -->
+</body></html>

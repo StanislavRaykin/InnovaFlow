@@ -1,0 +1,28 @@
+
+  .grid-bg {
+            background-size: 24px 24px;
+            background-image: linear-gradient(to right, rgba(107, 251, 154, 0.05) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(107, 251, 154, 0.05) 1px, transparent 1px);
+        }
+        .glow-effect:hover {
+            box-shadow: 0 0 15px rgba(74, 222, 128, 0.2);
+            border-color: rgba(74, 222, 128, 0.4);
+        }
+        .scanning-line {
+            position: relative;
+            overflow: hidden;
+        }
+        .scanning-line::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(74, 222, 128, 0.4), transparent);
+            animation: scan 2s linear infinite;
+        }
+        @keyframes scan {
+            0% { left: -100%; }
+            100% { left: 200%; }
+        }

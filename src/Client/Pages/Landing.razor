@@ -1,0 +1,202 @@
+@page "/"
+
+<PageTitle>Innovation Studio - Turn your idea into an opportunity</PageTitle>
+
+<HeadContent>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="~/css/landingpage_css.css"  />
+<script src="~/js/landingpage_js.js"></script>
+</HeadContent>
+
+<div class="dark bg-surface text-on-surface font-body-md min-h-screen flex flex-col relative grid-bg">
+<!-- TopNavBar -->
+<nav class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-md h-16 bg-surface/80 backdrop-blur-md border-b border-primary/10">
+<div class="flex items-center gap-md">
+<span class="font-headline-md text-headline-md font-bold text-primary">Innovation Studio</span>
+<div class="hidden md:flex gap-sm">
+<a class="text-on-surface-variant hover:text-primary transition-colors px-sm py-xs font-body-md text-body-md" href="#">Features</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors px-sm py-xs font-body-md text-body-md" href="#">Pricing</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors px-sm py-xs font-body-md text-body-md" href="#">About</a>
+</div>
+</div>
+<div class="flex items-center gap-sm">
+<button class="text-on-surface-variant hover:text-primary transition-colors px-sm py-xs font-body-md text-body-md hidden sm:block">Login</button>
+<button class="bg-primary text-surface font-bold px-sm py-xs rounded-DEFAULT hover:bg-primary-container transition-colors">Start Analyzing</button>
+</div>
+</nav>
+<main class="flex-grow pt-24 px-md md:px-xl container-max mx-auto w-full">
+<!-- Hero Section -->
+<section class="flex flex-col items-center justify-center text-center py-xl mt-lg relative">
+<div class="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_center,rgba(74,222,128,0.15)_0%,transparent_70%)]"></div>
+<h1 class="font-display-lg text-display-lg text-on-surface mb-md max-w-4xl tracking-tight">Turn your idea into an opportunity.</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant mb-lg max-w-2xl">AI-powered platform for analyzing, validating and developing your next big idea.</p>
+<div class="flex flex-col sm:flex-row gap-sm w-full sm:w-auto">
+<button class="bg-primary text-surface font-bold px-md py-sm rounded-DEFAULT hover:bg-primary-container transition-colors flex items-center justify-center gap-xs">
+                    Start Analyzing <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">arrow_forward</span>
+</button>
+<button class="border border-primary/40 text-primary px-md py-sm rounded-DEFAULT hover:bg-primary/10 transition-colors flex items-center justify-center gap-xs">
+                    Explore Innovation Studio
+                </button>
+</div>
+</section>
+<!-- Dashboard Preview Bento -->
+<section class="py-lg w-full">
+<div class="bg-surface-container rounded-lg border border-primary/10 p-md flex flex-col md:flex-row gap-md shadow-2xl relative overflow-hidden">
+<div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent opacity-50"></div>
+<div class="flex-1 flex flex-col gap-sm">
+<div class="flex justify-between items-center mb-sm border-b border-primary/10 pb-xs">
+<span class="font-data-mono text-data-mono text-on-surface-variant">System Overview</span>
+<div class="flex items-center gap-xs bg-surface-container-high px-xs py-1 rounded-DEFAULT border border-primary/20">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span class="font-label-caps text-label-caps text-primary">System Status: Optimal</span>
+</div>
+</div>
+<div class="bg-surface-dim p-sm rounded-DEFAULT border border-primary/10 flex items-center justify-between glow-effect transition-all duration-300">
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 rounded-full bg-surface-container-high border border-primary/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant">lightbulb</span>
+</div>
+<div>
+<div class="font-data-mono text-data-mono text-on-surface">Idea Gen</div>
+<div class="font-label-caps text-label-caps text-on-surface-variant">Idle</div>
+</div>
+</div>
+<div class="font-data-mono text-data-mono text-on-surface-variant bg-surface-container-high px-xs py-1 rounded-DEFAULT">0 ops/s</div>
+</div>
+<div class="bg-surface-dim p-sm rounded-DEFAULT border border-primary/30 flex items-center justify-between glow-effect transition-all duration-300 relative overflow-hidden">
+<div class="absolute inset-0 bg-primary/5"></div>
+<div class="flex items-center gap-sm relative z-10">
+<div class="w-10 h-10 rounded-full bg-primary/20 border border-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">science</span>
+</div>
+<div>
+<div class="font-data-mono text-data-mono text-on-surface font-bold">Research</div>
+<div class="font-label-caps text-label-caps text-primary animate-pulse">Processing Data...</div>
+</div>
+</div>
+<div class="font-data-mono text-data-mono text-primary bg-primary/10 px-xs py-1 rounded-DEFAULT border border-primary/20 relative z-10">4,201 ops/s</div>
+<div class="absolute bottom-0 left-0 h-1 bg-primary/30 w-full">
+<div class="h-full bg-primary w-1/3 scanning-line"></div>
+</div>
+</div>
+</div>
+<div class="w-full md:w-1/3 flex flex-col gap-sm">
+<div class="bg-surface-dim p-sm rounded-DEFAULT border border-primary/10 h-full flex flex-col items-center justify-center text-center">
+<div class="text-on-surface-variant font-label-caps text-label-caps mb-sm">Feasibility Score</div>
+<div class="text-6xl font-display-lg text-primary mb-xs">83<span class="text-2xl text-on-surface-variant">/100</span></div>
+<div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden mt-sm">
+<div class="bg-primary h-full w-[83%] rounded-full shadow-[0_0_10px_rgba(74,222,128,0.5)]"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- How it works -->
+<section class="py-xl">
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-lg text-center">Как работи?</h2>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-md">
+<!-- Step 1 -->
+<div class="bg-surface-container/50 border border-primary/10 p-md rounded-lg flex flex-col gap-sm hover:bg-surface-container transition-colors relative">
+<div class="absolute -top-3 -left-3 w-8 h-8 rounded-full bg-surface-container border border-primary/30 flex items-center justify-center font-data-mono text-data-mono text-primary">01</div>
+<span class="material-symbols-outlined text-3xl text-secondary-fixed-dim">edit_document</span>
+<h3 class="font-headline-md text-headline-md text-on-surface">Опишете идеята си</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Въведете основната концепция, целева аудитория и очакван проблем, който решавате.</p>
+</div>
+<!-- Step 2 -->
+<div class="bg-surface-container/50 border border-primary/10 p-md rounded-lg flex flex-col gap-sm hover:bg-surface-container transition-colors relative">
+<div class="absolute -top-3 -left-3 w-8 h-8 rounded-full bg-surface-container border border-primary/30 flex items-center justify-center font-data-mono text-data-mono text-primary">02</div>
+<span class="material-symbols-outlined text-3xl text-primary">psychology</span>
+<h3 class="font-headline-md text-headline-md text-on-surface">AI Анализ</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Нашите агенти сканират пазара, анализират конкуренцията и оценяват жизнеспособността.</p>
+</div>
+<!-- Step 3 -->
+<div class="bg-surface-container/50 border border-primary/10 p-md rounded-lg flex flex-col gap-sm hover:bg-surface-container transition-colors relative">
+<div class="absolute -top-3 -left-3 w-8 h-8 rounded-full bg-surface-container border border-primary/30 flex items-center justify-center font-data-mono text-data-mono text-primary">03</div>
+<span class="material-symbols-outlined text-3xl text-secondary">explore</span>
+<h3 class="font-headline-md text-headline-md text-on-surface">Откриване на възможности</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Идентифициране на ниши, потенциални клиенти и скрити предимства.</p>
+</div>
+<!-- Step 4 -->
+<div class="bg-surface-container/50 border border-primary/10 p-md rounded-lg flex flex-col gap-sm hover:bg-surface-container transition-colors relative">
+<div class="absolute -top-3 -left-3 w-8 h-8 rounded-full bg-surface-container border border-primary/30 flex items-center justify-center font-data-mono text-data-mono text-primary">04</div>
+<span class="material-symbols-outlined text-3xl text-primary-container">trending_up</span>
+<h3 class="font-headline-md text-headline-md text-on-surface">По-добри решения</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Вземете информирани решения базирани на реални данни, не на догадки.</p>
+</div>
+</div>
+</section>
+<!-- What we analyze -->
+<section class="py-xl border-t border-primary/10">
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-lg text-center">Какво анализираме</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-md">
+<div class="bg-surface-dim border border-primary/10 p-md rounded-DEFAULT flex flex-col gap-xs hover:border-primary/30 transition-colors">
+<div class="flex items-center gap-sm mb-xs">
+<span class="material-symbols-outlined text-primary">storefront</span>
+<h4 class="font-data-mono text-data-mono text-on-surface uppercase tracking-wider">Пазар (Market)</h4>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm">Оценка на размера на пазара, тенденции и потенциал за растеж.</p>
+</div>
+<div class="bg-surface-dim border border-primary/10 p-md rounded-DEFAULT flex flex-col gap-xs hover:border-primary/30 transition-colors">
+<div class="flex items-center gap-sm mb-xs">
+<span class="material-symbols-outlined text-secondary">tips_and_updates</span>
+<h4 class="font-data-mono text-data-mono text-on-surface uppercase tracking-wider">Иновация</h4>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm">Уникалност на идеята и технологично предимство.</p>
+</div>
+<div class="bg-surface-dim border border-primary/10 p-md rounded-DEFAULT flex flex-col gap-xs hover:border-primary/30 transition-colors">
+<div class="flex items-center gap-sm mb-xs">
+<span class="material-symbols-outlined text-tertiary">groups</span>
+<h4 class="font-data-mono text-data-mono text-on-surface uppercase tracking-wider">Аудитория</h4>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm">Профилиране на целевите потребители и техните нужди.</p>
+</div>
+<div class="bg-surface-dim border border-primary/10 p-md rounded-DEFAULT flex flex-col gap-xs hover:border-primary/30 transition-colors">
+<div class="flex items-center gap-sm mb-xs">
+<span class="material-symbols-outlined text-error">query_stats</span>
+<h4 class="font-data-mono text-data-mono text-on-surface uppercase tracking-wider">Конкуренция</h4>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm">Анализ на съществуващи алтернативи и преки конкуренти.</p>
+</div>
+<div class="bg-surface-dim border border-primary/10 p-md rounded-DEFAULT flex flex-col gap-xs hover:border-primary/30 transition-colors">
+<div class="flex items-center gap-sm mb-xs">
+<span class="material-symbols-outlined text-primary-fixed-dim">fact_check</span>
+<h4 class="font-data-mono text-data-mono text-on-surface uppercase tracking-wider">Осъществимост</h4>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm">Техническа и финансова реалистичност на проекта.</p>
+</div>
+<div class="bg-surface-dim border border-primary/10 p-md rounded-DEFAULT flex flex-col gap-xs hover:border-primary/30 transition-colors">
+<div class="flex items-center gap-sm mb-xs">
+<span class="material-symbols-outlined text-secondary-fixed">warning</span>
+<h4 class="font-data-mono text-data-mono text-on-surface uppercase tracking-wider">Рискове</h4>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm">Идентифициране на потенциални пречки и стратегии за смекчаване.</p>
+</div>
+</div>
+</section>
+<!-- Final CTA -->
+<section class="py-xl my-lg bg-surface-container rounded-lg border border-primary/20 text-center relative overflow-hidden">
+<div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(74,222,128,0.1)_0%,transparent_60%)]"></div>
+<div class="relative z-10 p-lg flex flex-col items-center">
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-sm">Имате идея? Нека разберем докъде може да стигне.</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mb-md max-w-xl">Включете се в мрежата и стартирайте своя първи AI анализ днес.</p>
+<button class="bg-primary text-surface font-bold px-lg py-sm rounded-DEFAULT hover:bg-primary-container transition-colors shadow-[0_0_15px_rgba(74,222,128,0.3)]">
+                    Start your analysis
+                </button>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="mt-auto w-full py-sm bg-surface-container-lowest border-t border-primary/10 flex justify-between items-center px-md text-on-surface-variant font-label-caps text-label-caps">
+<div>© 2024 Innovation Studio. AI OS v2.4</div>
+<div class="flex gap-md">
+<a class="hover:text-primary transition-colors flex items-center gap-xs" href="#">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                System Status: Optimal
+            </a>
+<a class="hover:text-primary transition-colors hidden sm:block" href="#">Privacy Policy</a>
+<a class="hover:text-primary transition-colors hidden sm:block" href="#">API Docs</a>
+</div>
+</footer>
+</div>

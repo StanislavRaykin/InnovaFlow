@@ -1,0 +1,13 @@
+body {
+    background-color: #0b1320;
+    background-image: linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    background-size: 40px 40px
+    }
+.glow-text {
+    text-shadow: 0 0 10px rgba(94, 234, 212, 0.5)
+    }
+.bg-image-overlay {
+    background-image: linear-gradient(to right, rgba(17, 24, 39, 0.8), rgba(17, 24, 39, 0.9)), url(https://lh3.googleusercontent.com/aida-public/AB6AXuCnKmlQV2YonCJl6ubHjrCHFGiqQFxoBQvHBhq-IqAStETQylnWJ0-MdoC3lJC2DyRVyHXABo_-D_C2VuspsZFCT6khDizJckn8VSBiB6OdrBbMCmBLszy9PpEYmNOjJv_vtMtvtDJGTJOr2mZVcNuqnOqPeGbBtzVo46ef6WXrApEAaIZFKZXxZOoFOuzZltSt67Lu8BfP4ixuieZtkxxqnOsd0uxMxmUKz7djPpnyAzL37Ycx_jaE);
+    background-size: cover;
+    background-position: center
+    }
