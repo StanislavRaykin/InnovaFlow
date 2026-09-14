@@ -7,7 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.AddServiceDefaults();
-
+builder.AddJwtAuthentication();
 
 string cs = builder.Configuration.GetConnectionString("innovaflow")!;
 builder.Services.AddProjectsData<SystemUser>(cs);
@@ -29,6 +29,8 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseHttpsRedirection();
 
 var summaries = new[]

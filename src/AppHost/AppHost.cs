@@ -4,9 +4,11 @@ var builder = DistributedApplication.CreateBuilder(args);
 
 // ---------- secrets and api keys ----------
 var claudeKey = builder.AddParameter("CLAUDE-API-KEY", secret: true);
+var ghCliSecret = builder.AddParameter("GH-CLI-SECRET", secret: true);
 var bzKeyId = builder.AddParameter("BZ-KEY-ID", secret: true);
 var bzAppKey = builder.AddParameter("BZ-APP-KEY", secret: true);
-var ghCliSecret =  builder.AddParameter("GH-CLI-SECRET", secret: true);
+var jwtPrivKey = builder.AddParameter("JWT-PRIVATE-KEY", secret: true);
+var jwtPubKey = builder.AddParameter("JWT-PUBLIC-KEY");
 
 //---------- infrastructure ----------
 
@@ -31,7 +33,8 @@ var cache = builder.AddRedis("cache");
 // ---------- services ----------
 var identity = builder.AddProject<Projects.Identity>("identity")//migrations
                       .WithEnvironment("RunMigrationsOnStartup", "true")
-                      .WithEnvironment("GH-CLI-SECRET", ghCliSecret)
+                      .WithEnvironment("GH-SECRET", ghCliSecret)
+                      .WithEnvironment("Jwt__PrivateKey", jwtPrivKey)
                       .WithReference(db)
                       .WaitFor(db);
 
@@ -39,8 +42,8 @@ var projects = builder.AddProject<Projects.Projects>("projects")//migrations
                                                                    .WithReference(db)
                                                                    .WithReference(rabbit)
                                                                    .WithEnvironment("RunMigrationsOnStartup", "true")
-                                                                   .WithEnvironment("BZ-KEY-ID", bzKeyId)
- .WithEnvironment("BZ-APP-KEY", bzAppKey)
+                                                                   .WithEnvironment("BACKBLAZE-KEY-ID", bzKeyId)
+                                                                   .WithEnvironment("BACKBLAZE-APP-KEY", bzAppKey)
                                                                    .WaitFor(db)
                                                                    .WaitFor(rabbit);
 
@@ -49,8 +52,8 @@ var analysis = builder.AddProject<Projects.Analysis_Api>("analysis") //migration
  .WithReference(rabbit)
  .WithReference(cache)
  .WithEnvironment("RunMigrationsOnStartup", "true")
- .WithEnvironment("BZ-KEY", bzKeyId)
- .WithEnvironment("BZ-APP", bzAppKey)
+ .WithEnvironment("BACKBLAZE-KEY", bzKeyId)
+ .WithEnvironment("BACKBLAZE-APP", bzAppKey)
  .WaitFor(db)
  .WaitFor(rabbit);
 
@@ -59,8 +62,8 @@ builder.AddProject<Projects.Analysis_Worker>("worker")
        .WithReference(rabbit)
        .WithReference(cache)
        .WithEnvironment("CLAUDE-KEY", claudeKey)
-       .WithEnvironment("BZ-KEY-ID", bzKeyId)
- .WithEnvironment("BZ-APP-KEY", bzAppKey)
+       .WithEnvironment("BACKBLAZE-KEY-ID", bzKeyId)
+ .WithEnvironment("BACKBLAZE-APP-KEY", bzAppKey)
        .WaitFor(rabbit)
        .WithReplicas(3);                         // three competing consumers
 
@@ -78,6 +81,12 @@ var gateway = builder.AddProject<Projects.Gateway>("gateway")
                      .WithReference(analysis)
                      .WithReference(notifier)
                      .WithExternalHttpEndpoints();
+
+
+foreach(var s in new[] { notifier, projects, analysis, identity })
+{
+       s.WithEnvironment("Jwt__PublicKey", jwtPubKey);
+}
 
 builder.AddProject<Projects.Client>("client")
        .WithReference(gateway);

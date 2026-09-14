@@ -5,9 +5,15 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.ServiceDiscovery;
+using Microsoft.IdentityModel.Tokens;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
+using ServiceDefaults;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Cryptography;
+using System.Text;
 
 
 
@@ -111,6 +117,7 @@ public static class Extensions
 
     public static WebApplication MapDefaultEndpoints(this WebApplication app)
     {
+
         // Adding health checks endpoints to applications in non-development environments has security implications.
         // See https://aka.ms/aspire/healthchecks for details before enabling these endpoints in non-development environments.
         if (app.Environment.IsDevelopment())
@@ -128,4 +135,49 @@ public static class Extensions
         return app;
     }
 
+    public static IHostApplicationBuilder AddJwtAuthentication(this IHostApplicationBuilder builder)
+    {
+        var options = builder.Configuration
+            .GetSection("Jwt")
+            .Get<JwtValidationOptions>() ?? new JwtValidationOptions();
+
+        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(jwt =>
+            {
+                jwt.MapInboundClaims = false;
+
+                jwt.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = options.Issuer,
+
+                    ValidateAudience = true,
+                    ValidAudience = options.Audience,
+
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = BuildPublicKey(options.PublicKey),
+
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.FromSeconds(30),
+
+                    NameClaimType = JwtRegisteredClaimNames.Sub,
+                    RoleClaimType = "role"
+                };
+            });
+
+        builder.Services.AddAuthorization();
+
+        return builder;
+    }
+
+
+    private static RsaSecurityKey? BuildPublicKey(string base64)
+    {
+        if (string.IsNullOrWhiteSpace(base64))
+            return null;
+
+        var rsa = RSA.Create();
+        rsa.ImportFromPem(Encoding.UTF8.GetString(Convert.FromBase64String(base64)));
+        return new RsaSecurityKey(rsa);
+    }
 }

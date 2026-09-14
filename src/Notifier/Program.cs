@@ -6,7 +6,8 @@ string cs = builder.Configuration.GetConnectionString("InnovaFlow")!;
 builder.Services.AddDbContext<NotifierDbContext>(o =>
     o.UseNpgsql(cs, npg => npg.MigrationsHistoryTable("__EFMigrationsHistory", "Notifier")));
 
-
+builder.AddServiceDefaults();
+builder.AddJwtAuthentication();
 
 var app = builder.Build();
 
@@ -18,6 +19,8 @@ if (app.Configuration.GetValue<bool>("RunMigrationsOnStartup"))
                .Database.MigrateAsync();
 }
 
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapGet("/", () => "Hello World!");
 
 app.Run();
