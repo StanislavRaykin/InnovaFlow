@@ -1,17 +1,16 @@
 @page "/"
+@layout BlankLayout
 
 <PageTitle>Innovation Studio - Turn your idea into an opportunity</PageTitle>
 
 <HeadContent>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link
-    href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap"
-    rel="stylesheet" />
+        href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap"
+        rel="stylesheet" />
     <link
-    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
-    rel="stylesheet" />
-    <link rel="stylesheet" href="~/css/landing.css" />
-    <script src="/js/landing.js"></script>
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="css/landing.css" />
 </HeadContent>
 
 <div class="dark bg-surface text-on-surface font-body-md min-h-screen flex flex-col relative grid-bg">
@@ -31,7 +30,7 @@
         </div>
         <div class="flex items-center gap-sm">
             <button
-            class="text-on-surface-variant hover:text-primary transition-colors px-sm py-xs font-body-md text-body-md hidden sm:block">Login</button>
+            class="text-on-surface-variant hover:text-primary transition-colors px-sm py-xs font-body-md text-body-md hidden sm:block" onclick="window.location.href='/signin'">Login</button>
             <button
                 class="bg-primary text-surface font-bold px-sm py-xs rounded-DEFAULT hover:bg-primary-container transition-colors">Start
                 Analyzing</button>
@@ -57,6 +56,7 @@
                                 class="border border-primary/40 text-primary px-md py-sm rounded-DEFAULT hover:bg-primary/10 transition-colors flex items-center justify-center gap-xs">
                                 Explore Innovation Studio
                             </button>
+                        
                         </div>
                     </section>
                     <!-- Dashboard Preview Bento -->
