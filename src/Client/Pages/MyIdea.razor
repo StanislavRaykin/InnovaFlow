@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="bg"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Моите Идеи | Innovation Studio</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@600;700;800&amp;family=Inter:wght@400&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="~/css/myideas_css.css"  />
+<script src="~/js/myideas_js.js"></script>
+</head>
+
+<body class="bg-surface text-on-surface min-h-screen flex font-body-md">
+<!-- SideNavBar -->
+<nav class="bg-surface-container text-primary font-data-mono text-data-mono fixed h-full left-0 w-sidebar-width border-r border-primary/10 flex flex-col justify-between py-md hidden md:flex z-50">
+<div>
+<div class="px-md mb-xl flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="lightbulb" style="font-variation-settings: 'FILL' 1;">lightbulb</span>
+<div>
+<div class="font-headline-md text-headline-md font-bold text-primary">InnovaFlow</div>
+<div class="font-label-caps text-label-caps text-on-surface-variant">AI OS v2.4</div>
+</div>
+</div>
+<ul class="flex flex-col gap-xs">
+<li>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+                        Dashboard
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-sm px-md py-sm bg-primary/10 text-primary border-l-4 border-primary transition-all duration-300 relative group" href="#">
+<span class="material-symbols-outlined" data-icon="lightbulb">lightbulb</span>
+                        My Ideas
+                        <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none border border-primary/40 shadow-[0_0_15px_rgba(107,251,154,0.2)]"></div>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+                        Create Idea
+                    </a>
+</li>
+</ul>
+</div>
+<div class="px-md">
+<button class="w-full py-sm bg-transparent border border-primary/20 text-primary hover:bg-primary/10 transition-colors rounded mb-md font-data-mono text-data-mono shimmer">Deploy Agent</button>
+<ul class="flex flex-col gap-xs border-t border-primary/10 pt-md">
+<li>
+<a class="flex items-center gap-sm py-xs text-on-surface-variant hover:text-on-surface transition-colors" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="settings">settings</span>
+                        Settings
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-sm py-xs text-on-surface-variant hover:text-on-surface transition-colors" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="help">help</span>
+                        Support
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-sm py-xs text-on-surface-variant hover:text-on-surface transition-colors" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="logout">logout</span>
+                        Logout
+                    </a>
+</li>
+</ul>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col md:ml-sidebar-width min-h-screen">
+<!-- TopAppBar -->
+<header class="bg-surface-dim/50 backdrop-blur-xl text-primary font-headline-lg text-headline-lg border-b border-primary/20 shadow-lg shadow-primary/5 w-full flex flex-col gap-sm p-md sticky top-0 z-40">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary text-4xl" data-icon="analytics" style="font-variation-settings: 'FILL' 1;">analytics</span>
+<h1 class="font-headline-lg text-headline-lg font-bold text-primary">Моите Идеи</h1>
+</div>
+<div class="flex items-center gap-md">
+<div class="relative group hidden sm:block w-64">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant" data-icon="search">search</span>
+<input class="w-full bg-surface-container-high border border-primary/20 rounded pl-10 pr-4 py-2 text-on-surface font-data-mono text-data-mono focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all placeholder:text-on-surface-variant/50" placeholder="Търсене на идеи..." type="text"/>
+<div class="absolute inset-0 rounded pointer-events-none border border-transparent group-focus-within:border-primary/40 group-focus-within:shadow-[0_0_10px_rgba(107,251,154,0.15)] transition-all"></div>
+</div>
+<button class="bg-primary text-surface font-bold px-4 py-2 rounded flex items-center gap-2 hover:bg-primary-fixed transition-colors font-data-mono text-data-mono">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+<span class="hidden sm:inline">Нова Идея</span>
+</button>
+<div class="flex gap-2">
+<button class="p-2 text-on-surface-variant hover:bg-primary/10 rounded-lg transition-colors group relative">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors" data-icon="refresh">refresh</span>
+<div class="absolute inset-0 rounded-lg bg-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity shimmer pointer-events-none"></div>
+</button>
+<button class="p-2 text-on-surface-variant hover:bg-primary/10 rounded-lg transition-colors group relative">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors" data-icon="ios_share">ios_share</span>
+<div class="absolute inset-0 rounded-lg bg-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity shimmer pointer-events-none"></div>
+</button>
+</div>
+</div>
+</div>
+<!-- Filters -->
+<div class="flex gap-4 overflow-x-auto pb-2 mt-4 scrollbar-hide">
+<button class="whitespace-nowrap px-4 py-1 rounded-full border border-primary text-primary bg-primary/10 font-label-caps text-label-caps">Всички</button>
+<button class="whitespace-nowrap px-4 py-1 rounded-full border border-primary/20 text-on-surface-variant hover:border-primary/50 hover:text-on-surface transition-colors font-label-caps text-label-caps">Бизнес</button>
+<button class="whitespace-nowrap px-4 py-1 rounded-full border border-primary/20 text-on-surface-variant hover:border-primary/50 hover:text-on-surface transition-colors font-label-caps text-label-caps">Бранд</button>
+<button class="whitespace-nowrap px-4 py-1 rounded-full border border-primary/20 text-on-surface-variant hover:border-primary/50 hover:text-on-surface transition-colors font-label-caps text-label-caps">Стартъп</button>
+<button class="whitespace-nowrap px-4 py-1 rounded-full border border-primary/20 text-on-surface-variant hover:border-primary/50 hover:text-on-surface transition-colors font-label-caps text-label-caps">Продукт</button>
+<button class="whitespace-nowrap px-4 py-1 rounded-full border border-primary/20 text-on-surface-variant hover:border-primary/50 hover:text-on-surface transition-colors font-label-caps text-label-caps">Услуга</button>
+<button class="whitespace-nowrap px-4 py-1 rounded-full border border-primary/20 text-on-surface-variant hover:border-primary/50 hover:text-on-surface transition-colors font-label-caps text-label-caps">Приложение</button>
+</div>
+</header>
+<!-- Content Area -->
+<div class="p-md flex-1 overflow-y-auto">
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-md">
+<!-- Card 1 -->
+<div class="bg-surface-container-high rounded border border-primary/10 p-sm glow-border transition-all duration-300 relative group overflow-hidden flex flex-col h-full backdrop-blur-xl">
+<div class="flex justify-between items-start mb-4 border-b border-primary/10 pb-2">
+<div>
+<h3 class="font-headline-md text-headline-md font-bold text-on-surface">NeoBank OS</h3>
+<p class="font-label-caps text-label-caps text-on-surface-variant mt-1">Финанси • Стартъп</p>
+</div>
+<div class="flex items-center gap-1 bg-surface-container border border-primary/20 px-2 py-1 rounded">
+<div class="w-2 h-2 rounded-full bg-primary shadow-[0_0_5px_#6bfb9a]"></div>
+<span class="font-label-caps text-label-caps text-primary">Анализирана</span>
+</div>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6 flex-1">
+                        Децентрализирана банкова платформа за микро-транзакции в web3 екосистеми с интегриран AI финансов съветник.
+                    </p>
+<div class="flex items-center justify-between mt-auto">
+<div class="flex flex-col gap-1 w-1/3">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Резултат</span>
+<div class="w-16 h-16">
+<svg class="circular-chart text-primary" viewbox="0 0 36 36">
+<path class="circle-bg" d="M18 2.0845
+                                        a 15.9155 15.9155 0 0 1 0 31.831
+                                        a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+<path class="circle text-primary" d="M18 2.0845
+                                        a 15.9155 15.9155 0 0 1 0 31.831
+                                        a 15.9155 15.9155 0 0 1 0 -31.831" stroke="#6bfb9a" stroke-dasharray="87, 100"></path>
+<text class="percentage" x="18" y="20.35">87</text>
+</svg>
+</div>
+</div>
+<div class="flex flex-col items-end gap-1">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Последен анализ</span>
+<span class="font-data-mono text-data-mono text-on-surface">Днес, 14:32</span>
+</div>
+</div>
+<!-- Hover Actions -->
+<div class="absolute inset-0 bg-surface/90 backdrop-blur-sm flex items-center justify-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+<button class="px-4 py-2 bg-transparent border border-primary text-primary font-data-mono text-data-mono rounded hover:bg-primary/10 transition-colors">Преглед</button>
+<button class="px-4 py-2 bg-primary text-surface font-data-mono text-data-mono font-bold rounded hover:bg-primary-fixed transition-colors">Анализ</button>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container-high rounded border border-primary/10 p-sm glow-border transition-all duration-300 relative group overflow-hidden flex flex-col h-full backdrop-blur-xl">
+<div class="flex justify-between items-start mb-4 border-b border-primary/10 pb-2">
+<div>
+<h3 class="font-headline-md text-headline-md font-bold text-on-surface">AgriTech Sync</h3>
+<p class="font-label-caps text-label-caps text-on-surface-variant mt-1">Земеделие • Продукт</p>
+</div>
+<div class="flex items-center gap-1 bg-surface-container border border-tertiary/20 px-2 py-1 rounded">
+<div class="w-2 h-2 rounded-full bg-tertiary animate-pulse shadow-[0_0_5px_#ffdd75]"></div>
+<span class="font-label-caps text-label-caps text-tertiary">Обработка...</span>
+</div>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6 flex-1">
+                        IoT сензорна мрежа за прецизно земеделие с предиктивни алгоритми за оптимизация на напояването.
+                    </p>
+<div class="flex items-center justify-between mt-auto">
+<div class="flex flex-col gap-1 w-1/3">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Резултат</span>
+<div class="w-16 h-16 opacity-50">
+<svg class="circular-chart text-tertiary" viewbox="0 0 36 36">
+<path class="circle-bg" d="M18 2.0845
+                                        a 15.9155 15.9155 0 0 1 0 31.831
+                                        a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+<text class="percentage !text-tertiary" x="18" y="20.35">--</text>
+</svg>
+</div>
+</div>
+<div class="flex flex-col items-end gap-1">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Създадена</span>
+<span class="font-data-mono text-data-mono text-on-surface">Вчера, 09:15</span>
+</div>
+</div>
+<!-- Hover Actions -->
+<div class="absolute inset-0 bg-surface/90 backdrop-blur-sm flex items-center justify-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+<button class="px-4 py-2 bg-transparent border border-primary text-primary font-data-mono text-data-mono rounded hover:bg-primary/10 transition-colors">Преглед</button>
+<button class="px-4 py-2 text-secondary font-data-mono text-data-mono hover:text-secondary-fixed-dim transition-colors">Отказ</button>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container-high rounded border border-primary/10 p-sm glow-border transition-all duration-300 relative group overflow-hidden flex flex-col h-full backdrop-blur-xl">
+<div class="flex justify-between items-start mb-4 border-b border-primary/10 pb-2">
+<div>
+<h3 class="font-headline-md text-headline-md font-bold text-on-surface">Urban Canopy</h3>
+<p class="font-label-caps text-label-caps text-on-surface-variant mt-1">Екология • Приложение</p>
+</div>
+<div class="flex items-center gap-1 bg-surface-container border border-primary/20 px-2 py-1 rounded">
+<div class="w-2 h-2 rounded-full bg-primary shadow-[0_0_5px_#6bfb9a]"></div>
+<span class="font-label-caps text-label-caps text-primary">Анализирана</span>
+</div>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6 flex-1">
+                        Геймифицирано приложение за картиране на градската растителност, използващо сателитни данни и crowdsourcing.
+                    </p>
+<div class="flex items-center justify-between mt-auto">
+<div class="flex flex-col gap-1 w-1/3">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Резултат</span>
+<div class="w-16 h-16">
+<svg class="circular-chart text-secondary" viewbox="0 0 36 36">
+<path class="circle-bg" d="M18 2.0845
+                                        a 15.9155 15.9155 0 0 1 0 31.831
+                                        a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+<path class="circle text-secondary" d="M18 2.0845
+                                        a 15.9155 15.9155 0 0 1 0 31.831
+                                        a 15.9155 15.9155 0 0 1 0 -31.831" stroke="#5de6ff" stroke-dasharray="64, 100"></path>
+<text class="percentage !text-secondary" x="18" y="20.35">64</text>
+</svg>
+</div>
+</div>
+<div class="flex flex-col items-end gap-1">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Последен анализ</span>
+<span class="font-data-mono text-data-mono text-on-surface">12 Окт, 11:20</span>
+</div>
+</div>
+<!-- Hover Actions -->
+<div class="absolute inset-0 bg-surface/90 backdrop-blur-sm flex items-center justify-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+<button class="px-4 py-2 bg-transparent border border-primary text-primary font-data-mono text-data-mono rounded hover:bg-primary/10 transition-colors">Преглед</button>
+<button class="px-4 py-2 bg-primary text-surface font-data-mono text-data-mono font-bold rounded hover:bg-primary-fixed transition-colors">Анализ</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer -->
+<footer class="bg-surface-container-lowest text-secondary font-label-caps text-label-caps w-full py-sm border-t border-primary/10 px-md flex justify-between items-center mt-auto">
+<div class="font-label-caps text-primary">© 2024 Innovation Studio. AI OS v2.4</div>
+<div class="flex gap-4">
+<a class="text-on-surface-variant hover:text-secondary-fixed-dim transition-colors flex items-center gap-1" href="#">
+<div class="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_5px_#6bfb9a] animate-pulse"></div>
+                    System Status: Optimal
+                </a>
+<a class="text-on-surface-variant hover:text-secondary-fixed-dim transition-colors" href="#">Privacy Policy</a>
+<a class="text-on-surface-variant hover:text-secondary-fixed-dim transition-colors" href="#">API Docs</a>
+</div>
+</footer>
+</main>
+</body></html>
