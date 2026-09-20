@@ -1,47 +1,53 @@
 
         body {
-            background-color: theme('colors.background');
-            color: theme('colors.on-surface');
-            background-image: linear-gradient(theme('colors.surface-container-lowest') 1px, transparent 1px),
-            linear-gradient(90deg, theme('colors.surface-container-lowest') 1px, transparent 1px);
+            background-color: #0b1326;
+            color: #dae2fd;
+            background-image: 
+                linear-gradient(to right, rgba(107, 251, 154, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(107, 251, 154, 0.03) 1px, transparent 1px);
             background-size: 24px 24px;
         }
         
-        .glow-active {
-            box-shadow: 0 0 15px rgba(107, 251, 154, 0.2);
+        .cyber-glow {
+            box-shadow: 0 0 15px rgba(74, 222, 128, 0.2);
+        }
+        
+        .cyber-glow-active {
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.35);
         }
 
         .neon-glow-btn {
-            box-shadow: 0 0 20px rgba(74, 222, 128, 0.4);
-            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.35);
+            transition: all 0.2s ease;
         }
         .neon-glow-btn:hover {
-            box-shadow: 0 0 30px rgba(74, 222, 128, 0.6);
-            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(74, 222, 128, 0.5);
+            transform: translateY(-1px);
+        }
+
+        .glass-panel {
+            background: rgba(19, 27, 46, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 0.5px solid rgba(107, 251, 154, 0.15);
+        }
+
+        .glass-subcard {
+            background: rgba(11, 19, 38, 0.6);
+            backdrop-filter: blur(8px);
+            border: 0.5px solid rgba(107, 251, 154, 0.1);
+        }
+        .glass-subcard:hover {
+            border-color: rgba(93, 230, 255, 0.35);
+            background: rgba(19, 27, 46, 0.8);
         }
 
         .shimmer-progress {
-            position: relative;
-            overflow: hidden;
-        }
-        .shimmer-progress::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 50%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            background: linear-gradient(90deg, #171f33 0%, #2d3449 50%, #171f33 100%);
+            background-size: 200% 100%;
             animation: shimmer 2s infinite linear;
         }
         @keyframes shimmer {
-            100% { left: 200%; }
-        }
-
-        /* Glassmorphism utils */
-        .glass-panel {
-            background: rgba(30, 41, 59, 0.6);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(107, 251, 154, 0.1);
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
         }
