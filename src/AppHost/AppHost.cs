@@ -36,7 +36,9 @@ var identity = builder.AddProject<Projects.Identity>("identity")//migrations
                       .WithEnvironment("GH-SECRET", ghCliSecret)
                       .WithEnvironment("Jwt__PrivateKey", jwtPrivKey)
                       .WithReference(db)
-                      .WaitFor(db);
+                      .WithReference(cache)
+                      .WaitFor(db)
+                      .WaitFor(cache);
 
 var projects = builder.AddProject<Projects.Projects>("projects")//migrations
                                                                    .WithReference(db)
@@ -80,10 +82,12 @@ var gateway = builder.AddProject<Projects.Gateway>("gateway")
                      .WithReference(projects)
                      .WithReference(analysis)
                      .WithReference(notifier)
+                     .WithReference(cache)
+                     .WaitFor(cache)
                      .WithExternalHttpEndpoints();
 
 
-foreach(var s in new[] { notifier, projects, analysis, identity })
+foreach(var s in new[] { notifier, projects, analysis, identity, gateway })
 {
        s.WithEnvironment("Jwt__PublicKey", jwtPubKey);
 }

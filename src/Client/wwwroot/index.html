@@ -7,7 +7,11 @@
     <title>InnovaFlow</title>
     <base href="/" />
     <link rel="preload" id="webassembly" />
-    <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css" />
+    <!-- Bootstrap is deliberately NOT loaded: its utilities (.text-primary,
+         .bg-primary, .border, .shadow-sm, .px-4 ...) share names with Tailwind's
+         and are emitted with !important, so they silently win over the design
+         tokens in js/tailwind.config.js. The files remain under lib/ but are
+         unreferenced. -->
     <link rel="stylesheet" href="css/app.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
     <link href="Client.styles.css" rel="stylesheet" />

@@ -1,8 +1,157 @@
 @inherits LayoutComponentBase
+@inject AuthService Auth
+@inject NavigationManager Navigation
 
-@* Centres a single auth card on the page. Replaces the body-level utility
-   classes the original standalone HTML documents carried. Page-specific
-   colour/font classes stay on each page's own root element. *@
-<div class="min-h-screen flex items-center justify-center p-4">
-    @Body
+@* Shell for every signed-in page (Dashboard, My Ideas, Create Idea). It owns the
+   chrome the standalone HTML mock-ups carried inside each page — the mobile top
+   bar, the fixed side nav and the footer — so pages only supply their own
+   content (their own TopAppBar with the step progress stays page-local, since
+   the title and the highlighted step differ per page).
+
+   Design tokens (surface/primary/on-* colours, the xs..xl spacing scale, the
+   sidebar-width value and the font-*/text-* pairs) come from
+   wwwroot/js/tailwind.config.js, loaded once from index.html. The .cyber-glow /
+   .glass-panel / .shimmer-progress helpers come from css/createidea.css, which
+   also paints the dark grid background the mock-ups put on <body>. *@
+
+<HeadContent>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="css/createidea.css" />
+</HeadContent>
+
+<div class="dark bg-surface text-on-surface font-body-md text-body-md antialiased min-h-screen flex flex-col md:flex-row overflow-x-hidden">
+
+    <!-- TopNavBar (Mobile) -->
+    <nav
+        class="md:hidden fixed top-0 left-0 w-full z-50 flex justify-between items-center px-md h-16 bg-surface/80 backdrop-blur-md border-b border-primary/10">
+        <a class="flex items-center gap-sm" href="home">
+            <span class="material-symbols-outlined text-primary">lightbulb</span>
+            <span class="font-headline-md text-headline-md font-bold text-primary">InnovaFlow</span>
+        </a>
+        <button class="text-on-surface-variant hover:text-primary transition-colors" type="button"
+                aria-label="Навигация" aria-expanded="@(drawerOpen ? "true" : "false")" @onclick="ToggleDrawer">
+            <span class="material-symbols-outlined">@(drawerOpen ? "close" : "menu")</span>
+        </button>
+    </nav>
+
+    @* Scrim behind the mobile drawer; tapping it closes the drawer. *@
+    @if (drawerOpen)
+    {
+        <div class="md:hidden fixed inset-0 z-40 bg-surface/80 backdrop-blur-sm" @onclick="CloseDrawer"></div>
+    }
+
+    <!-- SideNavBar: fixed rail from md up, slide-in drawer below it -->
+    <aside class="@DrawerCssClass flex flex-col justify-between py-md fixed h-full top-0 left-0 w-sidebar-width
+                  bg-surface-container border-r border-primary/10 z-50 md:z-40 md:flex md:translate-x-0
+                  transition-transform duration-300">
+        <div>
+            <div class="px-md mb-xl">
+                <a class="flex items-center gap-sm mb-xs" href="home">
+                    <span class="material-symbols-outlined text-primary text-3xl"
+                          style="font-variation-settings: 'FILL' 1;">lightbulb</span>
+                    <span class="font-headline-md text-headline-md font-bold text-primary">InnovaFlow</span>
+                </a>
+                <div class="font-data-mono text-data-mono text-primary/70">AI OS v2.4</div>
+            </div>
+
+            <nav class="flex flex-col gap-xs px-sm" @onclick="CloseDrawer">
+                <NavLink class="@NavItem" ActiveClass="@NavItemActive" href="home" Match="NavLinkMatch.All">
+                    <span class="material-symbols-outlined">dashboard</span>
+                    Dashboard
+                </NavLink>
+                <NavLink class="@NavItem" ActiveClass="@NavItemActive" href="ideas">
+                    <span class="material-symbols-outlined">lightbulb</span>
+                    My Ideas
+                </NavLink>
+                <NavLink class="@NavItem" ActiveClass="@NavItemActive" href="create-idea">
+                    <span class="material-symbols-outlined">add_circle</span>
+                    Create Idea
+                </NavLink>
+            </nav>
+        </div>
+
+        <div class="px-sm">
+            <AuthorizeView>
+                <Authorized>
+                    @* Who is signed in — the mock-ups had no room for this, but every
+                       other screen in the app needs it once auth is real. *@
+                    <div class="flex items-center gap-sm mb-md px-sm py-xs rounded-DEFAULT border border-primary/10">
+                        <span class="material-symbols-outlined text-primary">account_circle</span>
+                        <span class="font-data-mono text-data-mono text-on-surface-variant truncate">
+                            @context.User.Identity?.Name
+                        </span>
+                    </div>
+                </Authorized>
+            </AuthorizeView>
+
+            <button
+                class="w-full py-sm mb-md bg-primary-container text-surface font-label-caps text-label-caps font-bold rounded-DEFAULT hover:opacity-90 transition-opacity"
+                type="button">
+                Deploy Agent
+            </button>
+
+            <nav class="flex flex-col gap-xs" @onclick="CloseDrawer">
+                <NavLink class="@NavItem" ActiveClass="@NavItemActive" href="settings">
+                    <span class="material-symbols-outlined">settings</span>
+                    Settings
+                </NavLink>
+                <NavLink class="@NavItem" ActiveClass="@NavItemActive" href="support">
+                    <span class="material-symbols-outlined">help</span>
+                    Support
+                </NavLink>
+                <button class="@NavItem w-full text-left" type="button" @onclick="SignOutAsync">
+                    <span class="material-symbols-outlined">logout</span>
+                    Logout
+                </button>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 mt-16 md:mt-0 md:ml-sidebar-width flex flex-col min-h-screen">
+        @Body
+
+        <!-- Footer -->
+        <footer
+            class="flex flex-wrap gap-sm justify-between items-center px-md py-sm bg-surface-container-lowest border-t border-primary/10 mt-auto">
+            <div class="font-label-caps text-label-caps text-primary">© 2024 Innovation Studio. AI OS v2.4</div>
+            <div class="flex gap-md font-label-caps text-label-caps text-on-surface-variant">
+                <a class="hover:text-secondary-fixed-dim transition-colors flex items-center gap-xs" href="#">
+                    <span class="w-2 h-2 rounded-full bg-primary animate-pulse cyber-glow"></span>
+                    System Status: Optimal
+                </a>
+                <a class="hover:text-secondary-fixed-dim transition-colors hidden md:block" href="#">Privacy Policy</a>
+                <a class="hover:text-secondary-fixed-dim transition-colors hidden md:block" href="#">API Docs</a>
+            </div>
+        </footer>
+    </main>
 </div>
+
+@code {
+    // Nav-item classes, lifted verbatim from the mock-ups so the rail keeps its
+    // look; NavLink swaps in the tinted marker for the current page.
+    private const string NavItem =
+        "flex items-center gap-sm p-sm rounded-DEFAULT text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-colors font-data-mono text-data-mono";
+
+    private const string NavItemActive = "bg-primary/10 text-primary border-l-4 border-primary";
+
+    private bool drawerOpen;
+
+    // Off-canvas below md; the md:translate-x-0 on the element wins from md up.
+    private string DrawerCssClass => drawerOpen ? "translate-x-0" : "-translate-x-full";
+
+    private void ToggleDrawer() => drawerOpen = !drawerOpen;
+
+    private void CloseDrawer() => drawerOpen = false;
+
+    private async Task SignOutAsync()
+    {
+        await Auth.SignOutAsync();
+        Navigation.NavigateTo("signin");
+    }
+}

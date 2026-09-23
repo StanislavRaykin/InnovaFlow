@@ -12,6 +12,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.AddIdentityServices();
 
+//cache (active login sessions)
+builder.AddRedisClient("cache");
+
 //auth
 builder.AddJwtAuthentication();
 builder.Services.AddSingleton<SigningKeyProvider>();

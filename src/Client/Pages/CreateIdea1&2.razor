@@ -1,193 +1,129 @@
-<!DOCTYPE html>
+@page "/create-idea"
+@layout AccountLayout
+@attribute [Authorize]
 
-<html class="dark" lang="bg"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>InnovaFlow - Създаване на идея</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@600;700;800&amp;family=Inter:wght@400&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="~/css/createidea_css.css"  />
-<script src="~/js/createidea_js.js"></script>
-</head>
+@* Steps 01 Idea / 02 Problem of the create-idea wizard.
 
-<body class="font-body-md text-body-md min-h-screen flex flex-col md:flex-row overflow-x-hidden">
-<!-- TopNavBar (Mobile) -->
-<nav class="md:hidden fixed top-0 left-0 w-full z-50 flex justify-between items-center px-md h-16 bg-surface/80 backdrop-blur-md border-b border-primary/10 flat no shadows">
-<div class="flex items-center gap-sm">
-<span class="material-symbols-outlined text-primary">lightbulb</span>
-<span class="font-headline-md text-headline-md font-bold text-primary">InnovaFlow</span>
-</div>
-<button class="text-on-surface-variant hover:text-primary transition-colors">
-<span class="material-symbols-outlined">menu</span>
-</button>
-</nav>
-<!-- SideNavBar (Desktop) -->
-<aside class="hidden md:flex flex-col justify-between py-md fixed h-full left-0 w-sidebar-width bg-surface-container border-r border-primary/10 flat no shadows z-40">
-<div>
-<div class="px-md mb-xl">
-<div class="flex items-center gap-sm mb-xs">
-<span class="material-symbols-outlined text-primary text-3xl">lightbulb</span>
-<span class="font-headline-md text-headline-md font-bold text-primary">InnovaFlow</span>
-</div>
-<div class="font-data-mono text-data-mono text-primary/70">AI OS v2.4</div>
-</div>
-<nav class="flex flex-col gap-xs px-sm">
-<a class="flex items-center gap-sm p-sm rounded-DEFAULT text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-colors font-data-mono text-data-mono" href="#">
-<span class="material-symbols-outlined">dashboard</span>
-                    Dashboard
-                </a>
-<a class="flex items-center gap-sm p-sm rounded-DEFAULT text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-colors font-data-mono text-data-mono" href="#">
-<span class="material-symbols-outlined">lightbulb</span>
-                    My Ideas
-                </a>
-<a class="flex items-center gap-sm p-sm rounded-DEFAULT bg-primary/10 text-primary border-l-4 border-primary font-data-mono text-data-mono" href="#">
-<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">add_circle</span>
-                    Create Idea
-                </a>
-</nav>
-</div>
-<div class="px-sm">
-<button class="w-full py-sm mb-md bg-primary-container text-surface font-label-caps text-label-caps font-bold rounded-DEFAULT hover:opacity-90 transition-opacity">Deploy Agent</button>
-<nav class="flex flex-col gap-xs">
-<a class="flex items-center gap-sm p-sm rounded-DEFAULT text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-colors font-data-mono text-data-mono" href="#">
-<span class="material-symbols-outlined">settings</span>
-                    Settings
-                </a>
-<a class="flex items-center gap-sm p-sm rounded-DEFAULT text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-colors font-data-mono text-data-mono" href="#">
-<span class="material-symbols-outlined">help</span>
-                    Support
-                </a>
-<a class="flex items-center gap-sm p-sm rounded-DEFAULT text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-colors font-data-mono text-data-mono" href="#">
-<span class="material-symbols-outlined">logout</span>
-                    Logout
-                </a>
-</nav>
-</div>
-</aside>
-<!-- Main Content Area -->
-<main class="flex-1 mt-16 md:mt-0 md:ml-sidebar-width flex flex-col min-h-screen">
+   The side nav, the mobile top bar and the footer now live in AccountLayout;
+   so does the css/createidea.css link that supplies .glass-panel, .cyber-glow
+   and .shimmer-progress. The TopAppBar stays here because its title and the
+   highlighted step differ per wizard page.
+
+   The old ~/js/createidea_js.js was only another copy of the Tailwind config,
+   which index.html already loads from js/tailwind.config.js — so it is gone. *@
+
+<PageTitle>InnovaFlow - Създаване на идея</PageTitle>
+
 <!-- TopAppBar -->
-<header class="flex flex-col gap-sm p-md bg-surface-dim/50 backdrop-blur-xl border-b border-primary/20 shadow-lg shadow-primary/5 full-width z-30 sticky top-0 md:top-0 md:relative">
-<div class="flex justify-between items-center">
-<div class="flex items-center gap-sm">
-<span class="material-symbols-outlined text-primary text-2xl">analytics</span>
-<h1 class="font-headline-lg text-headline-lg font-bold text-primary hidden md:block">Idea Analysis</h1>
-<h1 class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary md:hidden">Idea Analysis</h1>
-</div>
-<div class="flex gap-sm">
-<button class="p-xs text-on-surface-variant hover:bg-primary/10 rounded-lg transition-colors">
-<span class="material-symbols-outlined">refresh</span>
-</button>
-<button class="p-xs text-on-surface-variant hover:bg-primary/10 rounded-lg transition-colors">
-<span class="material-symbols-outlined">ios_share</span>
-</button>
-</div>
-</div>
-<!-- Progress Indicator -->
-<div class="mt-sm">
-<div class="flex justify-between mb-xs font-data-mono text-data-mono text-xs">
-<span class="text-primary">01 Idea</span>
-<span class="text-on-surface-variant">02 Problem</span>
-<span class="text-on-surface-variant">03 Audience</span>
-<span class="text-on-surface-variant">04 Review</span>
-</div>
-<div class="w-full h-1 bg-surface-container rounded-full overflow-hidden flex">
-<div class="w-1/4 bg-primary h-full"></div>
-<div class="w-1/4 h-full shimmer-progress"></div>
-<div class="w-2/4 h-full"></div>
-</div>
-</div>
+<header
+    class="flex flex-col gap-sm p-md bg-surface-dim/50 backdrop-blur-xl border-b border-primary/20 shadow-lg shadow-primary/5 w-full z-30 sticky top-16 md:top-0">
+    <div class="flex justify-between items-center">
+        <div class="flex items-center gap-sm">
+            <span class="material-symbols-outlined text-primary text-2xl">analytics</span>
+            <h1 class="font-headline-lg text-headline-lg font-bold text-primary hidden md:block">Idea Analysis</h1>
+            <h1 class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary md:hidden">Idea Analysis</h1>
+        </div>
+        <div class="flex gap-sm">
+            <button class="p-xs text-on-surface-variant hover:bg-primary/10 rounded-lg transition-colors">
+                <span class="material-symbols-outlined">refresh</span>
+            </button>
+            <button class="p-xs text-on-surface-variant hover:bg-primary/10 rounded-lg transition-colors">
+                <span class="material-symbols-outlined">ios_share</span>
+            </button>
+        </div>
+    </div>
+    <!-- Progress Indicator -->
+    <div class="mt-sm">
+        <div class="flex justify-between mb-xs font-data-mono text-data-mono text-xs">
+            <span class="text-primary">01 Idea</span>
+            <span class="text-on-surface-variant">02 Problem</span>
+            <span class="text-on-surface-variant">03 Audience</span>
+            <span class="text-on-surface-variant">04 Review</span>
+        </div>
+        <div class="w-full h-1 bg-surface-container rounded-full overflow-hidden flex">
+            <div class="w-1/4 bg-primary h-full"></div>
+            <div class="w-1/4 h-full shimmer-progress"></div>
+            <div class="w-2/4 h-full"></div>
+        </div>
+    </div>
 </header>
+
 <!-- Canvas -->
 <div class="flex-1 p-md md:p-lg flex flex-col items-center justify-center">
-<!-- Step 1 Wizard -->
-<div class="w-full max-w-3xl glass-panel rounded-xl p-md md:p-lg flex flex-col gap-lg cyber-glow relative overflow-hidden">
-<!-- Decorative background elements -->
-<div class="absolute -top-10 -right-10 w-32 h-32 bg-primary/5 rounded-full blur-2xl pointer-events-none"></div>
-<div class="absolute -bottom-10 -left-10 w-32 h-32 bg-secondary/5 rounded-full blur-2xl pointer-events-none"></div>
-<div>
-<h2 class="font-headline-md text-headline-md font-bold text-on-surface mb-xs">Нека започнем с вашата идея.</h2>
-<p class="font-body-md text-body-md text-on-surface-variant">Дефинирайте основните параметри на вашия проект.</p>
-</div>
-<div class="flex flex-col gap-md">
-<!-- Input Field -->
-<div class="flex flex-col gap-xs">
-<label class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider" for="idea-name">Как се казва вашата идея?</label>
-<div class="relative group">
-<input class="w-full bg-surface-container-low border border-outline-variant rounded-DEFAULT p-sm text-on-surface font-body-md text-body-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all shadow-inner placeholder-on-surface-variant/50" id="idea-name" placeholder="Въведете име..." type="text" value="SmartWear"/>
-<!-- Input glow effect on focus -->
-<div class="absolute inset-0 rounded-DEFAULT pointer-events-none group-focus-within:cyber-glow-active transition-all opacity-0 group-focus-within:opacity-100"></div>
-</div>
-</div>
-<!-- Type Selection (Bento Grid Style) -->
-<div class="flex flex-col gap-xs">
-<label class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider mb-xs">Какъв тип е идеята?</label>
-<div class="grid grid-cols-2 md:grid-cols-3 gap-sm">
-<!-- Card 1 (Active) -->
-<button class="glass-panel p-sm rounded-DEFAULT border border-primary/40 bg-primary/10 flex flex-col items-center justify-center gap-xs hover:border-primary/60 transition-all cyber-glow-active">
-<span class="material-symbols-outlined text-primary text-2xl" style="font-variation-settings: 'FILL' 1;">store</span>
-<span class="font-data-mono text-data-mono text-primary">Business</span>
-</button>
-<!-- Card 2 -->
-<button class="glass-panel p-sm rounded-DEFAULT border border-outline-variant bg-surface-container-low flex flex-col items-center justify-center gap-xs hover:border-secondary/40 hover:bg-surface-variant/30 transition-all group">
-<span class="material-symbols-outlined text-on-surface-variant group-hover:text-secondary text-2xl transition-colors">branding_watermark</span>
-<span class="font-data-mono text-data-mono text-on-surface-variant group-hover:text-on-surface transition-colors">Brand</span>
-</button>
-<!-- Card 3 -->
-<button class="glass-panel p-sm rounded-DEFAULT border border-outline-variant bg-surface-container-low flex flex-col items-center justify-center gap-xs hover:border-secondary/40 hover:bg-surface-variant/30 transition-all group">
-<span class="material-symbols-outlined text-on-surface-variant group-hover:text-secondary text-2xl transition-colors">rocket_launch</span>
-<span class="font-data-mono text-data-mono text-on-surface-variant group-hover:text-on-surface transition-colors">Startup</span>
-</button>
-<!-- Card 4 -->
-<button class="glass-panel p-sm rounded-DEFAULT border border-outline-variant bg-surface-container-low flex flex-col items-center justify-center gap-xs hover:border-secondary/40 hover:bg-surface-variant/30 transition-all group">
-<span class="material-symbols-outlined text-on-surface-variant group-hover:text-secondary text-2xl transition-colors">inventory_2</span>
-<span class="font-data-mono text-data-mono text-on-surface-variant group-hover:text-on-surface transition-colors">Product</span>
-</button>
-<!-- Card 5 -->
-<button class="glass-panel p-sm rounded-DEFAULT border border-outline-variant bg-surface-container-low flex flex-col items-center justify-center gap-xs hover:border-secondary/40 hover:bg-surface-variant/30 transition-all group">
-<span class="material-symbols-outlined text-on-surface-variant group-hover:text-secondary text-2xl transition-colors">handshake</span>
-<span class="font-data-mono text-data-mono text-on-surface-variant group-hover:text-on-surface transition-colors">Service</span>
-</button>
-<!-- Card 6 -->
-<button class="glass-panel p-sm rounded-DEFAULT border border-outline-variant bg-surface-container-low flex flex-col items-center justify-center gap-xs hover:border-secondary/40 hover:bg-surface-variant/30 transition-all group">
-<span class="material-symbols-outlined text-on-surface-variant group-hover:text-secondary text-2xl transition-colors">apps</span>
-<span class="font-data-mono text-data-mono text-on-surface-variant group-hover:text-on-surface transition-colors">Application</span>
-</button>
-</div>
-</div>
-</div>
-<!-- Step 2 Teaser / Next Step Context -->
-<div class="mt-md pt-md border-t border-primary/10 flex flex-col gap-xs opacity-50 pointer-events-none">
-<label class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Какъв проблем решава вашата идея?</label>
-<div class="w-full bg-surface-container-low border border-outline-variant rounded-DEFAULT p-sm h-24 flex items-center justify-center">
-<span class="font-data-mono text-data-mono text-on-surface-variant/50">Очаква въвеждане...</span>
-</div>
-</div>
-<!-- Action Buttons -->
-<div class="flex justify-between items-center mt-md pt-sm border-t border-primary/10">
-<button class="px-md py-sm rounded-DEFAULT border border-primary/30 text-primary font-label-caps text-label-caps font-bold hover:bg-primary/5 transition-colors">
-                        Назад
+    <!-- Step 1 Wizard -->
+    <div class="w-full max-w-3xl glass-panel rounded-xl p-md md:p-lg flex flex-col gap-lg cyber-glow relative overflow-hidden">
+        <!-- Decorative background elements -->
+        <div class="absolute -top-10 -right-10 w-32 h-32 bg-primary/5 rounded-full blur-2xl pointer-events-none"></div>
+        <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-secondary/5 rounded-full blur-2xl pointer-events-none"></div>
+        <div>
+            <h2 class="font-headline-md text-headline-md font-bold text-on-surface mb-xs">Нека започнем с вашата идея.</h2>
+            <p class="font-body-md text-body-md text-on-surface-variant">Дефинирайте основните параметри на вашия проект.</p>
+        </div>
+        <div class="flex flex-col gap-md">
+            <!-- Input Field -->
+            <div class="flex flex-col gap-xs">
+                <label class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider" for="idea-name">Как се казва вашата идея?</label>
+                <div class="relative group">
+                    <input class="w-full bg-surface-container-low border border-outline-variant rounded-DEFAULT p-sm text-on-surface font-body-md text-body-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all shadow-inner placeholder-on-surface-variant/50" id="idea-name" placeholder="Въведете име..." type="text" value="SmartWear"/>
+                    <!-- Input glow effect on focus -->
+                    <div class="absolute inset-0 rounded-DEFAULT pointer-events-none group-focus-within:cyber-glow-active transition-all opacity-0 group-focus-within:opacity-100"></div>
+                </div>
+            </div>
+            <!-- Type Selection (Bento Grid Style) -->
+            <div class="flex flex-col gap-xs">
+                <label class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider mb-xs">Какъв тип е идеята?</label>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-sm">
+                    <!-- Card 1 (Active) -->
+                    <button class="glass-panel p-sm rounded-DEFAULT border border-primary/40 bg-primary/10 flex flex-col items-center justify-center gap-xs hover:border-primary/60 transition-all cyber-glow-active">
+                        <span class="material-symbols-outlined text-primary text-2xl" style="font-variation-settings: 'FILL' 1;">store</span>
+                        <span class="font-data-mono text-data-mono text-primary">Business</span>
                     </button>
-<button class="px-md py-sm rounded-DEFAULT bg-primary-container text-surface font-label-caps text-label-caps font-bold hover:opacity-90 transition-opacity flex items-center gap-xs shadow-[0_0_15px_rgba(74,222,128,0.3)]">
-                        Напред
-                        <span class="material-symbols-outlined text-sm">arrow_forward</span>
-</button>
+                    <!-- Card 2 -->
+                    <button class="glass-panel p-sm rounded-DEFAULT border border-outline-variant bg-surface-container-low flex flex-col items-center justify-center gap-xs hover:border-secondary/40 hover:bg-surface-variant/30 transition-all group">
+                        <span class="material-symbols-outlined text-on-surface-variant group-hover:text-secondary text-2xl transition-colors">branding_watermark</span>
+                        <span class="font-data-mono text-data-mono text-on-surface-variant group-hover:text-on-surface transition-colors">Brand</span>
+                    </button>
+                    <!-- Card 3 -->
+                    <button class="glass-panel p-sm rounded-DEFAULT border border-outline-variant bg-surface-container-low flex flex-col items-center justify-center gap-xs hover:border-secondary/40 hover:bg-surface-variant/30 transition-all group">
+                        <span class="material-symbols-outlined text-on-surface-variant group-hover:text-secondary text-2xl transition-colors">rocket_launch</span>
+                        <span class="font-data-mono text-data-mono text-on-surface-variant group-hover:text-on-surface transition-colors">Startup</span>
+                    </button>
+                    <!-- Card 4 -->
+                    <button class="glass-panel p-sm rounded-DEFAULT border border-outline-variant bg-surface-container-low flex flex-col items-center justify-center gap-xs hover:border-secondary/40 hover:bg-surface-variant/30 transition-all group">
+                        <span class="material-symbols-outlined text-on-surface-variant group-hover:text-secondary text-2xl transition-colors">inventory_2</span>
+                        <span class="font-data-mono text-data-mono text-on-surface-variant group-hover:text-on-surface transition-colors">Product</span>
+                    </button>
+                    <!-- Card 5 -->
+                    <button class="glass-panel p-sm rounded-DEFAULT border border-outline-variant bg-surface-container-low flex flex-col items-center justify-center gap-xs hover:border-secondary/40 hover:bg-surface-variant/30 transition-all group">
+                        <span class="material-symbols-outlined text-on-surface-variant group-hover:text-secondary text-2xl transition-colors">handshake</span>
+                        <span class="font-data-mono text-data-mono text-on-surface-variant group-hover:text-on-surface transition-colors">Service</span>
+                    </button>
+                    <!-- Card 6 -->
+                    <button class="glass-panel p-sm rounded-DEFAULT border border-outline-variant bg-surface-container-low flex flex-col items-center justify-center gap-xs hover:border-secondary/40 hover:bg-surface-variant/30 transition-all group">
+                        <span class="material-symbols-outlined text-on-surface-variant group-hover:text-secondary text-2xl transition-colors">apps</span>
+                        <span class="font-data-mono text-data-mono text-on-surface-variant group-hover:text-on-surface transition-colors">Application</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Step 2 Teaser / Next Step Context -->
+        <div class="mt-md pt-md border-t border-primary/10 flex flex-col gap-xs opacity-50 pointer-events-none">
+            <label class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Какъв проблем решава вашата идея?</label>
+            <div class="w-full bg-surface-container-low border border-outline-variant rounded-DEFAULT p-sm h-24 flex items-center justify-center">
+                <span class="font-data-mono text-data-mono text-on-surface-variant/50">Очаква въвеждане...</span>
+            </div>
+        </div>
+        <!-- Action Buttons -->
+        <div class="flex justify-between items-center mt-md pt-sm border-t border-primary/10">
+            <a class="px-md py-sm rounded-DEFAULT border border-primary/30 text-primary font-label-caps text-label-caps font-bold hover:bg-primary/5 transition-colors"
+               href="ideas">
+                Назад
+            </a>
+            <a class="px-md py-sm rounded-DEFAULT bg-primary-container text-surface font-label-caps text-label-caps font-bold hover:opacity-90 transition-opacity flex items-center gap-xs shadow-[0_0_15px_rgba(74,222,128,0.3)]"
+               href="create-idea/review">
+                Напред
+                <span class="material-symbols-outlined text-sm">arrow_forward</span>
+            </a>
+        </div>
+    </div>
 </div>
-</div>
-</div>
-<!-- Footer -->
-<footer class="flex justify-between items-center px-md py-sm bg-surface-container-lowest border-t border-primary/10 flat no shadows mt-auto">
-<div class="font-label-caps text-label-caps text-primary">© 2024 Innovation Studio. AI OS v2.4</div>
-<div class="flex gap-md font-label-caps text-label-caps text-on-surface-variant">
-<a class="hover:text-secondary-fixed-dim transition-colors flex items-center gap-xs" href="#">
-<span class="w-2 h-2 rounded-full bg-primary animate-pulse cyber-glow"></span>
-                    System Status: Optimal
-                </a>
-<a class="hover:text-secondary-fixed-dim transition-colors hidden md:block" href="#">Privacy Policy</a>
-<a class="hover:text-secondary-fixed-dim transition-colors hidden md:block" href="#">API Docs</a>
-</div>
-</footer>
-</main>
-</body></html>

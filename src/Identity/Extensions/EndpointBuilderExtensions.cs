@@ -8,6 +8,8 @@ public static class EndpointBuilderExtensions
     {
         var group = app.MapGroup("/api/auth").WithTags("auth");
         group.MapLogin();
+        group.MapRegistration();
+        group.MapLogout();
 
         return app;
     }

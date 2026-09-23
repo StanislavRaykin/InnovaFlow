@@ -3,11 +3,13 @@ using InnovaFlow.Identity.Data;
 using Microsoft.AspNetCore.Identity;
 using OpenTelemetry.Trace;
 using static System.Net.Mime.MediaTypeNames;
+using System.Data;
 using System.Reflection.Metadata;
 using Identity.Services;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using FluentValidation;
+using System.Text.RegularExpressions;
 namespace Identity.Endpoints;
 
 public static class Registration
@@ -15,7 +17,7 @@ public static class Registration
     public static RouteGroupBuilder MapRegistration(this RouteGroupBuilder group)
     {
         group.MapPost("/signup", HandleRegistration)
-        .WithName("signin")
+        .WithName("signup")
         .AllowAnonymous()
         .Produces<AuthResponse>()
         .Produces(StatusCodes.Status400BadRequest);
@@ -36,10 +38,23 @@ public static class Registration
                 return Results.BadRequest("Потребител с този имейл вече съществува.");
             }
 
+            // The email doubles as the Identity user name: it is unique and uses only characters
+            // Identity allows. The person's real name lives in the Profile.
+            var now = DateTimeOffset.UtcNow;
+            var nameParts = request.FullName.Trim().Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+
             ApplicationUser user = new ApplicationUser()
             {
-                UserName = request.FullName,
-                Email = request.Email
+                UserName = request.Email,
+                Email = request.Email,
+                CreatedAt = now,
+                Profile = new Profile
+                {
+                    FirstName = nameParts[0],
+                    LastName = nameParts.Length > 1 ? nameParts[1] : null,
+                    CreatedAt = now,
+                    UpdatedAt = now
+                }
             };
 
             var createdResult = await users.CreateAsync(user, request.Password);
@@ -70,6 +85,12 @@ public static class Registration
 
 public class RegistrationRequestValidator : AbstractValidator<RegistrationRequest>
 {
+    private readonly Regex Uppercase = new Regex(@"\p{Lu}", RegexOptions.Compiled);
+    private readonly Regex Lowercase = new Regex(@"\p{Ll}", RegexOptions.Compiled);
+
+    private readonly Regex Digit = new Regex(@"\p{Nd}", RegexOptions.Compiled);
+
+    private readonly Regex Symbol = new Regex(@"[^\p{L}\p{Nd}]", RegexOptions.Compiled);
     public RegistrationRequestValidator()
     {
         RuleFor(x => x.Email)
@@ -78,19 +99,17 @@ public class RegistrationRequestValidator : AbstractValidator<RegistrationReques
 
         RuleFor(x => x.Password)
             .NotEmpty().WithMessage("Паролата е задължителна.")
-            .MinimumLength(8).WithMessage("Паролата трябва да съдържа минимум 8 символа");
+            .MinimumLength(8).WithMessage("Паролата трябва да съдържа минимум 8 символа")
+            .Matches(Uppercase).WithMessage("Паролата трябва да съдържа поне 1 главна буква")
+            .Matches(Lowercase).WithMessage("Паролата трябва да съдържа поне 1 малка буква")
+            .Matches(Digit).WithMessage("Паролата трябва да съдържа поне 1 цифра")
+            .Matches(Symbol).WithMessage("Паролата трябва да съдържа поне 1 символ");
 
 
         RuleFor(x => x.FullName)
-    .Matches(@"^.{1,39}$")
-        .WithMessage("Потребителското име трябва да бъде между 1 и 39 символа.")
-    .Matches(@"^[a-zA-Z0-9-]+$")
-        .WithMessage("Потребителското име може да съдържа само латински букви, цифри и тирета.")
-    .Matches(@"^[^-]")
-        .WithMessage("Потребителското име не може да започва с тире.")
-    .Matches(@"[^-]$")
-        .WithMessage("Потребителското име не може да завършва с тире.")
-    .Matches(@"^(?!.*--).*$")
-        .WithMessage("Потребителското име не може да съдържа две последователни тирета.");
+            .NotEmpty().WithMessage("Името е задължително.")
+            .MaximumLength(100).WithMessage("Името не може да бъде по-дълго от 100 символа.")
+            .Matches(@"^\p{L}+([ '\-]\p{L}+)*$")
+                .WithMessage("Името може да съдържа само букви, интервали, тирета и апострофи.");
     }
 }

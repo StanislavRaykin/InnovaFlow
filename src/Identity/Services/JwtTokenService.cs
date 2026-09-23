@@ -8,9 +8,11 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Security.Claims;
 using System.Text;
 using System.IdentityModel.Tokens.Jwt;
+using ServiceDefaults;
+using StackExchange.Redis;
 namespace Identity.Services;
 
-public class JwtTokenService(UserManager<ApplicationUser> users, IOptions<JwtOptions> options, SigningKeyProvider provider)  : ITokenService
+public class JwtTokenService(UserManager<ApplicationUser> users, IOptions<JwtOptions> options, SigningKeyProvider provider, IConnectionMultiplexer redis)  : ITokenService
 {
     private readonly JwtOptions _options = options.Value;
 
@@ -21,12 +23,13 @@ public class JwtTokenService(UserManager<ApplicationUser> users, IOptions<JwtOpt
         DateTime now = DateTime.UtcNow;
         DateTime expires = now.AddMinutes(_options.AccessTokenMinutes);
          
+        string jti = Guid.NewGuid().ToString();
         long unix = ((DateTimeOffset)now).ToUnixTimeSeconds();
         var claims = new List<Claim>
         {
             new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new(JwtRegisteredClaimNames.Email, user.Email!),
-            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new(JwtRegisteredClaimNames.Jti, jti),
             new(JwtRegisteredClaimNames.Iat,
                 unix.ToString(),
                 ClaimValueTypes.Integer64)
@@ -46,6 +49,10 @@ public class JwtTokenService(UserManager<ApplicationUser> users, IOptions<JwtOpt
             signingCredentials: provider.Credentials);
 
         var accessToken = JwtHandler.WriteToken(token);
+
+        // The session lives exactly as long as the token; signing out deletes it early.
+        await redis.GetDatabase().StringSetAsync(AuthSessionKeys.For(jti), user.Id.ToString(), expires - now);
+
         return new AuthResponse
         {
             UserId = user.Id,

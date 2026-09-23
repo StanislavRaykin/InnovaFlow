@@ -64,8 +64,6 @@ tailwind.config = {
                     darkest: "#0b1320",
                     dark: "#111827",
                     navy: "#1a2235",
-                    mint: "#5eead4",
-                    mintDark: "#14b8a6",
                     textMuted: "#9ca3af",
                     border: "#374151"
                 },

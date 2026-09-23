@@ -1,17 +1,61 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+@* Default layout for every public (unauthenticated) page: Landing, Login,
+   Registration, NotFound. It owns the chrome that used to live inside
+   Landing.razor — the dark grid background, the top nav bar and the footer —
+   so pages only supply their own content.
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+   Design tokens (surface/primary/on-* colours, the xs..xl spacing scale and
+   the font-*/text-* pairs) come from wwwroot/js/tailwind.config.js, which is
+   loaded once from index.html. The .grid-bg / .glow-effect / .scanning-line
+   helpers come from css/landing.css, linked below. *@
+
+<HeadContent>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="css/landing.css" />
+</HeadContent>
+
+<div class="dark bg-surface text-on-surface font-body-md min-h-screen flex flex-col relative grid-bg">
+    <!-- TopNavBar -->
+    <nav
+        class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-md h-16 bg-surface/80 backdrop-blur-md border-b border-primary/10">
+        <div class="flex items-center gap-md">
+            <a class="font-headline-md text-headline-md font-bold text-primary" href="">Innovation Studio</a>
+            <div class="hidden md:flex gap-sm">
+                <a class="text-on-surface-variant hover:text-primary transition-colors px-sm py-xs font-body-md text-body-md"
+                   href="#">Features</a>
+                <a class="text-on-surface-variant hover:text-primary transition-colors px-sm py-xs font-body-md text-body-md"
+                   href="#">About</a>
+            </div>
         </div>
+        <div class="flex items-center gap-sm">
+            <a class="text-on-surface-variant hover:text-primary transition-colors px-sm py-xs font-body-md text-body-md hidden sm:block"
+               href="signin">Login</a>
+            <a class="bg-primary text-surface font-bold px-sm py-xs rounded-DEFAULT hover:bg-primary-container transition-colors"
+               href="signup">Start Analyzing</a>
+        </div>
+    </nav>
 
-        <article class="content px-4">
-            @Body
-        </article>
+    <main class="flex-grow flex flex-col pt-24 px-md md:px-xl container-max mx-auto w-full">
+        @Body
     </main>
+
+    <!-- Footer -->
+    <footer
+        class="mt-auto w-full py-sm bg-surface-container-lowest border-t border-primary/10 flex justify-between items-center px-md text-on-surface-variant font-label-caps text-label-caps">
+        <div>© 2024 Innovation Studio. AI OS v2.4</div>
+        <div class="flex gap-md">
+            <a class="hover:text-primary transition-colors flex items-center gap-xs" href="#">
+                <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                System Status: Optimal
+            </a>
+            <a class="hover:text-primary transition-colors hidden sm:block" href="#">Privacy Policy</a>
+            <a class="hover:text-primary transition-colors hidden sm:block" href="#">API Docs</a>
+        </div>
+    </footer>
 </div>
