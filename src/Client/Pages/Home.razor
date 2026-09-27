@@ -1,8 +1,277 @@
 ﻿@page "/home"
+@layout MainLayout
 @attribute [Authorize]
 @* for logged in users *@
 
-<PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
-Welcome to your new app.
+<html class="dark" lang="bg"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>InnovaFlow - System Overview</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="~/css/home_css.css"  />
+<script src="~/js/home.js"></script>
+</head>
+
+<body class="bg-surface text-on-surface font-body-md min-h-screen flex selection:bg-primary/30 selection:text-primary">
+<!-- Fixed Background Grid -->
+<div class="fixed inset-0 grid-background pointer-events-none z-[-1]"></div>
+<!-- SideNavBar -->
+<nav class="bg-surface-container fixed h-full left-0 w-sidebar-width border-r border-primary/10 flex flex-col justify-between py-md z-40 hidden md:flex">
+<div class="flex flex-col px-md">
+<!-- Header -->
+<div class="mb-lg">
+<h1 class="font-headline-md text-headline-md font-bold text-primary tracking-tight">InnovaFlow</h1>
+<p class="font-data-mono text-data-mono text-on-surface-variant mt-1">AI OS v2.4</p>
+</div>
+<!-- Navigation Links -->
+<ul class="flex flex-col gap-sm">
+<li>
+<a class="flex items-center gap-sm px-sm py-2 rounded bg-primary/10 text-primary border-l-4 border-primary font-data-mono text-data-mono transition-colors" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+                        Dashboard
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-sm px-sm py-2 rounded text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface border-l-4 border-transparent hover:border-primary/50 font-data-mono text-data-mono transition-colors" href="#">
+<span class="material-symbols-outlined">lightbulb</span>
+                        My Ideas
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-sm px-sm py-2 rounded text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface border-l-4 border-transparent hover:border-primary/50 font-data-mono text-data-mono transition-colors" href="#">
+<span class="material-symbols-outlined">add_circle</span>
+                        Create Idea
+                    </a>
+</li>
+</ul>
+</div>
+<div class="flex flex-col px-md gap-md">
+<!-- CTA -->
+<button class="w-full bg-primary-container text-on-primary-container font-data-mono text-data-mono font-bold py-3 rounded-DEFAULT hover:brightness-110 transition-all flex items-center justify-center gap-2 pulse-glow">
+                Deploy Agent
+            </button>
+<!-- Footer Links -->
+<ul class="flex flex-col gap-sm">
+<li>
+<a class="flex items-center gap-sm px-sm py-2 text-on-surface-variant hover:text-on-surface font-data-mono text-data-mono transition-colors" href="#">
+<span class="material-symbols-outlined text-[18px]">settings</span>
+                        Settings
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-sm px-sm py-2 text-on-surface-variant hover:text-on-surface font-data-mono text-data-mono transition-colors" href="#">
+<span class="material-symbols-outlined text-[18px]">help</span>
+                        Support
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-sm px-sm py-2 text-on-surface-variant hover:text-on-surface font-data-mono text-data-mono transition-colors mt-2 border-t border-primary/10 pt-4" href="#">
+<span class="material-symbols-outlined text-[18px]">logout</span>
+                        Logout
+                    </a>
+</li>
+</ul>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-1 ml-0 md:ml-[280px] p-4 md:p-lg flex flex-col gap-lg max-w-container-max mx-auto w-full">
+<!-- Header Area -->
+<header class="flex flex-col md:flex-row md:items-end justify-between gap-md border-b border-primary/20 pb-md">
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-2">SYSTEM OVERVIEW</p>
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg font-bold text-on-surface">Good morning, Alex <span class="text-2xl">👋</span></h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2 max-w-2xl">
+                    Explore your ideas and discover their potential. Real-time telemetry and agent status.
+                </p>
+</div>
+<div class="flex items-center gap-4 flex-wrap">
+<!-- Status Badge -->
+<div class="flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary/30 bg-surface-container/50">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span class="font-data-mono text-[12px] text-primary">System Status: Optimal</span>
+</div>
+<!-- Main CTA -->
+<button class="bg-primary text-on-primary-fixed font-bold px-6 py-3 rounded hover:brightness-110 transition-all flex items-center gap-2 border border-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">add</span>
+                    Създай нова идея
+                </button>
+</div>
+</header>
+<!-- Stats Grid -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-md">
+<!-- Stat 1 -->
+<div class="bg-surface-container border border-primary/10 rounded-lg p-md hover:border-primary/40 hover:shadow-[0_0_15px_rgba(107,251,154,0.1)] transition-all relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-[48px] text-primary">lightbulb</span>
+</div>
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-4">ОБЩО ИДЕИ</p>
+<p class="font-display-lg text-display-lg text-on-surface">24</p>
+<div class="mt-4 flex items-center gap-2 text-primary font-data-mono text-[12px]">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+<span>+3 тази седмица</span>
+</div>
+</div>
+<!-- Stat 2 -->
+<div class="bg-surface-container border border-primary/10 rounded-lg p-md hover:border-primary/40 hover:shadow-[0_0_15px_rgba(107,251,154,0.1)] transition-all relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-[48px] text-primary">analytics</span>
+</div>
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-4">АНАЛИЗИРАНИ</p>
+<p class="font-display-lg text-display-lg text-on-surface">18</p>
+<div class="mt-4 w-full bg-surface-variant h-1 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[75%] rounded-full"></div>
+</div>
+</div>
+<!-- Stat 3 -->
+<div class="bg-surface-container border border-primary/10 rounded-lg p-md hover:border-primary/40 hover:shadow-[0_0_15px_rgba(107,251,154,0.1)] transition-all relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-[48px] text-secondary">radar</span>
+</div>
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-4">СРЕДЕН РЕЗУЛТАТ</p>
+<p class="font-display-lg text-display-lg text-secondary">76<span class="text-headline-md text-on-surface-variant">/100</span></p>
+<div class="mt-4 flex items-center gap-2 text-secondary font-data-mono text-[12px]">
+<span>Оптимален потенциал</span>
+</div>
+</div>
+<!-- Stat 4 -->
+<div class="bg-surface-container border border-primary/10 rounded-lg p-md hover:border-primary/40 hover:shadow-[0_0_15px_rgba(107,251,154,0.1)] transition-all relative overflow-hidden group shimmer-line">
+<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-[48px] text-tertiary">autorenew</span>
+</div>
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-4">В ПРОГРЕС</p>
+<p class="font-display-lg text-display-lg text-tertiary">2</p>
+<div class="mt-4 flex items-center gap-2 text-tertiary font-data-mono text-[12px] animate-pulse">
+<span class="material-symbols-outlined text-[14px]">memory</span>
+<span>Агентите работят...</span>
+</div>
+</div>
+</section>
+<!-- Agent Swarm Status Widget -->
+<section class="bg-[#121b2d] border border-primary/20 rounded-xl overflow-hidden shadow-lg shadow-primary/5">
+<div class="bg-surface-dim/50 border-b border-primary/20 px-md py-4 flex items-center justify-between backdrop-blur-md">
+<div class="flex items-center gap-3 text-primary">
+<span class="material-symbols-outlined">hub</span>
+<h3 class="font-data-mono text-data-mono uppercase tracking-wider">Agent Swarm Status</h3>
+</div>
+<span class="material-symbols-outlined text-primary/30 text-[32px]">memory</span>
+</div>
+<div class="p-4 md:p-md flex flex-col gap-sm">
+<!-- Agent 1 -->
+<div class="border border-primary/10 bg-surface-container/30 rounded p-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full border border-primary/30 flex items-center justify-center bg-primary/5 text-primary">
+<span class="material-symbols-outlined text-[20px]">psychology</span>
+</div>
+<div>
+<p class="font-data-mono text-[14px] text-on-surface">Idea Gen</p>
+<p class="font-data-mono text-[12px] text-on-surface-variant">Idle - Ready for deployment</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<span class="font-data-mono text-[12px] px-2 py-1 bg-surface-variant rounded text-on-surface-variant">0 ops/s</span>
+</div>
+</div>
+<!-- Agent 2 -->
+<div class="border border-primary/30 bg-primary/5 rounded p-sm flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent w-[200%] animate-[shimmer_2s_infinite_linear]"></div>
+<div class="flex items-center gap-4 relative z-10">
+<div class="w-10 h-10 rounded-full border border-primary flex items-center justify-center bg-primary/20 text-primary pulse-glow">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">science</span>
+</div>
+<div>
+<p class="font-data-mono text-[14px] text-on-surface font-bold">Research</p>
+<p class="font-data-mono text-[12px] text-primary">Processing Data...</p>
+</div>
+</div>
+<div class="flex items-center gap-3 relative z-10">
+<span class="font-data-mono text-[12px] px-2 py-1 bg-primary/20 border border-primary/30 rounded text-primary">4,201 ops/s</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Your Ideas Section (Bento/Card Grid) -->
+<section>
+<div class="flex items-center justify-between mb-md">
+<h3 class="font-headline-md text-headline-md text-on-surface">Твоите Идеи</h3>
+<a class="font-data-mono text-data-mono text-primary hover:underline flex items-center gap-1" href="#">
+                    Виж всички <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-md">
+<!-- Idea Card 1 -->
+<article class="bg-[#1e293b]/80 backdrop-blur-md border border-primary/10 rounded-lg p-md flex flex-col gap-4 hover:border-primary/40 hover:shadow-[0_0_15px_rgba(107,251,154,0.1)] transition-all cursor-pointer group">
+<div class="flex justify-between items-start border-b border-primary/10 pb-4">
+<div>
+<h4 class="font-headline-md text-[20px] text-on-surface font-bold group-hover:text-primary transition-colors">SmartWear</h4>
+<p class="font-data-mono text-[12px] text-on-surface-variant mt-1">IoT / Здравеопазване</p>
+</div>
+<div class="bg-surface-variant px-2 py-1 rounded border border-primary/20 flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+<span class="font-label-caps text-[10px] text-primary">ЗАВЪРШЕН</span>
+</div>
+</div>
+<div class="flex-1">
+<p class="font-label-caps text-on-surface-variant mb-2">ПОТЕНЦИАЛЕН РЕЗУЛТАТ</p>
+<div class="flex items-end gap-2">
+<span class="font-display-lg text-[40px] leading-none text-primary">83</span>
+<span class="font-data-mono text-on-surface-variant mb-1">/100</span>
+</div>
+</div>
+<div class="pt-4 mt-auto border-t border-primary/10 flex justify-between items-center text-[12px] font-data-mono text-on-surface-variant">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">schedule</span>Преди 2 ч.</span>
+<span class="hover:text-primary transition-colors">Детайли →</span>
+</div>
+</article>
+<!-- Idea Card 2 (Processing State) -->
+<article class="bg-[#1e293b]/80 backdrop-blur-md border border-tertiary/30 rounded-lg p-md flex flex-col gap-4 hover:border-tertiary/50 transition-all cursor-pointer relative overflow-hidden group">
+<div class="absolute bottom-0 left-0 h-1 bg-tertiary w-[40%] animate-pulse"></div>
+<div class="flex justify-between items-start border-b border-primary/10 pb-4">
+<div>
+<h4 class="font-headline-md text-[20px] text-on-surface font-bold group-hover:text-tertiary transition-colors">EduAI</h4>
+<p class="font-data-mono text-[12px] text-on-surface-variant mt-1">EdTech / AI</p>
+</div>
+<div class="bg-surface-variant px-2 py-1 rounded border border-tertiary/20 flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px] text-tertiary animate-spin">sync</span>
+<span class="font-label-caps text-[10px] text-tertiary">АНАЛИЗ...</span>
+</div>
+</div>
+<div class="flex-1 flex flex-col justify-center">
+<p class="font-data-mono text-[13px] text-tertiary text-center animate-pulse">Събиране на пазарни данни...</p>
+</div>
+<div class="pt-4 mt-auto border-t border-primary/10 flex justify-between items-center text-[12px] font-data-mono text-on-surface-variant">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">schedule</span>Сега</span>
+<span class="opacity-50">Детайли →</span>
+</div>
+</article>
+<!-- Idea Card 3 -->
+<article class="bg-[#1e293b]/80 backdrop-blur-md border border-primary/10 rounded-lg p-md flex flex-col gap-4 hover:border-primary/40 hover:shadow-[0_0_15px_rgba(107,251,154,0.1)] transition-all cursor-pointer group">
+<div class="flex justify-between items-start border-b border-primary/10 pb-4">
+<div>
+<h4 class="font-headline-md text-[20px] text-on-surface font-bold group-hover:text-primary transition-colors">GreenBox</h4>
+<p class="font-data-mono text-[12px] text-on-surface-variant mt-1">E-commerce / Екология</p>
+</div>
+<div class="bg-surface-variant px-2 py-1 rounded border border-primary/20 flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+<span class="font-label-caps text-[10px] text-primary">ЗАВЪРШЕН</span>
+</div>
+</div>
+<div class="flex-1">
+<p class="font-label-caps text-on-surface-variant mb-2">ПОТЕНЦИАЛЕН РЕЗУЛТАТ</p>
+<div class="flex items-end gap-2">
+<span class="font-display-lg text-[40px] leading-none text-secondary">68</span>
+<span class="font-data-mono text-on-surface-variant mb-1">/100</span>
+</div>
+</div>
+<div class="pt-4 mt-auto border-t border-primary/10 flex justify-between items-center text-[12px] font-data-mono text-on-surface-variant">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">schedule</span>Преди 1 ден</span>
+<span class="hover:text-primary transition-colors">Детайли →</span>
+</div>
+</article>
+</div>
+</section>
+</main>
+</body></html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="bg"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI Analysis Processing</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@600;700;800&amp;family=Inter:wght@400&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="css/analysis_css.css"  />
+<script src="js/startanalysis_js.js"></script>
+</head>
+
+<body class="bg-surface text-on-surface font-body-md min-h-screen relative grid-bg flex flex-col md:flex-row overflow-hidden">
+<!-- Sidebar Component (Hidden on mobile, Fixed on Desktop) -->
+<aside class="hidden md:flex flex-col justify-between py-md fixed h-full left-0 w-sidebar-width bg-surface-container border-r border-primary/10 z-40">
+<div>
+<div class="px-md mb-xl flex items-center gap-xs">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="hub">hub</span>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary">InnovaFlow</h1>
+<p class="font-data-mono text-data-mono text-on-surface-variant">AI OS v2.4</p>
+</div>
+</div>
+<nav class="flex flex-col px-sm gap-2">
+<a class="flex items-center gap-sm px-sm py-xs rounded-lg text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-colors font-data-mono text-data-mono" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+                    Dashboard
+                </a>
+<a class="flex items-center gap-sm px-sm py-xs rounded-lg text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-colors font-data-mono text-data-mono" href="#">
+<span class="material-symbols-outlined" data-icon="lightbulb">lightbulb</span>
+                    My Ideas
+                </a>
+<a class="flex items-center gap-sm px-sm py-xs rounded-lg bg-primary/10 text-primary border-l-4 border-primary transition-all font-data-mono text-data-mono" href="#">
+<span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+                    Create Idea
+                </a>
+</nav>
+</div>
+<div class="px-sm flex flex-col gap-2">
+<button class="w-full bg-primary-container text-surface font-bold py-xs rounded-DEFAULT mb-md hover:brightness-110 transition-all font-data-mono text-data-mono">Deploy Agent</button>
+<a class="flex items-center gap-sm px-sm py-xs rounded-lg text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-colors font-data-mono text-data-mono" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+                Settings
+            </a>
+<a class="flex items-center gap-sm px-sm py-xs rounded-lg text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-colors font-data-mono text-data-mono" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+                Support
+            </a>
+<a class="flex items-center gap-sm px-sm py-xs rounded-lg text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-colors font-data-mono text-data-mono" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+                Logout
+            </a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 md:ml-sidebar-width flex flex-col h-screen overflow-y-auto">
+<!-- TopAppBar (Hidden Navigation Context - Linear/Transactional Override applied to TopNavBar) -->
+<header class="flex flex-col gap-sm p-md bg-surface-dim/50 backdrop-blur-xl border-b border-primary/20 shadow-lg shadow-primary/5 sticky top-0 z-30">
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="analytics" style="font-variation-settings: 'FILL' 1;">analytics</span>
+<h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg font-bold text-primary">Анализ на Идеята</h1>
+</div>
+<div class="flex gap-sm">
+<button class="p-xs text-on-surface-variant hover:bg-primary/10 rounded-lg transition-colors group relative">
+<span class="material-symbols-outlined group-hover:text-primary" data-icon="refresh">refresh</span>
+</button>
+<button class="p-xs text-on-surface-variant hover:bg-primary/10 rounded-lg transition-colors group relative">
+<span class="material-symbols-outlined group-hover:text-primary" data-icon="ios_share">ios_share</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Body -->
+<div class="flex-1 p-md md:p-xl flex flex-col items-center justify-center relative">
+<!-- Central Processing UI -->
+<div class="w-full max-w-4xl grid grid-cols-1 lg:grid-cols-2 gap-md items-start">
+<!-- Left Column: Status & Progress -->
+<div class="flex flex-col gap-lg bg-surface-container/80 backdrop-blur-xl border border-primary/10 rounded-xl p-md md:p-xl shadow-[0_0_15px_rgba(74,222,128,0.05)]">
+<div class="text-center lg:text-left">
+<h2 class="font-display-lg text-display-lg text-primary mb-xs">Анализиране...</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Нашите AI агенти оценяват вашата идея от множество перспективи в реално време.</p>
+</div>
+<!-- Progress Section -->
+<div class="space-y-sm">
+<div class="flex justify-between font-data-mono text-data-mono text-secondary">
+<span>ПРОГРЕС НА АНАЛИЗА</span>
+<span>6 / 8 МОДУЛА</span>
+</div>
+<div class="w-full h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary shimmer-bar w-3/4 shadow-[0_0_10px_rgba(74,222,128,0.5)]"></div>
+</div>
+</div>
+<!-- Process List -->
+<div class="space-y-sm font-data-mono text-data-mono mt-sm">
+<div class="flex items-center gap-sm text-on-surface-variant opacity-70">
+<span class="material-symbols-outlined text-primary" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span>Разбиране на вашата идея</span>
+</div>
+<div class="flex items-center gap-sm text-on-surface-variant opacity-70">
+<span class="material-symbols-outlined text-primary" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span>Идентифициране на целева аудитория</span>
+</div>
+<div class="flex items-center gap-sm text-on-surface-variant opacity-70">
+<span class="material-symbols-outlined text-primary" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span>Анализ на пазара</span>
+</div>
+<div class="flex items-center gap-sm text-on-surface-variant opacity-70">
+<span class="material-symbols-outlined text-primary" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span>Намиране на конкуренти</span>
+</div>
+<!-- Active Step -->
+<div class="flex items-center gap-sm text-primary font-bold p-xs rounded-DEFAULT bg-primary/5 border border-primary/20">
+<span class="material-symbols-outlined text-primary animate-pulse-glow rounded-full" data-icon="pending">pending</span>
+<span>Оценяване на иновацията</span>
+<span class="ml-auto text-label-caps font-label-caps text-secondary-fixed-dim animate-pulse">ОБРАБОТКА...</span>
+</div>
+<div class="flex items-center gap-sm text-surface-bright">
+<span class="material-symbols-outlined" data-icon="radio_button_unchecked">radio_button_unchecked</span>
+<span>Оценка на осъществимостта</span>
+</div>
+<div class="flex items-center gap-sm text-surface-bright">
+<span class="material-symbols-outlined" data-icon="radio_button_unchecked">radio_button_unchecked</span>
+<span>Идентифициране на рискове</span>
+</div>
+<div class="flex items-center gap-sm text-surface-bright">
+<span class="material-symbols-outlined" data-icon="radio_button_unchecked">radio_button_unchecked</span>
+<span>Генериране на препоръки</span>
+</div>
+</div>
+</div>
+<!-- Right Column: AI Agent Swarm -->
+<div class="flex flex-col gap-md bg-surface-container-low/50 backdrop-blur-xl border border-primary/10 rounded-xl p-md relative overflow-hidden h-full min-h-[400px]">
+<!-- Subtle background decoration -->
+<div class="absolute inset-0 opacity-10 flex items-center justify-center pointer-events-none">
+<span class="material-symbols-outlined text-[200px] text-primary" data-icon="memory">memory</span>
+</div>
+<h3 class="font-label-caps text-label-caps text-on-surface-variant mb-xs z-10">АКТИВНИ AI АГЕНТИ</h3>
+<div class="grid grid-cols-2 gap-sm z-10 flex-1 content-start">
+<!-- Agent 1: Completed -->
+<div class="bg-surface-container border border-primary/10 rounded-lg p-sm flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-surface-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-sm text-primary" data-icon="trending_up">trending_up</span>
+</div>
+<div>
+<div class="font-label-caps text-label-caps text-primary">Market Agent</div>
+<div class="font-data-mono text-[10px] text-on-surface-variant">ПРИКЛЮЧЕН</div>
+</div>
+</div>
+<!-- Agent 2: Active (Innovation) -->
+<div class="bg-surface-container border border-primary/40 rounded-lg p-sm flex items-center gap-sm agent-active relative overflow-hidden">
+<div class="absolute inset-0 bg-primary/5"></div>
+<div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center border border-primary relative z-10">
+<span class="material-symbols-outlined text-sm text-primary" data-icon="tips_and_updates">tips_and_updates</span>
+</div>
+<div class="relative z-10">
+<div class="font-label-caps text-label-caps text-primary shadow-primary">Innovation Agent</div>
+<div class="font-data-mono text-[10px] text-secondary">СКАНИРАНЕ...</div>
+</div>
+</div>
+<!-- Agent 3: Completed -->
+<div class="bg-surface-container border border-primary/10 rounded-lg p-sm flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-surface-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-sm text-primary" data-icon="groups">groups</span>
+</div>
+<div>
+<div class="font-label-caps text-label-caps text-primary">Audience Agent</div>
+<div class="font-data-mono text-[10px] text-on-surface-variant">ПРИКЛЮЧЕН</div>
+</div>
+</div>
+<!-- Agent 4: Pending -->
+<div class="bg-surface-container border border-surface-bright rounded-lg p-sm flex items-center gap-sm opacity-50">
+<div class="w-8 h-8 rounded-full bg-surface-bright flex items-center justify-center">
+<span class="material-symbols-outlined text-sm text-on-surface-variant" data-icon="construction">construction</span>
+</div>
+<div>
+<div class="font-label-caps text-label-caps text-on-surface-variant">Feasibility Agent</div>
+<div class="font-data-mono text-[10px] text-surface-bright">ИЗЧАКВАНЕ</div>
+</div>
+</div>
+<!-- Agent 5: Pending -->
+<div class="bg-surface-container border border-surface-bright rounded-lg p-sm flex items-center gap-sm opacity-50">
+<div class="w-8 h-8 rounded-full bg-surface-bright flex items-center justify-center">
+<span class="material-symbols-outlined text-sm text-on-surface-variant" data-icon="warning">warning</span>
+</div>
+<div>
+<div class="font-label-caps text-label-caps text-on-surface-variant">Risk Agent</div>
+<div class="font-data-mono text-[10px] text-surface-bright">ИЗЧАКВАНЕ</div>
+</div>
+</div>
+</div>
+<!-- Network Visualizer Output Box -->
+<div class="mt-auto bg-[#040812] border border-primary/20 rounded-DEFAULT p-sm font-data-mono text-[10px] text-secondary-fixed-dim z-10 h-24 overflow-hidden relative">
+<div class="absolute inset-0 bg-gradient-to-b from-transparent to-[#040812] z-10 pointer-events-none"></div>
+<div class="space-y-1 opacity-80" id="terminal-output">
+<div>&gt; Инициализиране на модул 'Иновации'... OK</div>
+<div>&gt; Зареждане на патентни бази данни... OK</div>
+<div>&gt; Търсене на семантични съвпадения...</div>
+<div class="text-primary">&gt; Открити 3 потенциални вектора за диференциация.</div>
+<div>&gt; Изчисляване на индекс на уникалност...</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer -->
+<footer class="flex justify-between items-center px-md py-sm bg-surface-container-lowest border-t border-primary/10 w-full mt-auto">
+<span class="font-label-caps text-label-caps text-primary">© 2024 Innovation Studio. AI OS v2.4</span>
+<div class="flex gap-md font-label-caps text-label-caps text-secondary">
+<a class="flex items-center gap-xs hover:text-secondary-fixed-dim" href="#">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_5px_#4ADE80]"></span>
+                    System Status: Optimal
+                </a>
+<a class="hidden md:block text-on-surface-variant hover:text-secondary-fixed-dim" href="#">Privacy Policy</a>
+<a class="hidden md:block text-on-surface-variant hover:text-secondary-fixed-dim" href="#">API Docs</a>
+</div>
+</footer>
+</main>
+<script>
+        // Simple terminal output animation for flavor
+        document.addEventListener('DOMContentLoaded', () => {
+            const terminal = document.getElementById('terminal-output');
+            const logs = [
+                "> Анализ на пазарната ниша...",
+                "> Кръстосано сравнение с топ 10 конкуренти...",
+                "> Генериране на матрица за оценка...",
+                "> Оптимизиране на теглата на критериите...",
+                "> Изолиране на уникални стойностни предложения..."
+            ];
+            
+            let i = 0;
+            setInterval(() => {
+                if(i < logs.length) {
+                    const el = document.createElement('div');
+                    el.textContent = logs[i];
+                    terminal.appendChild(el);
+                    if(terminal.children.length > 5) {
+                        terminal.removeChild(terminal.firstChild);
+                    }
+                    i++;
+                } else {
+                    i = 0; // loop for demo purposes
+                }
+            }, 1200);
+        });
+    </script>
+</body></html>
