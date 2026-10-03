@@ -10,6 +10,7 @@ using System.Text;
 using System.IdentityModel.Tokens.Jwt;
 using ServiceDefaults;
 using StackExchange.Redis;
+using Identity.Data.Options;
 namespace Identity.Services;
 
 public class JwtTokenService(UserManager<ApplicationUser> users, IOptions<JwtOptions> options, SigningKeyProvider provider, IConnectionMultiplexer redis)  : ITokenService
@@ -21,10 +22,11 @@ public class JwtTokenService(UserManager<ApplicationUser> users, IOptions<JwtOpt
      public async Task<AuthResponse> GenerateTokenAsync(ApplicationUser user, CancellationToken ct = default)
     {
         DateTime now = DateTime.UtcNow;
-        DateTime expires = now.AddMinutes(_options.AccessTokenMinutes);
+        DateTime expires = now.AddDays(_options.AccessTokenDays);
          
         string jti = Guid.NewGuid().ToString();
         long unix = ((DateTimeOffset)now).ToUnixTimeSeconds();
+        
         var claims = new List<Claim>
         {
             new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
@@ -49,8 +51,6 @@ public class JwtTokenService(UserManager<ApplicationUser> users, IOptions<JwtOpt
             signingCredentials: provider.Credentials);
 
         var accessToken = JwtHandler.WriteToken(token);
-
-        // The session lives exactly as long as the token; signing out deletes it early.
         await redis.GetDatabase().StringSetAsync(AuthSessionKeys.For(jti), user.Id.ToString(), expires - now);
 
         return new AuthResponse
@@ -62,4 +62,9 @@ public class JwtTokenService(UserManager<ApplicationUser> users, IOptions<JwtOpt
         };
 
     }
+}
+
+public interface ITokenService
+{
+    public Task<AuthResponse> GenerateTokenAsync(ApplicationUser user, CancellationToken ct = default);
 }

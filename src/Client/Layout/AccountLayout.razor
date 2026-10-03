@@ -1,5 +1,6 @@
 @inherits LayoutComponentBase
-@inject AuthService Auth
+@inject IdentityClient Auth
+@inject JwtAuthenticationStateProvider AuthState
 @inject NavigationManager Navigation
 
 @* Shell for every signed-in page (Dashboard, My Ideas, Create Idea). It owns the
@@ -64,11 +65,12 @@
                     <span class="material-symbols-outlined">dashboard</span>
                     Dashboard
                 </NavLink>
-                <NavLink class="@NavItem" ActiveClass="@NavItemActive" href="ideas">
+                @* Exact match, otherwise /ideas/create would light up My Ideas too. *@
+                <NavLink class="@NavItem" ActiveClass="@NavItemActive" href="ideas" Match="NavLinkMatch.All">
                     <span class="material-symbols-outlined">lightbulb</span>
                     My Ideas
                 </NavLink>
-                <NavLink class="@NavItem" ActiveClass="@NavItemActive" href="create-idea">
+                <NavLink class="@NavItem" ActiveClass="@NavItemActive" href="ideas/create">
                     <span class="material-symbols-outlined">add_circle</span>
                     Create Idea
                 </NavLink>
@@ -133,6 +135,19 @@
 </div>
 
 @code {
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthState.GetAuthenticationStateAsync();
+        bool isAuthenticated = authState.User.Identity?.IsAuthenticated ?? false;
+
+        if (!isAuthenticated)
+        {
+            Navigation.NavigateTo("/", replace: true);
+        }
+
+    }
+
     // Nav-item classes, lifted verbatim from the mock-ups so the rail keeps its
     // look; NavLink swaps in the tinted marker for the current page.
     private const string NavItem =

@@ -3,6 +3,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Security.Cryptography;
 using Microsoft.Extensions.Options;
 using System.Text;
+using Identity.Data.Options;
 namespace Identity.Services;
 
 public sealed class SigningKeyProvider : IDisposable

@@ -1,0 +1,31 @@
+@inject IdentityClient Identity
+@inject JwtAuthenticationStateProvider AuthState
+@inject NavigationManager Nav
+
+@page "/auth/callback"
+
+@code{
+    [SupplyParameterFromQuery] public string? Code { get; set; }
+    [SupplyParameterFromQuery] public string? ReturnUrl { get; set; }
+    [SupplyParameterFromQuery] public string? Error { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Console.WriteLine("Callback parameters: " + (Code, ReturnUrl, Error));
+        if (string.IsNullOrEmpty(Error) || Code == null) 
+        {
+            Nav.NavigateTo("/signin?error=1"); 
+            return; 
+        }
+
+        var auth = await Identity.ExchangeGitHubCodeAsync(Code);
+        if (auth == null) 
+        { 
+            Nav.NavigateTo("/signin?error=1");
+            return; 
+        }
+
+        await AuthState.SignInAsync(auth.Token);
+        Nav.NavigateTo(ReturnUrl ?? "/home", replace: true);   // replace → code leaves history
+    }
+}

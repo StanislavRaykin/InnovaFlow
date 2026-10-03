@@ -28,6 +28,7 @@ public class JwtAuthenticationStateProvider(TokenStorage storage) : Authenticati
             return Anonymous;
         }
 
+
         var identity = new ClaimsIdentity(claims, authenticationType: "jwt", nameType: "email", roleType: RoleClaim);
         return new AuthenticationState(new ClaimsPrincipal(identity));
     }

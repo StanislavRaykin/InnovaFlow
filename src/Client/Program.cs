@@ -8,7 +8,6 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-// Without this the API calls would hit the Blazor dev server itself, which answers 405.
 var gatewayUrl = builder.Configuration["GatewayUrl"]
     ?? throw new InvalidOperationException("GatewayUrl is missing from wwwroot/appsettings.json.");
 
@@ -27,6 +26,6 @@ builder.Services.AddHttpClient("Gateway", c => c.BaseAddress = new Uri(gatewayUr
 builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("Gateway"));
 
 //services
-builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<IdentityClient>();
 
 await builder.Build().RunAsync();

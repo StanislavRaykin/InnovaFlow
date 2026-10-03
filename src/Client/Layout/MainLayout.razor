@@ -1,4 +1,6 @@
 @inherits LayoutComponentBase
+@inject JwtAuthenticationStateProvider AuthState
+@inject NavigationManager Navigation
 
 @* Default layout for every public (unauthenticated) page: Landing, Login,
    Registration, NotFound. It owns the chrome that used to live inside
@@ -59,3 +61,17 @@
         </div>
     </footer>
 </div>
+@code{
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthState.GetAuthenticationStateAsync();
+        bool isAuthenticated = authState.User.Identity?.IsAuthenticated ?? false;
+
+        if (isAuthenticated)
+        {
+            Navigation.NavigateTo("/home", replace: true);
+        }
+
+    }
+}

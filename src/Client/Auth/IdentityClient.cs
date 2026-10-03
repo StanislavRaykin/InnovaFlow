@@ -7,8 +7,10 @@ namespace Client.Auth;
 
 public record AuthResult(bool Succeeded, string? Error = null);
 
-public class AuthService(HttpClient http, JwtAuthenticationStateProvider authState)
+public class IdentityClient(HttpClient http, JwtAuthenticationStateProvider authState)
 {
+
+
     public async Task<AuthResult> SignInAsync(LoginRequest request)
     {
         try
@@ -66,6 +68,14 @@ public class AuthService(HttpClient http, JwtAuthenticationStateProvider authSta
 
         await authState.SignInAsync(auth.Token);
         return new AuthResult(true);
+    }
+
+     public async Task<AuthResponse?> ExchangeGitHubCodeAsync(string code, CancellationToken ct = default)
+    {
+        var res = await http.PostAsJsonAsync("/api/auth/github/exchange", new { code }, ct);
+        return res.IsSuccessStatusCode
+            ? await res.Content.ReadFromJsonAsync<AuthResponse>(ct)
+            : null;
     }
 
     // Identity returns errors as a plain string, a { code: [messages] } dictionary,

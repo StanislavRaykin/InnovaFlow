@@ -5,6 +5,8 @@ var builder = DistributedApplication.CreateBuilder(args);
 // ---------- secrets and api keys ----------
 var claudeKey = builder.AddParameter("CLAUDE-API-KEY", secret: true);
 var ghCliSecret = builder.AddParameter("GH-CLI-SECRET", secret: true);
+
+var ghCliId = builder.AddParameter("GH-CLI-ID", secret: true);
 var bzKeyId = builder.AddParameter("BZ-KEY-ID", secret: true);
 var bzAppKey = builder.AddParameter("BZ-APP-KEY", secret: true);
 var jwtPrivKey = builder.AddParameter("JWT-PRIVATE-KEY", secret: true);
@@ -30,15 +32,10 @@ var rabbit = builder.AddRabbitMQ("messaging")
 
 var cache = builder.AddRedis("cache");
 
+
+
 // ---------- services ----------
-var identity = builder.AddProject<Projects.Identity>("identity")//migrations
-                      .WithEnvironment("RunMigrationsOnStartup", "true")
-                      .WithEnvironment("GH-SECRET", ghCliSecret)
-                      .WithEnvironment("Jwt__PrivateKey", jwtPrivKey)
-                      .WithReference(db)
-                      .WithReference(cache)
-                      .WaitFor(db)
-                      .WaitFor(cache);
+
 
 var projects = builder.AddProject<Projects.Projects>("projects")//migrations
                                                                    .WithReference(db)
@@ -67,7 +64,7 @@ builder.AddProject<Projects.Analysis_Worker>("worker")
        .WithEnvironment("BACKBLAZE-KEY-ID", bzKeyId)
  .WithEnvironment("BACKBLAZE-APP-KEY", bzAppKey)
        .WaitFor(rabbit)
-       .WithReplicas(3);                         // three competing consumers
+       .WithReplicas(2);                         // three competing consumers
 
 var notifier = builder.AddProject<Projects.Notifier>("notifier") //migrations
                       .WithReference(rabbit)
@@ -75,6 +72,19 @@ var notifier = builder.AddProject<Projects.Notifier>("notifier") //migrations
                       .WithReference(db)
                       .WithEnvironment("RunMigrationsOnStartup", "true")      
                       .WaitFor(rabbit);
+
+
+
+var identity = builder.AddProject<Projects.Identity>("identity")//migrations
+                      .WithEnvironment("RunMigrationsOnStartup", "true")
+                      .WithEnvironment("GH-CLI-SECRET", ghCliSecret)
+                      .WithEnvironment("GH-CLI-ID", ghCliId)
+                      .WithEnvironment("Jwt__PrivateKey", jwtPrivKey)
+                      .WithReference(db)
+                      .WithReference(cache)
+                      .WaitFor(db)
+                      .WaitFor(cache);
+
 
 // ---------- edge ----------
 var gateway = builder.AddProject<Projects.Gateway>("gateway")
@@ -86,13 +96,18 @@ var gateway = builder.AddProject<Projects.Gateway>("gateway")
                      .WaitFor(cache)
                      .WithExternalHttpEndpoints();
 
+var client = builder.AddProject<Projects.Client>("client")
+       .WithReference(gateway);
+
+identity.WithEnvironment("Client__BaseUrl", client.GetEndpoint("https"));
+client.WithReference(identity).WaitFor(identity);
+
 
 foreach(var s in new[] { notifier, projects, analysis, identity, gateway })
 {
        s.WithEnvironment("Jwt__PublicKey", jwtPubKey);
 }
 
-builder.AddProject<Projects.Client>("client")
-       .WithReference(gateway);
+
 
 builder.Build().Run();

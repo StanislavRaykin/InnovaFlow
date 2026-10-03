@@ -11,14 +11,18 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.AddIdentityServices();
+builder.Services.AddDistributedMemoryCache();
 
 //cache (active login sessions)
 builder.AddRedisClient("cache");
 
 //auth
 builder.AddJwtAuthentication();
+builder.AddGithubAuthentication();
+
 builder.Services.AddSingleton<SigningKeyProvider>();
 builder.Services.AddScoped<ITokenService, JwtTokenService>();
+builder.Services.AddScoped<IExchangeCodeStore, RedisExchangeCodeStore>();
 
 //vaidators
 builder.Services.AddValidatorsFromAssemblyContaining<RegistrationRequestValidator>();

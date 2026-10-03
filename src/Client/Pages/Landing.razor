@@ -1,4 +1,6 @@
 @page "/"
+@inject JwtAuthenticationStateProvider AuthState
+@inject NavigationManager Navigation
 
 @* Nav bar, footer and the dark grid shell now live in MainLayout, which is the
    default layout for all public pages (see App.razor). *@
@@ -227,3 +229,17 @@
         </a>
     </div>
 </section>
+
+@code{
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthState.GetAuthenticationStateAsync();
+        bool isAuthenticated = authState.User.Identity?.IsAuthenticated ?? false;
+
+        if (isAuthenticated)
+        {
+            Navigation.NavigateTo("/home", replace: true);
+        }
+
+    }
+}
