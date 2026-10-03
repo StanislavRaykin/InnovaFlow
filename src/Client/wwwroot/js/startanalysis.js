@@ -157,3 +157,28 @@
           }
         },
       }
+       document.addEventListener('DOMContentLoaded', () => {
+            const terminal = document.getElementById('terminal-output');
+            const logs = [
+                "> Анализ на пазарната ниша...",
+                "> Кръстосано сравнение с топ 10 конкуренти...",
+                "> Генериране на матрица за оценка...",
+                "> Оптимизиране на теглата на критериите...",
+                "> Изолиране на уникални стойностни предложения..."
+            ];
+            
+            let i = 0;
+            setInterval(() => {
+                if(i < logs.length) {
+                    const el = document.createElement('div');
+                    el.textContent = logs[i];
+                    terminal.appendChild(el);
+                    if(terminal.children.length > 5) {
+                        terminal.removeChild(terminal.firstChild);
+                    }
+                    i++;
+                } else {
+                    i = 0; // loop for demo purposes
+                }
+            }, 1200);
+        });

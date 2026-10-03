@@ -1,295 +1,240 @@
-<!DOCTYPE html>
+@page "/overview-analysis"
+@layout AccountLayout
+@attribute [Authorize]
+@* for logged in users *@
 
-<html class="dark" lang="bg"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>SmartWear - AI Analysis Dashboard</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@100..900&family=Inter:wght@100..900&family=JetBrains+Mono:wght@100..900&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="~/css/analysis_css.css"  />
-<script src="~/js/overviewanalysis_js.js"></script>
-</head>
 
-<body class="bg-background text-on-surface font-body-md min-h-screen relative overflow-x-hidden">
 <!-- Subtle Grid Background -->
-<div class="fixed inset-0 pointer-events-none z-0" style="background-image: linear-gradient(to right, rgba(107, 251, 154, 0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(107, 251, 154, 0.03) 1px, transparent 1px); background-size: 24px 24px;"></div>
-<!-- Sidebar Layout Container -->
-<div class="flex min-h-screen">
-<!-- SideNavBar -->
-<nav class="hidden md:flex flex-col justify-between py-md bg-surface-container text-primary font-data-mono text-data-mono fixed h-full left-0 w-sidebar-width border-r border-primary/10 flat no shadows z-40">
-<div>
-<div class="px-md mb-xl flex items-center gap-sm">
-<div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30">
-<span class="material-symbols-outlined text-primary">memory</span>
+<div class="fixed inset-0 pointer-events-none z-0"
+     style="background-image: linear-gradient(to right, rgba(107, 251, 154, 0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(107, 251, 154, 0.03) 1px, transparent 1px); background-size: 24px 24px;">
 </div>
-<div>
-<div class="font-headline-md text-headline-md font-bold text-primary">InnovaFlow</div>
-<div class="text-on-surface-variant font-label-caps text-label-caps">AI OS v2.4</div>
-</div>
-</div>
-<div class="flex flex-col">
-<a class="px-md py-sm flex items-center gap-sm bg-primary/10 text-primary border-l-4 border-primary" href="#">
-<span class="material-symbols-outlined">dashboard</span>
-<span>Dashboard</span>
-</a>
-<a class="px-md py-sm flex items-center gap-sm text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-all" href="#">
-<span class="material-symbols-outlined">lightbulb</span>
-<span>My Ideas</span>
-</a>
-<a class="px-md py-sm flex items-center gap-sm text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-all" href="#">
-<span class="material-symbols-outlined">add_circle</span>
-<span>Create Idea</span>
-</a>
-</div>
-</div>
-<div>
-<div class="px-md mb-md">
-<button class="w-full py-xs px-sm bg-primary text-on-primary font-bold rounded flex items-center justify-center gap-xs hover:bg-primary-fixed transition-colors">
-<span class="material-symbols-outlined text-[18px]">rocket_launch</span>
-                        Deploy Agent
-                    </button>
-</div>
-<div class="flex flex-col border-t border-primary/10 pt-sm">
-<a class="px-md py-xs flex items-center gap-sm text-on-surface-variant hover:text-on-surface transition-colors" href="#">
-<span class="material-symbols-outlined text-[18px]">settings</span>
-<span>Settings</span>
-</a>
-<a class="px-md py-xs flex items-center gap-sm text-on-surface-variant hover:text-on-surface transition-colors" href="#">
-<span class="material-symbols-outlined text-[18px]">help</span>
-<span>Support</span>
-</a>
-<a class="px-md py-xs flex items-center gap-sm text-on-surface-variant hover:text-on-surface transition-colors" href="#">
-<span class="material-symbols-outlined text-[18px]">logout</span>
-<span>Logout</span>
-</a>
-</div>
-</div>
-</nav>
-<!-- Main Content Area -->
-<main class="flex-1 md:ml-sidebar-width z-10 flex flex-col relative pb-xl">
 <!-- TopAppBar -->
-<header class="bg-surface-dim/50 backdrop-blur-xl text-primary font-headline-lg text-headline-lg font-headline-lg text-headline-lg font-bold text-primary full-width border-b border-primary/20 shadow-lg shadow-primary/5 flex flex-col gap-sm p-md sticky top-0 z-30">
-<div class="flex justify-between items-center w-full max-w-container-max mx-auto">
-<div class="flex items-center gap-sm">
-<span class="material-symbols-outlined text-[32px]">analytics</span>
-<h1 class="text-primary font-bold">SmartWear</h1>
-<span class="ml-sm px-xs py-[2px] bg-primary/20 border border-primary/40 rounded-sm font-label-caps text-label-caps text-primary flex items-center gap-1">
-<div class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
-                            AI Analysis #3
-                        </span>
-</div>
-<div class="flex gap-sm">
-<button class="w-10 h-10 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-primary/10 hover:text-primary transition-colors">
-<span class="material-symbols-outlined">refresh</span>
-</button>
-<button class="w-10 h-10 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-primary/10 hover:text-primary transition-colors">
-<span class="material-symbols-outlined">ios_share</span>
-</button>
-</div>
-</div>
-<!-- Internal Navigation Tabs -->
-<div class="flex gap-md mt-sm overflow-x-auto no-scrollbar max-w-container-max mx-auto w-full font-data-mono text-data-mono border-b border-surface-variant">
-<button class="py-xs text-primary border-b-2 border-primary pb-1 font-bold whitespace-nowrap">Overview</button>
-<button class="py-xs text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap">Market</button>
-<button class="py-xs text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap">Innovation</button>
-<button class="py-xs text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap">Audience</button>
-<button class="py-xs text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap">Feasibility</button>
-<button class="py-xs text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap">Risks</button>
-<button class="py-xs text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap">Recommendations</button>
-</div>
+<header
+    class="bg-surface-dim/50 backdrop-blur-xl text-primary font-headline-lg text-headline-lg font-headline-lg text-headline-lg font-bold text-primary full-width border-b border-primary/20 shadow-lg shadow-primary/5 flex flex-col gap-sm p-md sticky top-0 z-30">
+    <div class="flex justify-between items-center w-full max-w-container-max mx-auto">
+        <div class="flex items-center gap-sm">
+            <span class="material-symbols-outlined text-[32px]">analytics</span>
+            <h1 class="text-primary font-bold">SmartWear</h1>
+            <span
+                class="ml-sm px-xs py-[2px] bg-primary/20 border border-primary/40 rounded-sm font-label-caps text-label-caps text-primary flex items-center gap-1">
+                <div class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
+                AI Analysis #3
+            </span>
+        </div>
+        <div class="flex gap-sm">
+            <button
+                class="w-10 h-10 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-primary/10 hover:text-primary transition-colors">
+                <span class="material-symbols-outlined">refresh</span>
+            </button>
+            <button
+                class="w-10 h-10 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-primary/10 hover:text-primary transition-colors">
+                <span class="material-symbols-outlined">ios_share</span>
+            </button>
+        </div>
+    </div>
+    <!-- Internal Navigation Tabs -->
+    <div
+        class="flex gap-md mt-sm overflow-x-auto no-scrollbar max-w-container-max mx-auto w-full font-data-mono text-data-mono border-b border-surface-variant">
+        <button class="py-xs text-primary border-b-2 border-primary pb-1 font-bold whitespace-nowrap">Overview</button>
+        <button
+        class="py-xs text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap">Market</button>
+        <button
+        class="py-xs text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap">Innovation</button>
+        <button
+        class="py-xs text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap">Audience</button>
+        <button
+        class="py-xs text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap">Feasibility</button>
+        <button
+        class="py-xs text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap">Risks</button>
+        <button
+        class="py-xs text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap">Recommendations</button>
+    </div>
 </header>
 <div class="p-md max-w-container-max mx-auto w-full grid grid-cols-12 gap-md mt-md">
-<!-- Primary Score - Left Column -->
-<div class="col-span-12 lg:col-span-4 flex flex-col gap-md">
-<div class="bg-surface-container rounded-xl border border-primary/10 p-md relative overflow-hidden group hover:border-primary/40 hover:shadow-[0_0_15px_rgba(107,251,154,0.2)] transition-all duration-300">
-<div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent"></div>
-<h2 class="font-label-caps text-label-caps text-on-surface-variant mb-md flex items-center gap-xs border-b border-primary/10 pb-xs">
-<span class="material-symbols-outlined text-[16px]">speed</span> 
-                            ОБЩА ОЦЕНКА
-                        </h2>
-<div class="flex flex-col items-center justify-center py-lg relative">
-<!-- SVG Gauge -->
-<div class="relative w-48 h-48">
-<svg class="w-full h-full transform -rotate-90" viewbox="0 0 100 100">
-<circle class="text-surface-variant" cx="50" cy="50" fill="none" r="45" stroke="currentColor" stroke-width="8"></circle>
-<circle class="text-primary drop-shadow-[0_0_8px_rgba(107,251,154,0.5)]" cx="50" cy="50" fill="none" r="45" stroke="currentColor" stroke-dasharray="283" stroke-dashoffset="48" stroke-width="8"></circle>
-</svg>
-<div class="absolute inset-0 flex flex-col items-center justify-center">
-<span class="font-display-lg text-display-lg text-on-surface font-bold">83</span>
-<span class="font-data-mono text-data-mono text-on-surface-variant">/100</span>
-</div>
-</div>
-<div class="mt-sm px-sm py-xs bg-primary/10 border border-primary/30 rounded text-primary font-headline-md text-headline-md text-center">
-                                Силeн потенциал
-                            </div>
-</div>
-</div>
-<!-- AI Recommendation Action Card -->
-<div class="bg-surface-container rounded-xl border border-secondary/20 p-md relative overflow-hidden group hover:border-secondary/40 hover:shadow-[0_0_15px_rgba(93,230,255,0.15)] transition-all duration-300 mt-auto">
-<div class="absolute -right-12 -top-12 w-32 h-32 bg-secondary/10 rounded-full blur-2xl"></div>
-<h2 class="font-label-caps text-label-caps text-secondary mb-sm flex items-center gap-xs">
-<span class="material-symbols-outlined text-[16px]">psychology</span> 
-                            AI ПРЕПОРЪКА
-                        </h2>
-<p class="font-body-md text-body-md text-on-surface-variant mb-md">
-                            Проектът показва висока пазарна пригодност, но изисква оптимизация на рисковия профил преди стартиране.
-                        </p>
-<button class="w-full py-sm bg-transparent border border-secondary text-secondary font-bold rounded flex items-center justify-center gap-xs hover:bg-secondary/10 transition-colors">
-<span class="material-symbols-outlined text-[20px]">assignment_turned_in</span>
-                            Виж препоръките
-                        </button>
-</div>
-</div>
-<!-- Right Column - Metrics & Analysis -->
-<div class="col-span-12 lg:col-span-8 flex flex-col gap-md">
-<!-- Metrics Grid -->
-<div class="grid grid-cols-2 md:grid-cols-3 gap-sm">
-<!-- Card 1 -->
-<div class="bg-surface-container rounded-lg border border-primary/10 p-sm group hover:border-primary/40 hover:shadow-[0_0_15px_rgba(107,251,154,0.1)] transition-all">
-<div class="font-label-caps text-label-caps text-on-surface-variant mb-xs">Пазар</div>
-<div class="flex items-end gap-xs">
-<span class="font-headline-lg text-headline-lg text-on-surface">84</span>
-<span class="material-symbols-outlined text-primary text-[20px] mb-1">trending_up</span>
-</div>
-<div class="w-full h-1 bg-surface-variant mt-sm rounded-full overflow-hidden">
-<div class="h-full bg-primary w-[84%]"></div>
-</div>
-</div>
-<!-- Card 2 -->
-<div class="bg-surface-container rounded-lg border border-primary/10 p-sm group hover:border-primary/40 hover:shadow-[0_0_15px_rgba(107,251,154,0.1)] transition-all">
-<div class="font-label-caps text-label-caps text-on-surface-variant mb-xs">Иновация</div>
-<div class="flex items-end gap-xs">
-<span class="font-headline-lg text-headline-lg text-on-surface">87</span>
-<span class="material-symbols-outlined text-primary text-[20px] mb-1">trending_up</span>
-</div>
-<div class="w-full h-1 bg-surface-variant mt-sm rounded-full overflow-hidden">
-<div class="h-full bg-primary w-[87%]"></div>
-</div>
-</div>
-<!-- Card 3 -->
-<div class="bg-surface-container rounded-lg border border-primary/10 p-sm group hover:border-primary/40 hover:shadow-[0_0_15px_rgba(107,251,154,0.1)] transition-all">
-<div class="font-label-caps text-label-caps text-on-surface-variant mb-xs">Аудитория</div>
-<div class="flex items-end gap-xs">
-<span class="font-headline-lg text-headline-lg text-on-surface">82</span>
-<span class="material-symbols-outlined text-primary text-[20px] mb-1">trending_flat</span>
-</div>
-<div class="w-full h-1 bg-surface-variant mt-sm rounded-full overflow-hidden">
-<div class="h-full bg-primary w-[82%]"></div>
-</div>
-</div>
-<!-- Card 4 -->
-<div class="bg-surface-container rounded-lg border border-primary/10 p-sm group hover:border-primary/40 hover:shadow-[0_0_15px_rgba(107,251,154,0.1)] transition-all">
-<div class="font-label-caps text-label-caps text-on-surface-variant mb-xs">Осъществимост</div>
-<div class="flex items-end gap-xs">
-<span class="font-headline-lg text-headline-lg text-on-surface">91</span>
-<span class="material-symbols-outlined text-primary text-[20px] mb-1">trending_up</span>
-</div>
-<div class="w-full h-1 bg-surface-variant mt-sm rounded-full overflow-hidden">
-<div class="h-full bg-primary w-[91%] relative">
-<div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full animate-[shimmer_2s_infinite]"></div>
-</div>
-</div>
-</div>
-<!-- Card 5 -->
-<div class="bg-surface-container rounded-lg border border-primary/10 p-sm group hover:border-primary/40 hover:shadow-[0_0_15px_rgba(107,251,154,0.1)] transition-all">
-<div class="font-label-caps text-label-caps text-on-surface-variant mb-xs">Мащабируемост</div>
-<div class="flex items-end gap-xs">
-<span class="font-headline-lg text-headline-lg text-on-surface">79</span>
-<span class="material-symbols-outlined text-tertiary text-[20px] mb-1">trending_flat</span>
-</div>
-<div class="w-full h-1 bg-surface-variant mt-sm rounded-full overflow-hidden">
-<div class="h-full bg-tertiary w-[79%]"></div>
-</div>
-</div>
-<!-- Card 6 -->
-<div class="bg-surface-container rounded-lg border border-error/20 p-sm group hover:border-error/40 hover:shadow-[0_0_15px_rgba(255,180,171,0.1)] transition-all">
-<div class="font-label-caps text-label-caps text-on-surface-variant mb-xs">Риск</div>
-<div class="flex items-end gap-xs">
-<span class="font-headline-lg text-headline-lg text-error">32</span>
-<span class="material-symbols-outlined text-error text-[20px] mb-1">warning</span>
-</div>
-<div class="w-full h-1 bg-surface-variant mt-sm rounded-full overflow-hidden flex flex-row-reverse">
-<div class="h-full bg-error w-[32%]"></div>
-</div>
-</div>
-</div>
-<!-- AI Explanation Section -->
-<div class="bg-surface-container rounded-xl border border-primary/10 p-md">
-<h3 class="font-headline-md text-headline-md text-on-surface mb-sm flex items-center gap-sm border-b border-primary/10 pb-xs">
-<span class="material-symbols-outlined text-primary">neurology</span>
-                            Защо тази оценка?
-                        </h3>
-<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed font-data-mono text-data-mono">
-<span class="text-primary">> Анализ на данните...</span><br/>
-                            SmartWear демонстрира изключителен баланс между технологична иновация (87/100) и практическа осъществимост (91/100). Пазарната готовност за носими смарт устройства с AI интеграция е във възходящ тренд. Основният двигател за високата обща оценка (83/100) е силната конвергенция на целевата аудитория с предложената ценова категория. Рисковият профил е умерен (32/100), свързан предимно с веригата на доставки на специфични сензори.
-                        </p>
-</div>
-<!-- Key Findings -->
-<div class="bg-surface-container rounded-xl border border-primary/10 p-md">
-<h3 class="font-headline-md text-headline-md text-on-surface mb-sm flex items-center gap-sm border-b border-primary/10 pb-xs">
-<span class="material-symbols-outlined text-secondary">fact_check</span>
-                            Ключови открития
-                        </h3>
-<div class="flex flex-col gap-sm mt-sm">
-<div class="flex gap-sm p-sm bg-surface rounded border border-surface-variant">
-<span class="material-symbols-outlined text-primary mt-1">check_circle</span>
-<div>
-<div class="font-bold text-on-surface">Висок интерес от Early Adopters</div>
-<div class="text-on-surface-variant font-body-md text-data-mono text-[12px] mt-xs">Данните показват 45% по-висока ангажираност в техно-форуми спрямо конкурентни продукти.</div>
-</div>
-</div>
-<div class="flex gap-sm p-sm bg-surface rounded border border-surface-variant">
-<span class="material-symbols-outlined text-primary mt-1">check_circle</span>
-<div>
-<div class="font-bold text-on-surface">Конкурентно предимство в AI интеграцията</div>
-<div class="text-on-surface-variant font-body-md text-data-mono text-[12px] mt-xs">Предложеният локален модел за обработка на данни решава основни проблеми с поверителността.</div>
-</div>
-</div>
-<div class="flex gap-sm p-sm bg-surface rounded border border-error/30">
-<span class="material-symbols-outlined text-error mt-1">error</span>
-<div>
-<div class="font-bold text-on-surface">Уязвимост във веригата за доставки</div>
-<div class="text-on-surface-variant font-body-md text-data-mono text-[12px] mt-xs">Зависимост от единствен доставчик за биометричния сензор V2. Препоръчва се диверсификация.</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<!-- Footer Component -->
-<footer class="mt-auto bg-surface-container-lowest text-secondary font-label-caps text-label-caps font-label-caps text-primary full-width py-sm border-t border-primary/10 flat no shadows flex justify-between items-center px-md ml-sidebar-width w-full relative z-20">
-<div class="flex items-center gap-sm">
-<div class="flex items-center gap-xs">
-<div class="w-2 h-2 rounded-full bg-primary animate-pulse drop-shadow-[0_0_4px_rgba(107,251,154,0.8)]"></div>
-<a class="text-on-surface-variant hover:text-secondary-fixed-dim transition-colors" href="#">System Status: Optimal</a>
-</div>
-</div>
-<div class="text-on-surface-variant">
-                    © 2024 Innovation Studio. AI OS v2.4
+    <!-- Primary Score - Left Column -->
+    <div class="col-span-12 lg:col-span-4 flex flex-col gap-md">
+        <div
+            class="bg-surface-container rounded-xl border border-primary/10 p-md relative overflow-hidden group hover:border-primary/40 hover:shadow-[0_0_15px_rgba(107,251,154,0.2)] transition-all duration-300">
+            <div
+                class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent">
+            </div>
+            <h2
+                class="font-label-caps text-label-caps text-on-surface-variant mb-md flex items-center gap-xs border-b border-primary/10 pb-xs">
+                <span class="material-symbols-outlined text-[16px]">speed</span>
+                ОБЩА ОЦЕНКА
+            </h2>
+            <div class="flex flex-col items-center justify-center py-lg relative">
+                <!-- SVG Gauge -->
+                <div class="relative w-48 h-48">
+                    <svg class="w-full h-full transform -rotate-90" viewbox="0 0 100 100">
+                        <circle class="text-surface-variant" cx="50" cy="50" fill="none" r="45" stroke="currentColor"
+                                stroke-width="8"></circle>
+                        <circle class="text-primary drop-shadow-[0_0_8px_rgba(107,251,154,0.5)]" cx="50" cy="50"
+                                fill="none" r="45" stroke="currentColor" stroke-dasharray="283" stroke-dashoffset="48"
+                                stroke-width="8"></circle>
+                    </svg>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                        <span class="font-display-lg text-display-lg text-on-surface font-bold">83</span>
+                        <span class="font-data-mono text-data-mono text-on-surface-variant">/100</span>
+                    </div>
                 </div>
-<div class="flex gap-md">
-<a class="text-on-surface-variant hover:text-secondary-fixed-dim transition-colors" href="#">Privacy Policy</a>
-<a class="text-on-surface-variant hover:text-secondary-fixed-dim transition-colors" href="#">API Docs</a>
-</div>
-</footer>
-</main>
-</div>
-<style>
-        @keyframes shimmer {
-            100% {
-                transform: translateX(100%);
-            }
-        }
-        
-        /* Hide scrollbar for nav tabs but keep functionality */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-    </style>
-</body></html>
+                <div
+                    class="mt-sm px-sm py-xs bg-primary/10 border border-primary/30 rounded text-primary font-headline-md text-headline-md text-center">
+                    Силeн потенциал
+                </div>
+            </div>
+        </div>
+        <!-- AI Recommendation Action Card -->
+        <div
+            class="bg-surface-container rounded-xl border border-secondary/20 p-md relative overflow-hidden group hover:border-secondary/40 hover:shadow-[0_0_15px_rgba(93,230,255,0.15)] transition-all duration-300 mt-auto">
+            <div class="absolute -right-12 -top-12 w-32 h-32 bg-secondary/10 rounded-full blur-2xl"></div>
+            <h2 class="font-label-caps text-label-caps text-secondary mb-sm flex items-center gap-xs">
+                <span class="material-symbols-outlined text-[16px]">psychology</span>
+                AI ПРЕПОРЪКА
+            </h2>
+            <p class="font-body-md text-body-md text-on-surface-variant mb-md">
+                Проектът показва висока пазарна пригодност, но изисква оптимизация на рисковия профил преди
+                стартиране.
+            </p>
+            <button
+                class="w-full py-sm bg-transparent border border-secondary text-secondary font-bold rounded flex items-center justify-center gap-xs hover:bg-secondary/10 transition-colors">
+                <span class="material-symbols-outlined text-[20px]">assignment_turned_in</span>
+                Виж препоръките
+            </button>
+        </div>
+    </div>
+    <!-- Right Column - Metrics & Analysis -->
+    <div class="col-span-12 lg:col-span-8 flex flex-col gap-md">
+        <!-- Metrics Grid -->
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-sm">
+            <!-- Card 1 -->
+            <div
+                class="bg-surface-container rounded-lg border border-primary/10 p-sm group hover:border-primary/40 hover:shadow-[0_0_15px_rgba(107,251,154,0.1)] transition-all">
+                <div class="font-label-caps text-label-caps text-on-surface-variant mb-xs">Пазар</div>
+                <div class="flex items-end gap-xs">
+                    <span class="font-headline-lg text-headline-lg text-on-surface">84</span>
+                    <span class="material-symbols-outlined text-primary text-[20px] mb-1">trending_up</span>
+                </div>
+                <div class="w-full h-1 bg-surface-variant mt-sm rounded-full overflow-hidden">
+                    <div class="h-full bg-primary w-[84%]"></div>
+                </div>
+            </div>
+            <!-- Card 2 -->
+            <div
+                class="bg-surface-container rounded-lg border border-primary/10 p-sm group hover:border-primary/40 hover:shadow-[0_0_15px_rgba(107,251,154,0.1)] transition-all">
+                <div class="font-label-caps text-label-caps text-on-surface-variant mb-xs">Иновация</div>
+                <div class="flex items-end gap-xs">
+                    <span class="font-headline-lg text-headline-lg text-on-surface">87</span>
+                    <span class="material-symbols-outlined text-primary text-[20px] mb-1">trending_up</span>
+                </div>
+                <div class="w-full h-1 bg-surface-variant mt-sm rounded-full overflow-hidden">
+                    <div class="h-full bg-primary w-[87%]"></div>
+                </div>
+            </div>
+            <!-- Card 3 -->
+            <div
+                class="bg-surface-container rounded-lg border border-primary/10 p-sm group hover:border-primary/40 hover:shadow-[0_0_15px_rgba(107,251,154,0.1)] transition-all">
+                <div class="font-label-caps text-label-caps text-on-surface-variant mb-xs">Аудитория</div>
+                <div class="flex items-end gap-xs">
+                    <span class="font-headline-lg text-headline-lg text-on-surface">82</span>
+                    <span class="material-symbols-outlined text-primary text-[20px] mb-1">trending_flat</span>
+                </div>
+                <div class="w-full h-1 bg-surface-variant mt-sm rounded-full overflow-hidden">
+                    <div class="h-full bg-primary w-[82%]"></div>
+                </div>
+            </div>
+            <!-- Card 4 -->
+            <div
+                class="bg-surface-container rounded-lg border border-primary/10 p-sm group hover:border-primary/40 hover:shadow-[0_0_15px_rgba(107,251,154,0.1)] transition-all">
+                <div class="font-label-caps text-label-caps text-on-surface-variant mb-xs">Осъществимост</div>
+                <div class="flex items-end gap-xs">
+                    <span class="font-headline-lg text-headline-lg text-on-surface">91</span>
+                    <span class="material-symbols-outlined text-primary text-[20px] mb-1">trending_up</span>
+                </div>
+                <div class="w-full h-1 bg-surface-variant mt-sm rounded-full overflow-hidden">
+                    <div class="h-full bg-primary w-[91%] relative">
+                        <div
+                            class="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full animate-[shimmer_2s_infinite]">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Card 5 -->
+            <div
+                class="bg-surface-container rounded-lg border border-primary/10 p-sm group hover:border-primary/40 hover:shadow-[0_0_15px_rgba(107,251,154,0.1)] transition-all">
+                <div class="font-label-caps text-label-caps text-on-surface-variant mb-xs">Мащабируемост</div>
+                <div class="flex items-end gap-xs">
+                    <span class="font-headline-lg text-headline-lg text-on-surface">79</span>
+                    <span class="material-symbols-outlined text-tertiary text-[20px] mb-1">trending_flat</span>
+                </div>
+                <div class="w-full h-1 bg-surface-variant mt-sm rounded-full overflow-hidden">
+                    <div class="h-full bg-tertiary w-[79%]"></div>
+                </div>
+            </div>
+            <!-- Card 6 -->
+            <div
+                class="bg-surface-container rounded-lg border border-error/20 p-sm group hover:border-error/40 hover:shadow-[0_0_15px_rgba(255,180,171,0.1)] transition-all">
+                <div class="font-label-caps text-label-caps text-on-surface-variant mb-xs">Риск</div>
+                <div class="flex items-end gap-xs">
+                    <span class="font-headline-lg text-headline-lg text-error">32</span>
+                    <span class="material-symbols-outlined text-error text-[20px] mb-1">warning</span>
+                </div>
+                <div class="w-full h-1 bg-surface-variant mt-sm rounded-full overflow-hidden flex flex-row-reverse">
+                    <div class="h-full bg-error w-[32%]"></div>
+                </div>
+            </div>
+        </div>
+        <!-- AI Explanation Section -->
+        <div class="bg-surface-container rounded-xl border border-primary/10 p-md">
+            <h3
+                class="font-headline-md text-headline-md text-on-surface mb-sm flex items-center gap-sm border-b border-primary/10 pb-xs">
+                <span class="material-symbols-outlined text-primary">neurology</span>
+                Защо тази оценка?
+            </h3>
+            <p class="font-body-md text-body-md text-on-surface-variant leading-relaxed font-data-mono text-data-mono">
+                <span class="text-primary">> Анализ на данните...</span><br />
+                SmartWear демонстрира изключителен баланс между технологична иновация (87/100) и практическа
+                осъществимост (91/100). Пазарната готовност за носими смарт устройства с AI интеграция е във
+                възходящ тренд. Основният двигател за високата обща оценка (83/100) е силната конвергенция на
+                целевата аудитория с предложената ценова категория. Рисковият профил е умерен (32/100), свързан
+                предимно с веригата на доставки на специфични сензори.
+            </p>
+        </div>
+        <!-- Key Findings -->
+        <div class="bg-surface-container rounded-xl border border-primary/10 p-md">
+            <h3
+                class="font-headline-md text-headline-md text-on-surface mb-sm flex items-center gap-sm border-b border-primary/10 pb-xs">
+                <span class="material-symbols-outlined text-secondary">fact_check</span>
+                Ключови открития
+            </h3>
+            <div class="flex flex-col gap-sm mt-sm">
+                <div class="flex gap-sm p-sm bg-surface rounded border border-surface-variant">
+                    <span class="material-symbols-outlined text-primary mt-1">check_circle</span>
+                    <div>
+                        <div class="font-bold text-on-surface">Висок интерес от Early Adopters</div>
+                        <div class="text-on-surface-variant font-body-md text-data-mono text-[12px] mt-xs">Данните
+                            показват 45% по-висока ангажираност в техно-форуми спрямо конкурентни продукти.</div>
+                        </div>
+                    </div>
+                    <div class="flex gap-sm p-sm bg-surface rounded border border-surface-variant">
+                        <span class="material-symbols-outlined text-primary mt-1">check_circle</span>
+                        <div>
+                            <div class="font-bold text-on-surface">Конкурентно предимство в AI интеграцията</div>
+                            <div class="text-on-surface-variant font-body-md text-data-mono text-[12px] mt-xs">
+                                Предложеният локален модел за обработка на данни решава основни проблеми с
+                                поверителността.</div>
+                            </div>
+                        </div>
+                        <div class="flex gap-sm p-sm bg-surface rounded border border-error/30">
+                            <span class="material-symbols-outlined text-error mt-1">error</span>
+                            <div>
+                                <div class="font-bold text-on-surface">Уязвимост във веригата за доставки</div>
+                                <div class="text-on-surface-variant font-body-md text-data-mono text-[12px] mt-xs">
+                                    Зависимост от единствен доставчик за биометричния сензор V2. Препоръчва се
+                                    диверсификация.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
