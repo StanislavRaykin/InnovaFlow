@@ -7,8 +7,12 @@ namespace Client.Auth;
 
 public record AuthResult(bool Succeeded, string? Error = null);
 
-public class IdentityClient(HttpClient http, JwtAuthenticationStateProvider authState)
+public class IdentityClient(HttpClient http, JwtAuthenticationStateProvider authState,ILogger<IdentityClient> logger)
 {
+    private readonly HttpClient http = http;
+    private readonly JwtAuthenticationStateProvider authState = authState;
+    private readonly ILogger<IdentityClient> logger = logger;
+
 
 
     public async Task<AuthResult> SignInAsync(LoginRequest request)
@@ -70,9 +74,10 @@ public class IdentityClient(HttpClient http, JwtAuthenticationStateProvider auth
         return new AuthResult(true);
     }
 
-     public async Task<AuthResponse?> ExchangeGitHubCodeAsync(string code, CancellationToken ct = default)
+     public async Task<AuthResponse?> ExchangeCodeAsync(string code, CancellationToken ct = default)
     {
-        var res = await http.PostAsJsonAsync("/api/auth/github/exchange", new { code }, ct);
+        var res = await http.PostAsJsonAsync("/api/auth/external/exchange", new { code }, ct);
+
         return res.IsSuccessStatusCode
             ? await res.Content.ReadFromJsonAsync<AuthResponse>(ct)
             : null;

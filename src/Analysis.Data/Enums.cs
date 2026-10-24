@@ -1,7 +1,5 @@
 namespace InnovaFlow.Analysis.Data;
 
-public enum AnalysisStatus { Pending, Running, Completed, Failed }
-
 public enum RiskSeverity { Low, Medium, High, Critical }
 
 public enum Priority { Low, Medium, High }

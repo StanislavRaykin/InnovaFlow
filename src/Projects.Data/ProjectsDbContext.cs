@@ -1,10 +1,12 @@
 using Microsoft.EntityFrameworkCore;
+using Projects.Data;
+using ServiceDefaults;
 
 namespace InnovaFlow.Projects.Data;
 
 public class ProjectsDbContext(
     DbContextOptions<ProjectsDbContext> options,
-    ICurrentUser currentUser) : DbContext(options)
+    IActor actor) : DbContext(options)
 {
     public DbSet<Idea> Ideas => Set<Idea>();
     public DbSet<IdeaMember> IdeaMembers => Set<IdeaMember>();
@@ -52,11 +54,11 @@ public class ProjectsDbContext(
             // Two independent grant paths, one filter, one place.
             e.HasQueryFilter(x =>
                 x.DeletedAt == null &&
-                (currentUser.IsSystem ||
-                 (currentUser.Id != null &&
-                  (x.Members.Any(m => m.UserId == currentUser.Id.Value) ||
+                (actor.IsSystem ||
+                 (actor.Id != null &&
+                  (x.Members.Any(m => m.UserId == actor.Id.Value) ||
                    (x.TeamId != null &&
-                    x.Team!.Members.Any(tm => tm.UserId == currentUser.Id.Value))))));
+                    x.Team!.Members.Any(tm => tm.UserId == actor.Id.Value))))));
         });
 
         b.Entity<IdeaMember>(e =>

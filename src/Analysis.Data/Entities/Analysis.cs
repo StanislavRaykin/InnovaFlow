@@ -1,3 +1,5 @@
+using Contracts;
+
 namespace InnovaFlow.Analysis.Data;
 
 public class Analysis

@@ -8,6 +8,4 @@ public class AuthResponse
 
     public required DateTime ExpiresAt { get; set; }
 
-    public bool IsValid() => Token != null;
-
 }

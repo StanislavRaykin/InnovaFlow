@@ -1,3 +1,5 @@
+using Contracts;
+
 namespace InnovaFlow.Projects.Data;
 
 public class AIMessage

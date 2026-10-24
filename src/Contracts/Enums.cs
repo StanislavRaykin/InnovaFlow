@@ -1,4 +1,4 @@
-namespace InnovaFlow.Projects.Data;
+namespace Contracts;
 
 public enum IdeaCategory
 {
@@ -7,6 +7,8 @@ public enum IdeaCategory
 }
 
 public enum IdeaStatus { Draft, Analyzing, Analyzed, Archived }
+
+public enum AnalysisStatus { Pending, Running, Completed, Failed }
 
 /// <summary>
 /// One enum for both idea membership and team membership. The values are

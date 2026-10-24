@@ -165,6 +165,8 @@ public static class Extensions
                 };
             });
 
+        builder.Services.AddHttpContextAccessor();
+        builder.Services.AddScoped<ICurrentUser, CurrentUser>();
         builder.Services.AddAuthorization();
 
         return builder;

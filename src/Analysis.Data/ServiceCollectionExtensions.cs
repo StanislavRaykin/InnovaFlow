@@ -9,6 +9,7 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services,
         string connectionString)
     {
+        
         return services.AddDbContext<AnalysisDbContext>(options =>
             options.UseNpgsql(connectionString, npgsql =>
             {

@@ -116,19 +116,20 @@
 <div class="mt-8 grid grid-cols-2 gap-4">
     <!-- GitHub -->
     <a
-    href="@GitHubLoginUrl"
+    href="@ExternalLoginUrl("github")"
     class="w-full inline-flex justify-center items-center py-2.5 px-4 border border-brand-border rounded-md shadow-sm bg-transparent text-sm font-medium text-gray-300 hover:bg-brand-border/30 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-border focus:ring-offset-brand-navy"
     type="button">
     <i class="fa-brands fa-github-alt mr-2 text-lg"></i>
     <span class="font-mono text-xs">GitHub</span>
 </a>
 <!-- Google Cloud -->
-<button
+<a
+href="@ExternalLoginUrl("google")"
 class="w-full inline-flex justify-center items-center py-2.5 px-4 border border-brand-border rounded-md shadow-sm bg-transparent text-sm font-medium text-gray-300 hover:bg-brand-border/30 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-border focus:ring-offset-brand-navy"
 type="button">
 <i class="fa-brands fa-google mr-2 text-lg"></i>
-<span class="font-mono text-xs">Google Cloud</span>
-</button>
+<span class="font-mono text-xs">Google</span>
+</a>
 </div>
 
 <!-- Footer Link -->
@@ -162,8 +163,8 @@ type="button">
     public string? ReturnUrl { get; set; }
 
     private string IdentityUrl => Config["IdentityUrl"] ?? "";
-    private string GitHubLoginUrl =>
-        $"{IdentityUrl}/api/auth/github/start?returnUrl={Uri.EscapeDataString(ReturnUrl ?? "/ideas")}";
+    private string ExternalLoginUrl(string provider) =>
+        $"{IdentityUrl}/api/auth/external/{provider}/start?returnUrl={Uri.EscapeDataString(ReturnUrl ?? "/home")}";
 
 
     private readonly LoginRequest model = new() { Email = "", Password = "" };

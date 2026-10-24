@@ -32,7 +32,7 @@ builder.Services.PostConfigure<JwtBearerOptions>(JwtBearerDefaults.Authenticatio
             var jti = ctx.Principal?.FindFirstValue(JwtRegisteredClaimNames.Jti);
             var redis = ctx.HttpContext.RequestServices.GetRequiredService<IConnectionMultiplexer>();
 
-            if (jti != null || !await redis.GetDatabase().KeyExistsAsync(AuthSessionKeys.For(jti)))
+            if (jti == null ||!await redis.GetDatabase().KeyExistsAsync(AuthSessionKeys.For(jti)))
             {
                 ctx.Fail("The session has ended.");
             }

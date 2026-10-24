@@ -18,7 +18,7 @@ builder.AddRedisClient("cache");
 
 //auth
 builder.AddJwtAuthentication();
-builder.AddGithubAuthentication();
+builder.AddExternalAuthentication();
 
 builder.Services.AddSingleton<SigningKeyProvider>();
 builder.Services.AddScoped<ITokenService, JwtTokenService>();

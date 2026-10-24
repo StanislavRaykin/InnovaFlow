@@ -1,6 +1,9 @@
 @page "/ideas/create/review"
 @layout AccountLayout
 @attribute [Authorize]
+@inject IdeaDraft Draft
+@inject DraftAutosave Autosave
+@implements IAsyncDisposable
 
 @* Steps 03 Audience / 04 Review of the create-idea wizard — the continuation of
    /ideas/create (CreateIdea1&2.razor, next to this file).
@@ -65,11 +68,11 @@
             <div class="flex flex-col gap-xs">
                 <label class="font-label-caps text-xs text-on-surface-variant uppercase tracking-wider">Индустрия</label>
                 <div class="relative group">
-                    <select class="w-full bg-surface-container-low border border-outline-variant rounded p-sm text-on-surface font-body-md text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all appearance-none cursor-pointer">
-                        <option class="bg-surface-container text-on-surface">Технологии / Носими устройства (Wearables)</option>
-                        <option class="bg-surface-container text-on-surface">Здравеопазване и фитнес</option>
-                        <option class="bg-surface-container text-on-surface">Финанси и финтех</option>
-                        <option class="bg-surface-container text-on-surface">Образование и развитие</option>
+                    <select class="w-full bg-surface-container-low border border-outline-variant rounded p-sm text-on-surface font-body-md text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all appearance-none cursor-pointer" @bind="Draft.Industry">
+                        @foreach (var industry in IdeaDraft.Industries)
+                        {
+                            <option class="bg-surface-container text-on-surface" value="@industry">@industry</option>
+                        }
                     </select>
                     <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">expand_more</span>
                 </div>
@@ -78,7 +81,7 @@
             <div class="flex flex-col gap-xs">
                 <label class="font-label-caps text-xs text-on-surface-variant uppercase tracking-wider">Описание на аудиторията</label>
                 <div class="relative group">
-                    <textarea rows="5" class="w-full bg-surface-container-low border border-outline-variant rounded p-sm text-on-surface font-body-md text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all resize-none shadow-inner placeholder-on-surface-variant/50" placeholder="Опишете демографията, поведението и нуждите на вашите идеални клиенти...">Активни професионалисти на възраст 25-45, които търсят дискретен начин да следят здравословното си състояние и нотификации по време на срещи, без да се разсейват със смартфони.</textarea>
+                    <textarea rows="5" class="w-full bg-surface-container-low border border-outline-variant rounded p-sm text-on-surface font-body-md text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all resize-none shadow-inner placeholder-on-surface-variant/50" placeholder="Опишете демографията, поведението и нуждите на вашите идеални клиенти..." @bind="Draft.Audience" @bind:event="oninput"></textarea>
                 </div>
             </div>
 
@@ -102,41 +105,41 @@
                     <span class="font-label-caps text-xs text-secondary bg-secondary/10 px-2 py-1 rounded border border-secondary/20 inline-block mb-1">ПРЕГЛЕД НА ДАННИТЕ</span>
                     <h2 class="font-headline-md text-xl font-bold text-on-surface">Системно Резюме</h2>
                 </div>
-                <span class="font-data-mono text-xs text-primary flex items-center gap-xs bg-primary/10 px-2.5 py-1 rounded border border-primary/20">
+                @* <span class="font-data-mono text-xs text-primary flex items-center gap-xs bg-primary/10 px-2.5 py-1 rounded border border-primary/20">
                     <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
                     Готовност: 85%
-                </span>
+                </span> *@
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-sm relative z-10 mb-md">
                 <!-- Card 1 -->
                 <div class="glass-subcard p-sm rounded transition-all">
                     <span class="font-label-caps text-xs text-on-surface-variant block mb-1">ИМЕ НА ИДЕЯТА</span>
-                    <span class="font-data-mono text-primary font-bold text-base">SmartWear</span>
+                    <span class="font-data-mono text-primary font-bold text-base">@Show(Draft.Name)</span>
                 </div>
                 <!-- Card 2 -->
                 <div class="glass-subcard p-sm rounded transition-all">
                     <span class="font-label-caps text-xs text-on-surface-variant block mb-1">ТИП</span>
-                    <span class="font-data-mono text-on-surface text-sm">Хардуерен Продукт (B2C)</span>
+                    <span class="font-data-mono text-on-surface text-sm">@Draft.Type</span>
                 </div>
                 <!-- Card 3 -->
                 <div class="glass-subcard p-sm rounded sm:col-span-2 transition-all">
                     <span class="font-label-caps text-xs text-on-surface-variant block mb-1">ИНДУСТРИЯ</span>
-                    <span class="font-data-mono text-secondary text-sm">Технологии / Носими устройства (Wearables)</span>
+                    <span class="font-data-mono text-secondary text-sm">@Draft.Industry</span>
                 </div>
                 <!-- Card 4 -->
                 <div class="glass-subcard p-sm rounded sm:col-span-2 transition-all">
                     <span class="font-label-caps text-xs text-on-surface-variant block mb-1 flex items-center gap-xs">
-                        <span class="material-symbols-outlined text-sm text-secondary">description</span> КРАТКО ОПИСАНИЕ
+                        <span class="material-symbols-outlined text-sm text-secondary">description</span> ЦЕЛЕВА АУДИТОРИЯ
                     </span>
-                    <p class="font-body-md text-sm text-on-surface-variant leading-relaxed">Интелигентен пръстен, който интегрира биометрични сензори и хаптична обратна връзка за дискретни нотификации.</p>
+                    <p class="font-body-md text-sm text-on-surface-variant leading-relaxed">@Show(Draft.Audience)</p>
                 </div>
                 <!-- Card 5 -->
                 <div class="glass-subcard p-sm rounded sm:col-span-2 transition-all">
                     <span class="font-label-caps text-xs text-on-surface-variant block mb-1 flex items-center gap-xs">
                         <span class="material-symbols-outlined text-sm text-tertiary">warning</span> ИДЕНТИФИЦИРАН ПРОБЛЕМ
                     </span>
-                    <p class="font-body-md text-sm text-on-surface-variant leading-relaxed">Смартчасовниците са твърде натрапчиви по време на бизнес срещи, а смартфоните отвличат вниманието. Липсва дискретен начин за филтриране на важни известия.</p>
+                    <p class="font-body-md text-sm text-on-surface-variant leading-relaxed">@Show(Draft.Problem)</p>
                 </div>
             </div>
 
@@ -146,7 +149,7 @@
                     <span class="material-symbols-outlined text-sm text-secondary">memory</span>
                     AI ще анализира вашата идея относно пазарен потенциал, иновация и рискове.
                 </p>
-                <button class="w-full bg-primary-container text-surface font-label-caps text-sm font-bold py-3 rounded neon-glow-btn flex justify-center items-center gap-sm hover:opacity-95">
+                <button class="w-full bg-primary-container text-surface font-label-caps text-sm font-bold py-3 rounded neon-glow-btn flex justify-center items-center gap-sm hover:opacity-95" @onclick="OnAnalyzeSubmit">
                     <span class="material-symbols-outlined text-base">auto_awesome</span>
                     Анализирай Идеята
                     <span class="material-symbols-outlined text-base">arrow_forward</span>
@@ -156,3 +159,21 @@
 
     </div>
 </div>
+
+@code {
+    protected override void OnInitialized()
+    {
+    
+      Autosave.Start();
+    }
+        
+
+    public async ValueTask DisposeAsync() => await Autosave.StopAsync();
+
+    private static string Show(string value) => string.IsNullOrWhiteSpace(value) ? "—" : value;
+
+    private async Task OnAnalyzeSubmit()
+    {
+        
+    }
+}

@@ -1,3 +1,5 @@
+using Contracts;
+using System.Security.Cryptography;
 namespace InnovaFlow.Projects.Data;
 
 public class Idea
@@ -23,8 +25,9 @@ public class Idea
     public string? Industry { get; set; }
     public IdeaStatus Status { get; set; } = IdeaStatus.Draft;
 
-    public DateTimeOffset CreatedAt { get; set; }
-    public DateTimeOffset UpdatedAt { get; set; }
+    public string Hash() => Convert.ToHexString(SHA256.HashData(System.Text.Encoding.UTF8.GetBytes($"{Id}{OwnerId}{Title}{Description}{ProblemStatement}{TargetAudience}{Category}{Industry}{Status}")));
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.Now.ToUniversalTime();
+    public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.Now.ToUniversalTime();
 
     /// <summary>Soft delete. Analyses in the other schema reference this id.</summary>
     public DateTimeOffset? DeletedAt { get; set; }

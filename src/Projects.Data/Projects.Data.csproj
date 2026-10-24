@@ -14,4 +14,9 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\ServiceDefaults\ServiceDefaults.csproj" />
+    <!-- the enums live in Contracts so the Blazor client can use them without EF/ASP.NET -->
+    <ProjectReference Include="..\Contracts\Contracts.csproj" />
+  </ItemGroup>
 </Project>

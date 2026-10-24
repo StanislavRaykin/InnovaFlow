@@ -1,3 +1,4 @@
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 
 namespace InnovaFlow.Analysis.Data;
@@ -31,8 +32,14 @@ public class AnalysisDbContext(DbContextOptions<AnalysisDbContext> options) : Db
 
     protected override void OnModelCreating(ModelBuilder b)
     {
+
+         b.AddInboxStateEntity();
+        b.AddOutboxMessageEntity();
+        b.AddOutboxStateEntity();
+        
         b.HasDefaultSchema("Analysis");
 
+        
         // -------------------------------------------------------------------
         // Job
         // -------------------------------------------------------------------
@@ -340,5 +347,6 @@ public class AnalysisDbContext(DbContextOptions<AnalysisDbContext> options) : Db
              .HasForeignKey(x => x.AnalysisId)
              .OnDelete(DeleteBehavior.Cascade);
         });
+        
     }
 }

@@ -1,15 +1,37 @@
 using InnovaFlow.Analysis.Data;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddDbContext<AnalysisDbContext>(o =>
-    o.UseNpgsql(builder.Configuration.GetConnectionString("innovaflow"), npg => npg.MigrationsHistoryTable("__EFMigrationsHistory", "Analysis")));
+builder.Services.AddAnalysisData(builder.Configuration.GetConnectionString("innovaflow")!);
+
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
 builder.AddServiceDefaults();
 builder.AddJwtAuthentication();
 
+
+builder.Services.AddMassTransit(x =>
+{
+    x.SetKebabCaseEndpointNameFormatter();
+
+    // Transactional outbox: the AnalysisRequested message is written to Postgres in the
+    // same transaction as the Analyses row, then delivered after commit. This is the answer
+    // to "how do you guarantee the row and the message agree?"
+    x.AddEntityFrameworkOutbox<AnalysisDbContext>(o =>
+    {
+        o.UsePostgres();
+        o.UseBusOutbox();
+    });
+
+    x.UsingRabbitMq((ctx, cfg) =>
+    {
+        cfg.Host(builder.Configuration.GetConnectionString("rabbit"));
+        cfg.ConfigureEndpoints(ctx);
+    });
+});
 var app = builder.Build();
 
 // migrations
@@ -29,28 +51,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
 
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
 
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}

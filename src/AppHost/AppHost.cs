@@ -7,6 +7,9 @@ var claudeKey = builder.AddParameter("CLAUDE-API-KEY", secret: true);
 var ghCliSecret = builder.AddParameter("GH-CLI-SECRET", secret: true);
 
 var ghCliId = builder.AddParameter("GH-CLI-ID", secret: true);
+var googleCliId = builder.AddParameter("GOOGLE-CLI-ID", secret: true);
+var googleCliSecret = builder.AddParameter("GOOGLE-CLI-SECRET", secret: true);
+
 var bzKeyId = builder.AddParameter("BZ-KEY-ID", secret: true);
 var bzAppKey = builder.AddParameter("BZ-APP-KEY", secret: true);
 var jwtPrivKey = builder.AddParameter("JWT-PRIVATE-KEY", secret: true);
@@ -60,7 +63,7 @@ builder.AddProject<Projects.Analysis_Worker>("worker")
        .WithReference(db)
        .WithReference(rabbit)
        .WithReference(cache)
-       .WithEnvironment("CLAUDE-KEY", claudeKey)
+       .WithEnvironment("Ai__Claude__ApiKey", claudeKey)
        .WithEnvironment("BACKBLAZE-KEY-ID", bzKeyId)
  .WithEnvironment("BACKBLAZE-APP-KEY", bzAppKey)
        .WaitFor(rabbit)
@@ -79,6 +82,8 @@ var identity = builder.AddProject<Projects.Identity>("identity")//migrations
                       .WithEnvironment("RunMigrationsOnStartup", "true")
                       .WithEnvironment("GH-CLI-SECRET", ghCliSecret)
                       .WithEnvironment("GH-CLI-ID", ghCliId)
+                      .WithEnvironment("GOOGLE-CLI-SECRET", googleCliSecret)
+                      .WithEnvironment("GOOGLE-CLI-ID", googleCliId)
                       .WithEnvironment("Jwt__PrivateKey", jwtPrivKey)
                       .WithReference(db)
                       .WithReference(cache)

@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using InnovaFlow.Identity.Data;
 using static System.Net.Mime.MediaTypeNames;
 using Microsoft.AspNetCore.Identity;
-using Identity.Services;
 using Microsoft.AspNetCore.Authentication;
 using Identity.Data.Options;
 namespace Identity.Extensions;
@@ -44,7 +43,7 @@ public static class ServiceCollectionExtensions
 
     }
 
-    public static IHostApplicationBuilder AddGithubAuthentication(this IHostApplicationBuilder builder)
+    public static IHostApplicationBuilder AddExternalAuthentication(this IHostApplicationBuilder builder)
     {
         builder.Services.AddAuthentication()
     .AddCookie("external", o =>       // temporary, only lives across the redirect
@@ -56,13 +55,21 @@ public static class ServiceCollectionExtensions
     .AddGitHub(o =>
     {
         o.ClientId = builder.Configuration["GH-CLI-ID"]! ?? throw new InvalidOperationException("Github client id is missing");
-        o.ClientSecret = builder.Configuration["GH-CLI-SECRET"] ?? throw new InvalidOperationException("Github client secret is missing");;
+        o.ClientSecret = builder.Configuration["GH-CLI-SECRET"] ?? throw new InvalidOperationException("Github client secret is missing"); ;
         o.SignInScheme = "external";
         o.CallbackPath = "/signin-github";
         o.Scope.Add("user:email");               // needed — GitHub hides email otherwise
         o.ClaimActions.MapJsonKey("urn:github:avatar", "avatar_url");
         o.ClaimActions.MapJsonKey("urn:github:login", "login");
         o.SaveTokens = false;
+    }).AddGoogle(o =>
+    {
+        o.ClientId     = builder.Configuration["GOOGLE-CLI-ID"]! ??  throw new InvalidOperationException("Google client id is missing");
+        o.ClientSecret = builder.Configuration["GOOGLE-CLI-SECRET"]! ?? throw new InvalidOperationException("Google client secret is missing");
+        o.SignInScheme = "external";
+        o.CallbackPath = "/signin-google";
+        o.SaveTokens   = false;
+        o.ClaimActions.MapJsonKey("urn:google:picture", "picture");
     });
         return builder;
     }

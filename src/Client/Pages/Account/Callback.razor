@@ -12,13 +12,13 @@
     protected override async Task OnInitializedAsync()
     {
         Console.WriteLine("Callback parameters: " + (Code, ReturnUrl, Error));
-        if (string.IsNullOrEmpty(Error) || Code == null) 
+        if (!string.IsNullOrEmpty(Error) || string.IsNullOrEmpty(Code))
         {
             Nav.NavigateTo("/signin?error=1"); 
             return; 
         }
 
-        var auth = await Identity.ExchangeGitHubCodeAsync(Code);
+        var auth = await Identity.ExchangeCodeAsync(Code);
         if (auth == null) 
         { 
             Nav.NavigateTo("/signin?error=1");
