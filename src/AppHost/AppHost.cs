@@ -51,22 +51,21 @@ var projects = builder.AddProject<Projects.Projects>("projects")//migrations
 
 var analysis = builder.AddProject<Projects.Analysis_Api>("analysis") //migrations
  .WithReference(db)
- .WithReference(rabbit)
+ .WithReference(rabbit).WaitFor(rabbit)
  .WithReference(cache)
+ .WithReference(projects) // IdeasClient fetches the idea from https+http://projects
  .WithEnvironment("RunMigrationsOnStartup", "true")
  .WithEnvironment("BACKBLAZE-KEY", bzKeyId)
  .WithEnvironment("BACKBLAZE-APP", bzAppKey)
- .WaitFor(db)
- .WaitFor(rabbit);
+ .WaitFor(db);
 
 builder.AddProject<Projects.Analysis_Worker>("worker")
        .WithReference(db)
-       .WithReference(rabbit)
+       .WithReference(rabbit).WaitFor(rabbit)
        .WithReference(cache)
        .WithEnvironment("Ai__Claude__ApiKey", claudeKey)
        .WithEnvironment("BACKBLAZE-KEY-ID", bzKeyId)
  .WithEnvironment("BACKBLAZE-APP-KEY", bzAppKey)
-       .WaitFor(rabbit)
        .WithReplicas(2);                         // three competing consumers
 
 var notifier = builder.AddProject<Projects.Notifier>("notifier") //migrations

@@ -2,7 +2,7 @@ namespace Contracts.Messaging;
 
 
 
-public sealed record AnalysisRequested(
+public record AnalysisRequested(
  Guid AnalysisId,
  Guid IdeaId,
  Guid IdeaVersionId,
@@ -15,9 +15,9 @@ public sealed record AnalysisRequested(
  IdeaCategory Category,
  string? Industry);
 
-public sealed record AnalysisModuleCompleted(
+public record AnalysisModuleCompleted(
     Guid AnalysisId, Guid IdeaId, string Module, int Completed, int Total);
 
-public sealed record AnalysisCompleted(Guid AnalysisId, Guid IdeaId, decimal OverallScore);
-public sealed record AnalysisFailed(Guid AnalysisId, Guid IdeaId, string Reason);
+public record AnalysisCompleted(Guid AnalysisId, Guid IdeaId, decimal OverallScore);
+public record AnalysisFailed(Guid AnalysisId, Guid IdeaId, string Reason);
 

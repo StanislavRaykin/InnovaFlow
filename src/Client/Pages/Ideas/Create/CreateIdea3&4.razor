@@ -3,6 +3,9 @@
 @attribute [Authorize]
 @inject IdeaDraft Draft
 @inject DraftAutosave Autosave
+@inject IdeaClient Ideas
+@inject AnalysisClient Analyses
+@inject NavigationManager Navigation
 @implements IAsyncDisposable
 
 @* Steps 03 Audience / 04 Review of the create-idea wizard — the continuation of
@@ -149,9 +152,13 @@
                     <span class="material-symbols-outlined text-sm text-secondary">memory</span>
                     AI ще анализира вашата идея относно пазарен потенциал, иновация и рискове.
                 </p>
-                <button class="w-full bg-primary-container text-surface font-label-caps text-sm font-bold py-3 rounded neon-glow-btn flex justify-center items-center gap-sm hover:opacity-95" @onclick="OnAnalyzeSubmit">
+                @if (error != null)
+                {
+                    <p class="font-body-md text-sm text-error mb-sm text-center">@error</p>
+                }
+                <button class="w-full bg-primary-container text-surface font-label-caps text-sm font-bold py-3 rounded neon-glow-btn flex justify-center items-center gap-sm hover:opacity-95 disabled:opacity-50 disabled:cursor-wait" disabled="@submitting" @onclick="OnAnalyzeSubmit">
                     <span class="material-symbols-outlined text-base">auto_awesome</span>
-                    Анализирай Идеята
+                    @(submitting ? "Стартиране..." : "Анализирай Идеята")
                     <span class="material-symbols-outlined text-base">arrow_forward</span>
                 </button>
             </div>
@@ -161,12 +168,19 @@
 </div>
 
 @code {
+    private bool submitting;
+    private string? error;
+
+    // set once the idea is created, so a retry after a failed analysis start
+    // doesn't try to create it a second time
+    private Guid? createdIdeaId;
+
     protected override void OnInitialized()
     {
-    
+
       Autosave.Start();
     }
-        
+
 
     public async ValueTask DisposeAsync() => await Autosave.StopAsync();
 
@@ -174,6 +188,37 @@
 
     private async Task OnAnalyzeSubmit()
     {
-        
+        if (submitting)
+            return;
+
+        submitting = true;
+        error = null;
+        try
+        {
+            if (createdIdeaId == null)
+            {
+                var created = await Ideas.CreateIdeaAsync();
+                if (!created.Success)
+                {
+                    error = created.Error;
+                    return;
+                }
+                createdIdeaId = created.IdeaId;
+            }
+
+            var started = await Analyses.StartAnalysisAsync(createdIdeaId.Value);
+            if (!started.Success)
+            {
+                error = started.Error;
+                return;
+            }
+
+            await Autosave.ResetAsync();
+            Navigation.NavigateTo($"start-analysis/{started.AnalysisId}");
+        }
+        finally
+        {
+            submitting = false;
+        }
     }
 }

@@ -62,6 +62,22 @@ public class DraftAutosave(HttpClient http, IdeaDraft draft, ILogger<DraftAutosa
         await SaveIfChangedAsync();
     }
 
+    // once the draft was submitted: clears it without saving the empty fields
+    // as a new draft; holds the lock so a save in flight can't undo it
+    public async Task ResetAsync()
+    {
+        await saving.WaitAsync();
+        try
+        {
+            draft.Reset();
+            lastSaved = draft.ToRequest();
+        }
+        finally
+        {
+            saving.Release();
+        }
+    }
+
     private async Task RunAsync(CancellationToken ct)
     {
         using var timer = new PeriodicTimer(Interval);

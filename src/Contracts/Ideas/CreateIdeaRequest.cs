@@ -9,9 +9,8 @@ public sealed record CreateIdeaRequest(
     IdeaCategory Category,
     string? Industry);
 
-// autosaved every few seconds while the wizard is open, so every field may
-// still be empty; full validation happens on CreateIdeaRequest
-public sealed record SaveDraftRequest(
+// autosaved every 2secs
+public record SaveDraftRequest(
     string? Title,
     string? Description,
     string? ProblemStatement,
@@ -19,7 +18,7 @@ public sealed record SaveDraftRequest(
     IdeaCategory Category,
     string? Industry);
 
-public sealed record IdeaDto(
+public record IdeaDto(
     Guid Id,
     string Title,
     string Description,

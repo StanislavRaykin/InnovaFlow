@@ -81,6 +81,9 @@ namespace Analysis.Data.Migrations
                     b.Property<DateTimeOffset?>("CompletedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int>("CompletedModules")
+                        .HasColumnType("integer");
+
                     b.Property<string>("ErrorMessage")
                         .HasColumnType("text");
 
@@ -104,6 +107,12 @@ namespace Analysis.Data.Migrations
 
                     b.Property<string>("Summary")
                         .HasColumnType("text");
+
+                    b.Property<int>("TotalModules")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -671,6 +680,8 @@ namespace Analysis.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasAlternateKey("MessageId", "ConsumerId");
+
                     b.HasIndex("Delivered");
 
                     b.ToTable("InboxState", "Analysis");
@@ -754,6 +765,10 @@ namespace Analysis.Data.Migrations
 
                     b.HasKey("SequenceNumber");
 
+                    b.HasIndex("EnqueueTime");
+
+                    b.HasIndex("ExpirationTime");
+
                     b.HasIndex("OutboxId", "SequenceNumber")
                         .IsUnique();
 
@@ -768,10 +783,6 @@ namespace Analysis.Data.Migrations
                     b.Property<Guid>("OutboxId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
-
-                    b.Property<string>("BusName")
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("timestamp with time zone");
@@ -792,7 +803,7 @@ namespace Analysis.Data.Migrations
 
                     b.HasKey("OutboxId");
 
-                    b.HasIndex("BusName", "Created");
+                    b.HasIndex("Created");
 
                     b.ToTable("OutboxState", "Analysis");
                 });
@@ -960,18 +971,6 @@ namespace Analysis.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Analysis");
-                });
-
-            modelBuilder.Entity("MassTransit.EntityFrameworkCoreIntegration.OutboxMessage", b =>
-                {
-                    b.HasOne("MassTransit.EntityFrameworkCoreIntegration.OutboxState", null)
-                        .WithMany()
-                        .HasForeignKey("OutboxId");
-
-                    b.HasOne("MassTransit.EntityFrameworkCoreIntegration.InboxState", null)
-                        .WithMany()
-                        .HasForeignKey("InboxMessageId", "InboxConsumerId")
-                        .HasPrincipalKey("MessageId", "ConsumerId");
                 });
 
             modelBuilder.Entity("InnovaFlow.Analysis.Data.Analysis", b =>

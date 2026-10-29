@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Client;
 using Client.Auth;
 using Client.Ideas;
+using Client.Analyses;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -30,5 +31,7 @@ builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().Cre
 builder.Services.AddScoped<IdentityClient>();
 builder.Services.AddScoped<IdeaDraft>();
 builder.Services.AddScoped<DraftAutosave>();
+builder.Services.AddScoped<IdeaClient>();
+builder.Services.AddScoped<AnalysisClient>();
 
 await builder.Build().RunAsync();

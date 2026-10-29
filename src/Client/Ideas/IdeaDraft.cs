@@ -46,12 +46,24 @@ public class IdeaDraft
         Category: Enum.Parse<IdeaCategory>(Type),
         Industry: Industry);
 
+    // the draft's own id, so the server promotes the autosaved draft
     public CreateIdeaRequest ToCreateIdeaRequest() => new CreateIdeaRequest(
-    Id: Guid.NewGuid(),
+    Id: Id,
     Title: Name,
-    Industry: Industry,
+    Description: string.Empty,
     ProblemStatement: Problem,
     TargetAudience: Audience,
-    Description: string.Empty,
-    Category: IdeaCategory.Business);
+    Category: Enum.Parse<IdeaCategory>(Type),
+    Industry: Industry);
+
+    // after submitting, so the next run of the wizard starts a new draft
+    public void Reset()
+    {
+        Id = Guid.NewGuid();
+        Name = "";
+        Type = Types[0].Name;
+        Problem = "";
+        Industry = Industries[0];
+        Audience = "";
+    }
 }

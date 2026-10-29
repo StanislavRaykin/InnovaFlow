@@ -26,8 +26,7 @@ public static class Drafts
         
     // }
 
-    // upsert: the client picks the draft id up front and PUTs to it on every
-    // autosave, so the first save creates the draft and later ones update it
+    
     public static async Task<IResult> HandleSaveDraft(Guid draftId, SaveDraftRequest request, ProjectsDbContext db, ICurrentUser currentUser, IValidator<SaveDraftRequest> validator, CancellationToken ct)
     {
         var validation = await validator.ValidateAsync(request, ct);
@@ -132,8 +131,8 @@ public class CreateIdeaRequestValidator : AbstractValidator<CreateIdeaRequest>
             .NotEmpty().WithMessage("Заглавието е задължително.")
             .MaximumLength(40).WithMessage("Заглавието не може да бъде по-дълго от 40 символа.");
 
+        // the wizard has no description field yet, so it stays optional
         RuleFor(x => x.Description)
-            .NotEmpty().WithMessage("Описанието е задължително.")
             .MaximumLength(300).WithMessage("Описанието не може да бъде по-дълго от 300 символа.");
 
         // NotEmpty() would reject Business, since it is the enum's default (0) value.

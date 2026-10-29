@@ -1,25 +1,32 @@
+using Analysis.Api.Clients;
+using Analysis.Api.Endpoints;
+using Humanizer;
 using InnovaFlow.Analysis.Data;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.AddServiceDefaults();
+builder.AddJwtAuthentication();
+
 builder.Services.AddAnalysisData(builder.Configuration.GetConnectionString("innovaflow")!);
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-builder.AddServiceDefaults();
-builder.AddJwtAuthentication();
-
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddTransient<ForwardTokenHandler>();
+// AddServiceDefaults already adds service discovery and the resilience handler to every HttpClient
+builder.Services.AddHttpClient<IdeasClient>("ideas", c => c.BaseAddress = new Uri("https+http://projects"))
+.AddHttpMessageHandler<ForwardTokenHandler>();
 
 builder.Services.AddMassTransit(x =>
 {
     x.SetKebabCaseEndpointNameFormatter();
 
-    // Transactional outbox: the AnalysisRequested message is written to Postgres in the
-    // same transaction as the Analyses row, then delivered after commit. This is the answer
-    // to "how do you guarantee the row and the message agree?"
+   
     x.AddEntityFrameworkOutbox<AnalysisDbContext>(o =>
     {
         o.UsePostgres();
@@ -28,7 +35,8 @@ builder.Services.AddMassTransit(x =>
 
     x.UsingRabbitMq((ctx, cfg) =>
     {
-        cfg.Host(builder.Configuration.GetConnectionString("rabbit"));
+        var connectionString = builder.Configuration.GetConnectionString("messaging")! ?? throw new InvalidOperationException("No rabbitMQ connection string. Check AppHost and Program.cs");
+        cfg.Host(new Uri(connectionString));
         cfg.ConfigureEndpoints(ctx);
     });
 });
@@ -51,6 +59,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseHttpsRedirection();
 
+app.MapAnalysisEndpoints();
 
 
 app.Run();

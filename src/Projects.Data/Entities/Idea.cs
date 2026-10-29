@@ -24,8 +24,6 @@ public class Idea
     public IdeaCategory Category { get; set; }
     public string? Industry { get; set; }
     public IdeaStatus Status { get; set; } = IdeaStatus.Draft;
-
-    public string Hash() => Convert.ToHexString(SHA256.HashData(System.Text.Encoding.UTF8.GetBytes($"{Id}{OwnerId}{Title}{Description}{ProblemStatement}{TargetAudience}{Category}{Industry}{Status}")));
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.Now.ToUniversalTime();
     public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.Now.ToUniversalTime();
 

@@ -1,35 +1,31 @@
 using Analysis.Worker;
+using Microsoft.Extensions.Options;
 using RabbitMQ;
 using InnovaFlow.Analysis.Data;
 using Microsoft.EntityFrameworkCore;
 using Analysis.Worker.AI;
 using MassTransit;
+using Analysis.Worker.Consumer;
+using MassTransit.Configuration;
 
 var builder = Host.CreateApplicationBuilder(args);
 builder.Services.AddHostedService<Worker>();
+builder.Services.AddAnalysisData(builder.Configuration.GetConnectionString("innovaflow")!);
 
 builder.Services.AddSingleton(TimeProvider.System);
 
 //AI configuration
-builder.Services.Configure<AiOptions>(builder.Configuration.GetSection("Ai:Claude"));
-
-//Add HttpClient for Claude AI
-builder.Services.AddHttpClient("claude", client =>
-{
-    var aiOptions = builder.Configuration.GetSection("Ai:Claude").Get<AiOptions>()!;
-    client.BaseAddress = new Uri(aiOptions.BaseUrl);
-    client.Timeout = TimeSpan.FromSeconds(aiOptions.TimeoutSeconds);
-    client.DefaultRequestHeaders.Add("X-API-Key", aiOptions.ApiKey);
-});
+builder.Services.AddAIClient<ClaudeOptions, ClaudeAiClient>(builder.Configuration, "Claude");
 
 builder.Services.AddMassTransit(x =>
 {
     x.SetKebabCaseEndpointNameFormatter();
-    // x.AddConsumer<AnalysisRequestedConsumer>(); // uncomment when ur done with start analysis and 
+    x.AddConsumer<AnalysisRequestedConsumer>();
 
     x.UsingRabbitMq((ctx, cfg) =>
     {
-        cfg.Host(builder.Configuration.GetConnectionString("rabbit"));
+         var connectionString = builder.Configuration.GetConnectionString("messaging")! ?? throw new InvalidOperationException("No rabbitMQ connection string. Check AppHost and Program.cs");
+        cfg.Host(new Uri(connectionString));
 
         cfg.ReceiveEndpoint("analysis-requested", e =>
         {
@@ -37,11 +33,10 @@ builder.Services.AddMassTransit(x =>
             e.ConcurrentMessageLimit = 1;
             e.UseMessageRetry(r => r.None());
 
-            // e.ConfigureConsumer<AnalysisRequestedConsumer>(ctx);
+            e.ConfigureConsumer<AnalysisRequestedConsumer>(ctx);
         });
     });
 });
-builder.Services.AddAnalysisData(builder.Configuration.GetConnectionString("innovaflow")!);
 
 var host = builder.Build();
 host.Run();
