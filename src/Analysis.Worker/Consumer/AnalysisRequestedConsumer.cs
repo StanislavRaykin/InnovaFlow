@@ -9,7 +9,7 @@ namespace Analysis.Worker.Consumer;
 public class AnalysisRequestedConsumer(AnalysisDbContext db,
     IEnumerable<IAnalysisModule> modules,
     IPublishEndpoint bus,
-    ILogger<AnalysisRequestedConsumer> logger) : IConsumer
+    ILogger<AnalysisRequestedConsumer> logger) : IConsumer<AnalysisRequested>
 {
 
 
@@ -18,7 +18,7 @@ public class AnalysisRequestedConsumer(AnalysisDbContext db,
         var msg = context.Message;
         var ct = context.CancellationToken;
 
-        var analysis = await db.Analyses.FindAsync(msg.AnalysisId, ct);
+        var analysis = await db.Analyses.FindAsync([msg.AnalysisId], ct);
         if (analysis == null)
         {
             logger.LogWarning("Analysis not found. Dropping message");
@@ -31,10 +31,8 @@ public class AnalysisRequestedConsumer(AnalysisDbContext db,
             return;
         }
 
-        var applicable = modules.Where(m => m.AppliesTo(msg)).ToList();
-
         analysis.Status = AnalysisStatus.Running;
-        analysis.TotalModules = applicable.Count;
+        analysis.TotalModules = modules.Count();
         analysis.CompletedModules = 0;
         await db.SaveChangesAsync(ct);
 
@@ -44,7 +42,7 @@ public class AnalysisRequestedConsumer(AnalysisDbContext db,
 
         try
         {
-            foreach (var stage in applicable.GroupBy(m => m.Stage).OrderBy(g => g.Key))
+            foreach (var stage in modules.GroupBy(m => m.Stage).OrderBy(g => g.Key))
             {
                 // Within a stage modules are independent, so run them together.
                 // With 10+ analyzers this is the difference between 30s and 5 minutes.
@@ -55,7 +53,7 @@ public class AnalysisRequestedConsumer(AnalysisDbContext db,
 
                     var done = Interlocked.Increment(ref completed);
                     await bus.Publish(new AnalysisModuleCompleted(
-                        msg.AnalysisId, msg.IdeaId, module.Name, done, applicable.Count), ct);
+                        msg.AnalysisId, msg.IdeaId, module.Name, done, modules.Count()), ct);
                 }));
 
                 // Persist progress after each stage so polling clients see movement.
@@ -78,7 +76,12 @@ public class AnalysisRequestedConsumer(AnalysisDbContext db,
         catch (Exception ex)
         {
             logger.LogError(ex, "Analysis {Id} failed after {Done}/{Total} modules",
-                msg.AnalysisId, completed, applicable.Count);
+                msg.AnalysisId, completed, modules.Count());
+
+            // A failed module leaves its rejected entities tracked on this shared context,
+            // and saving them again would throw here and strand the analysis as Running.
+            db.ChangeTracker.Clear();
+            db.Analyses.Attach(analysis);
 
             analysis.Status = AnalysisStatus.Failed;
             analysis.ErrorMessage = ex.Message;

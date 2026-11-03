@@ -91,8 +91,8 @@ public class AnalysisDbContext(DbContextOptions<AnalysisDbContext> options) : Db
             e.ToTable("MarketAnalyses");
             e.HasKey(x => x.Id);
             e.Property(x => x.Id).HasDefaultValueSql("gen_random_uuid()");
-            e.Property(x => x.MarketSize).HasMaxLength(200);
-            e.Property(x => x.MarketTrend).HasMaxLength(200);
+            e.Property(x => x.MarketSize);
+            e.Property(x => x.MarketTrend);
             e.Property(x => x.MarketOpportunity).HasPrecision(5, 2);
             e.Property(x => x.CreatedAt).HasDefaultValueSql("now()");
 
@@ -223,6 +223,8 @@ public class AnalysisDbContext(DbContextOptions<AnalysisDbContext> options) : Db
             e.HasKey(x => x.Id);
             e.Property(x => x.Id).HasDefaultValueSql("gen_random_uuid()");
 
+             
+            e.Property(x => x.Source).HasMaxLength(50);
             e.Property(x => x.Name).HasMaxLength(200).IsRequired();
             e.Property(x => x.WebsiteUrl).HasMaxLength(500);
             e.Property(x => x.Industry).HasMaxLength(100);
@@ -232,7 +234,7 @@ public class AnalysisDbContext(DbContextOptions<AnalysisDbContext> options) : Db
             e.Property(x => x.Strengths).HasColumnType("jsonb");
             e.Property(x => x.Weaknesses).HasColumnType("jsonb");
 
-            e.HasIndex(x => x.AnalysisId);
+            e.HasIndex(x => new {x.AnalysisId, x.Source});
 
             e.HasOne(x => x.Analysis).WithMany()
              .HasForeignKey(x => x.AnalysisId)

@@ -1,11 +1,12 @@
 using Contracts;
-using Contracts.AnalysisDtos;
 using Analysis.Data;
 using Contracts.Messaging;
 using InnovaFlow.Analysis.Data;
 using MassTransit;
 using ServiceDefaults;
 using Analysis.Api.Clients;
+using Contracts.AnalysisDtos;
+using AnalysisRequested = Contracts.AnalysisDtos.AnalysisRequested;
 
 namespace Analysis.Api.Endpoints;
 
@@ -34,7 +35,8 @@ public static class Analysis
         AnalysisDbContext db,
         CancellationToken ct,
         ICurrentUser currentUser,
-        IdeasClient ideas)
+        IdeasClient ideas
+        )
     {
 
         var idea = await ideas.GetAsync(ideaId, ct);
@@ -76,6 +78,7 @@ public static class Analysis
             idea.Category,
             idea.Industry), ct
         );
+
         await db.SaveChangesAsync();
 
 

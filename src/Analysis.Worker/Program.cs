@@ -1,42 +1,42 @@
 using Analysis.Worker;
-using Microsoft.Extensions.Options;
-using RabbitMQ;
-using InnovaFlow.Analysis.Data;
-using Microsoft.EntityFrameworkCore;
 using Analysis.Worker.AI;
-using MassTransit;
 using Analysis.Worker.Consumer;
-using MassTransit.Configuration;
+using Analysis.Worker.Modules;
+using Analysis.Worker.Modules.Market;
+using InnovaFlow.Analysis.Data;
+using MassTransit;
 
 var builder = Host.CreateApplicationBuilder(args);
-builder.Services.AddHostedService<Worker>();
-builder.Services.AddAnalysisData(builder.Configuration.GetConnectionString("innovaflow")!);
+builder.AddServiceDefaults();
 
-builder.Services.AddSingleton(TimeProvider.System);
+var dbConnection = builder.Configuration.GetConnectionString("innovaflow")
+    ?? throw new InvalidOperationException("Missing 'innovaflow' connection string. Check AppHost .WithReference(db).");
+var rabbitConnection = builder.Configuration.GetConnectionString("messaging")
+    ?? throw new InvalidOperationException("Missing 'messaging' connection string. Check AppHost .WithReference(rabbit).");
 
-//AI configuration
+builder.Services.AddAnalysisData(dbConnection);
+
+// AI
 builder.Services.AddAIClient<ClaudeOptions, ClaudeAiClient>(builder.Configuration, "Claude");
+builder.Services.AddSingleton<IAIClientFactory, AIClientFactory>();
 
+// Modules
+builder.Services.AddScoped<IAnalysisModule, MarketAnalysisModule>();
+
+// Messaging
 builder.Services.AddMassTransit(x =>
 {
     x.SetKebabCaseEndpointNameFormatter();
     x.AddConsumer<AnalysisRequestedConsumer>();
 
-    x.UsingRabbitMq((ctx, cfg) =>
+    x.UsingRabbitMq((context, cfg) =>
     {
-         var connectionString = builder.Configuration.GetConnectionString("messaging")! ?? throw new InvalidOperationException("No rabbitMQ connection string. Check AppHost and Program.cs");
-        cfg.Host(new Uri(connectionString));
-
-        cfg.ReceiveEndpoint("analysis-requested", e =>
-        {
-            e.PrefetchCount = 1;
-            e.ConcurrentMessageLimit = 1;
-            e.UseMessageRetry(r => r.None());
-
-            e.ConfigureConsumer<AnalysisRequestedConsumer>(ctx);
-        });
+        cfg.Host(new Uri(rabbitConnection));
+        cfg.UseMessageRetry(r => r.Intervals(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(60)));
+        cfg.ConfigureEndpoints(context);
     });
 });
 
 var host = builder.Build();
+host.Services.GetRequiredService<ILogger<Program>>().LogInformation("Analysis.Worker starting");
 host.Run();

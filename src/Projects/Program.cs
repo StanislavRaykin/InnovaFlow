@@ -46,6 +46,7 @@ app.UseAuthorization();
 app.UseHttpsRedirection();
 
 app.MapEndpoints();
+app.MapDefaultEndpoints();
 
 var summaries = new[]
 {

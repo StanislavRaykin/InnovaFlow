@@ -15,7 +15,7 @@ public static class Ideas
 
         group.MapPost("/", HandleCreateIdea);
         group.MapGet("/", HandleGetIdeas);
-        group.MapGet("{ideaId:guid}", HandleGetIdea);
+        group.MapGet("/{ideaId:guid}", HandleGetIdea);
 
         return group;
 

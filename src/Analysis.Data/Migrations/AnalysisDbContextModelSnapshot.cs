@@ -296,6 +296,11 @@ namespace Analysis.Data.Migrations
                         .HasPrecision(5, 2)
                         .HasColumnType("numeric(5,2)");
 
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
                     b.PrimitiveCollection<string>("Strengths")
                         .IsRequired()
                         .HasColumnType("jsonb");
@@ -310,7 +315,7 @@ namespace Analysis.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AnalysisId");
+                    b.HasIndex("AnalysisId", "Source");
 
                     b.ToTable("Competitors", "Analysis");
                 });
@@ -368,12 +373,10 @@ namespace Analysis.Data.Migrations
                         .HasColumnType("numeric(5,2)");
 
                     b.Property<string>("MarketSize")
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("text");
 
                     b.Property<string>("MarketTrend")
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Summary")
                         .HasColumnType("text");

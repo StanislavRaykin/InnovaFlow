@@ -79,15 +79,12 @@ public class ProjectsDbContext(
              .HasForeignKey(x => x.IdeaId)
              .OnDelete(DeleteBehavior.Cascade);
 
-            // Idea is the required end of this relationship and carries its
-            // own filter, so EF expects a matching one here - otherwise a
-            // membership row can outlive its (soft-deleted) idea and surface
-            // with a null Idea navigation. Only the soft-delete half of
-            // Idea's filter is repeated: the access-check half tests
-            // Members, and reusing it here would be circular - resolving a
-            // user's effective role requires reading IdeaMembers unfiltered
-            // by membership in the first place.
-            e.HasQueryFilter(x => x.Idea.DeletedAt == null);
+            // No query filter here, even though Idea is the required end of
+            // this relationship and carries one. Idea's filter reads Members,
+            // so any filter here that navigates x.Idea re-applies Idea's filter
+            // and EF recurses until the process dies with a stack overflow.
+            // A direct IdeaMembers query can therefore return rows of a
+            // soft-deleted idea and has to check for that itself.
         });
 
         b.Entity<Team>(e =>

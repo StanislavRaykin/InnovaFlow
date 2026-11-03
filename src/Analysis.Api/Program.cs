@@ -19,7 +19,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddTransient<ForwardTokenHandler>();
 // AddServiceDefaults already adds service discovery and the resilience handler to every HttpClient
-builder.Services.AddHttpClient<IdeasClient>("ideas", c => c.BaseAddress = new Uri("https+http://projects"))
+builder.Services.AddHttpClient<IdeasClient>(c => c.BaseAddress = new Uri("https+http://projects"))
 .AddHttpMessageHandler<ForwardTokenHandler>();
 
 builder.Services.AddMassTransit(x =>

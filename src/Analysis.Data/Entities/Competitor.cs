@@ -13,6 +13,8 @@ public class Competitor
     public Guid AnalysisId { get; set; }
     public Analysis Analysis { get; set; } = null!;
 
+    public string Source {get; set;} = null!; // 2 modules can return the same competitor, so we need to know which module produced it
+    
     public string Name { get; set; } = null!;
     public string? Description { get; set; }
     public string? WebsiteUrl { get; set; }

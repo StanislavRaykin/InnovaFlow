@@ -14,6 +14,7 @@ public static class Drafts
     public static RouteGroupBuilder MapDraftEndpoints(this RouteGroupBuilder group)
     {
         // group.MapGet("/{draftId:guid}", GetDraftsHandler);
+        //group.MapGet("/", ListDraftsHandler);
         group.MapPut("/{draftId:guid}", HandleSaveDraft);
 
         return group;
