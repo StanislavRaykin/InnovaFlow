@@ -1,0 +1,117 @@
+@page "/innovation-analysis"
+@layout AccountLayout
+@attribute [Authorize]
+
+
+<title>Innovation Analysis - SmartWear</title>
+
+    <!-- TopNavBar (Mobile Only) -->
+    <nav class="md:hidden fixed top-0 left-0 w-full z-50 flex justify-between items-center px-md h-16 bg-surface/80 backdrop-blur-md border-b border-primary/10 flat no shadows text-on-surface-variant">
+        <div class="flex items-center gap-xs">
+            <span class="font-headline-md text-headline-md font-bold text-primary">Innovation Studio</span>
+        </div>
+        <div class="flex gap-sm">
+            <span class="material-symbols-outlined text-primary cursor-pointer hover:text-primary transition-colors">menu</span>
+        </div>
+    </nav>
+    <div class="flex flex-1 pt-16 md:pt-0">
+        <!-- SideNavBar (Desktop) -->
+        <aside class="hidden md:flex flex-col justify-between py-md bg-surface-container border-r border-primary/10 flat no shadows fixed h-full left-0 w-sidebar-width z-40">
+            <div>
+                <div class="px-md pb-lg flex flex-col gap-1">
+                    <h1 class="font-headline-md text-headline-md font-bold text-primary">InnovaFlow</h1>
+                    <span class="font-data-mono text-data-mono text-on-surface-variant">AI OS v2.4</span>
+                </div>
+                <nav class="flex flex-col gap-2 px-sm">
+                    <a class="flex items-center gap-sm px-sm py-xs text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface rounded-DEFAULT transition-all font-data-mono text-data-mono" href="#">
+                        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">dashboard</span>
+                        Dashboard
+                    </a>
+                    <!-- Active State: 'Dashboard' logic implies My Ideas is the closest fit for looking at a specific idea -->
+                    <a class="flex items-center gap-sm px-sm py-xs bg-primary/10 text-primary border-l-4 border-primary rounded-r-DEFAULT transition-all font-data-mono text-data-mono" href="#">
+                        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">lightbulb</span>
+                        My Ideas
+                    </a>
+                    <a class="flex items-center gap-sm px-sm py-xs text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface rounded-DEFAULT transition-all font-data-mono text-data-mono" href="#">
+                        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">add_circle</span>
+                        Create Idea
+                    </a>
+                </nav>
+            </div>
+            <div class="px-sm flex flex-col gap-2">
+                <button class="w-full bg-primary-container text-surface font-bold py-xs rounded-DEFAULT font-label-caps text-label-caps hover:brightness-110 transition-all shadow-[0_0_10px_rgba(74,222,128,0.3)]">Deploy Agent</button>
+                <div class="mt-4 border-t border-primary/10 pt-4 flex flex-col gap-2">
+                    <a class="flex items-center gap-sm px-sm py-xs text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface rounded-DEFAULT transition-all font-data-mono text-data-mono" href="#">
+                        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">settings</span>
+                        Settings
+                    </a>
+                    <a class="flex items-center gap-sm px-sm py-xs text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface rounded-DEFAULT transition-all font-data-mono text-data-mono" href="#">
+                        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">help</span>
+                        Support
+                    </a>
+                    <a class="flex items-center gap-sm px-sm py-xs text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface rounded-DEFAULT transition-all font-data-mono text-data-mono" href="#">
+                        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">logout</span>
+                        Logout
+                    </a>
+                </div>
+            </div>
+        </aside>
+            <!-- TopAppBar -->
+            <header class="flex flex-col gap-sm p-md bg-surface-dim/50 backdrop-blur-xl border-b border-primary/20 shadow-lg shadow-primary/5 sticky top-0 z-30">
+                <div class="flex justify-between items-center w-full">
+                    <div class="flex items-center gap-sm">
+                        <span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">analytics</span>
+                        <h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg font-bold text-primary">Иновационен Анализ: SmartWear</h2>
+                    </div>
+                    <div class="flex gap-sm">
+                        <button class="p-2 text-on-surface-variant hover:bg-primary/10 rounded-lg transition-all relative overflow-hidden group">
+                            <span class="material-symbols-outlined relative z-10">refresh</span>
+                            <div class="absolute inset-0 hidden group-hover:block animate-scan z-0"></div>
+                        </button>
+                        <button class="p-2 text-on-surface-variant hover:bg-primary/10 rounded-lg transition-all relative overflow-hidden group">
+                            <span class="material-symbols-outlined relative z-10">ios_share</span>
+                            <div class="absolute inset-0 hidden group-hover:block animate-scan z-0"></div>
+                        </button>
+                    </div>
+                </div>
+            </header>
+            <!-- Dashboard Content Grid -->
+            <div class="p-md flex-1 grid grid-cols-1 lg:grid-cols-12 gap-md items-start max-w-container-max mx-auto w-full">
+                <!-- Left Column (Main Stats & Differentiators) -->
+                <div class="lg:col-span-8 flex flex-col gap-md">
+                    <!-- Big Score Card -->
+                    <section class="glass-panel rounded-xl p-md flex flex-col md:flex-row items-center justify-between gap-md relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
+                        <div class="flex flex-col z-10">
+                            <span class="font-label-caps text-label-caps text-secondary mb-xs">ОБЩ РЕЙТИНГ НА ИНОВАЦИЯТА</span>
+                            <div class="flex items-baseline gap-sm">
+                                <span class="font-display-lg text-display-lg text-primary neon-text">87</span>
+                                <span class="font-headline-md text-headline-md text-on-surface-variant">/100</span>
+                            </div>
+                            <div class="flex items-center gap-2 mt-xs">
+                                <div class="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_#4ADE80]"></div>
+                                <span class="font-data-mono text-data-mono text-primary">Високо иновативна концепция</span>
+                            </div>
+                        </div>
+                        <!-- Radial Progress Visual Placeholder -->
+                        <div class="w-32 h-32 rounded-full border-4 border-surface-variant relative flex items-center justify-center z-10">
+                            <svg class="absolute inset-0 w-full h-full transform -rotate-90">
+                                <circle class="text-surface-variant" cx="60" cy="60" fill="transparent" r="54" stroke="currentColor" stroke-width="8"></circle>
+                                <circle class="text-primary drop-shadow-[0_0_10px_rgba(74,222,128,0.5)]" cx="60" cy="60" fill="transparent" r="54" stroke="currentColor" stroke-dasharray="339.29" stroke-dashoffset="44.1" stroke-width="8"></circle>
+                            </svg>
+                            <span class="material-symbols-outlined text-4xl text-primary" style="font-variation-settings: 'FILL' 1;">insights</span>
+                        </div>
+                    </section>
+                    <!-- What makes it different -->
+                    <section class="glass-panel rounded-xl flex flex-col">
+                        <div class="px-md py-sm border-b border-primary/10 flex items-center gap-xs">
+                            <span class="material-symbols-outlined text-secondary text-sm">memory</span>
+                            <h3 class="font-label-caps text-label-caps text-secondary">AI АНАЛИЗ: КАКВО ПРАВИ ТАЗИ ИДЕЯ РАЗЛИЧНА?</h3>
+                        </div>
+                        <div class="p-md font-body-lg text-body-lg text-on-surface leading-relaxed">
+                            Интеграцията на биометрични сензори от медицински клас в ежедневни тъкани надхвърля текущите фитнес тракери. Чрез използване на патентовани алгоритми за нано-вплетени влакна, SmartWear предлага непрекъснато, неинвазивно събиране на данни, което се слива безпроблемно с потребителските навици. Ключовото предимство се крие в AI-управляваната система за превантивни здравни сигнали, базирана на микро-промени в телесната температура и електропроводимостта на кожата.
+                        </div>
+                    </section>
+                </div>
+            </div>
+    </div>
