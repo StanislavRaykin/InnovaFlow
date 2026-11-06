@@ -15,6 +15,9 @@ public class AnalysisDbContext(DbContextOptions<AnalysisDbContext> options) : Db
     public DbSet<AnalysisScore> Scores => Set<AnalysisScore>();
 
     public DbSet<MarketAnalysis> MarketAnalyses => Set<MarketAnalysis>();
+
+    public DbSet<InnovationAnalysis> InnovationAnalyses => Set<InnovationAnalysis>();
+
     public DbSet<Competitor> Competitors => Set<Competitor>();
     public DbSet<AudienceAnalysis> AudienceAnalyses => Set<AudienceAnalysis>();
     public DbSet<Persona> Personas => Set<Persona>();
@@ -94,6 +97,24 @@ public class AnalysisDbContext(DbContextOptions<AnalysisDbContext> options) : Db
             e.Property(x => x.MarketSize);
             e.Property(x => x.MarketTrend);
             e.Property(x => x.MarketOpportunity).HasPrecision(5, 2);
+            e.Property(x => x.CreatedAt).HasDefaultValueSql("now()");
+
+            e.HasIndex(x => x.AnalysisId).IsUnique();
+
+            e.HasOne(x => x.Analysis).WithMany()
+             .HasForeignKey(x => x.AnalysisId)
+             .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        b.Entity<InnovationAnalysis>(e =>
+        {
+            e.ToTable("InnovationAnalyses");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).HasDefaultValueSql("gen_random_uuid()");
+            e.Property(x => x.OriginalityScore).HasPrecision(5, 2);
+            e.Property(x => x.TechnologicalInnovationScore).HasPrecision(5, 2);
+            e.Property(x => x.BusinessInnovationScore).HasPrecision(5, 2);
+            e.Property(x => x.GrowthPotentialScore).HasPrecision(5, 2);
             e.Property(x => x.CreatedAt).HasDefaultValueSql("now()");
 
             e.HasIndex(x => x.AnalysisId).IsUnique();

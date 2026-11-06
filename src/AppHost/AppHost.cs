@@ -4,6 +4,7 @@ var builder = DistributedApplication.CreateBuilder(args);
 
 // ---------- secrets and api keys ----------
 var claudeKey = builder.AddParameter("CLAUDE-API-KEY", secret: true);
+var kimiKey = builder.AddParameter("KIMI-API-KEY", secret: true);
 var ghCliSecret = builder.AddParameter("GH-CLI-SECRET", secret: true);
 
 var ghCliId = builder.AddParameter("GH-CLI-ID", secret: true);
@@ -65,6 +66,7 @@ builder.AddProject<Projects.Analysis_Worker>("worker")
        .WithReference(rabbit).WaitFor(rabbit)
        .WithReference(cache)
        .WithEnvironment("Ai__Claude__ApiKey", claudeKey)
+       .WithEnvironment("Ai__Kimi__ApiKey", kimiKey)
        .WithEnvironment("BACKBLAZE-KEY-ID", bzKeyId)
  .WithEnvironment("BACKBLAZE-APP-KEY", bzAppKey);
 

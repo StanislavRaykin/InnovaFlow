@@ -1,60 +1,11 @@
-@page "/risk-analysis"
+@page "/analyses/{AnalysisId:guid}/risks"
 @layout AccountLayout
 @attribute [Authorize]
 
+<PageTitle>Анализ на риска | InnovaFlow</PageTitle>
 
-<title>Risk Analysis - SmartWear</title>
-
-    <!-- SideNavBar (Shared Component) -->
-    <nav class="hidden md:flex flex-col justify-between py-md bg-surface-container text-primary font-data-mono text-data-mono fixed h-full left-0 w-sidebar-width border-r border-primary/10 flat no shadows z-40">
-        <div>
-            <div class="px-md mb-xl flex items-center gap-sm">
-                <span class="material-symbols-outlined text-primary text-3xl">lightbulb</span>
-                <div>
-                    <div class="font-headline-md text-headline-md font-bold text-primary">InnovaFlow</div>
-                    <div class="text-label-caps text-on-surface-variant">AI OS v2.4</div>
-                </div>
-            </div>
-            <div class="px-sm flex flex-col gap-xs">
-                <!-- Dashboard - Inactive -->
-                <a class="flex items-center gap-sm px-sm py-xs rounded text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-all" href="#">
-                    <span class="material-symbols-outlined">dashboard</span>
-                    Dashboard
-                </a>
-                <!-- My Ideas - Active (Semantic Match for Analysis) -->
-                <a class="flex items-center gap-sm px-sm py-xs rounded bg-primary/10 text-primary border-l-4 border-primary hover:bg-surface-variant/50 hover:text-on-surface transition-all" href="#" style="box-shadow: -1px 0 10px rgba(107, 251, 154, 0.2);">
-                    <span class="material-symbols-outlined" data-weight="fill" style="font-variation-settings: 'FILL' 1;">lightbulb</span>
-                    My Ideas
-                </a>
-                <!-- Create Idea - Inactive -->
-                <a class="flex items-center gap-sm px-sm py-xs rounded text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-all" href="#">
-                    <span class="material-symbols-outlined">add_circle</span>
-                    Create Idea
-                </a>
-            </div>
-        </div>
-        <div class="px-sm">
-            <button class="w-full bg-primary text-on-primary font-bold py-xs rounded mb-md hover:bg-primary-fixed transition-colors flex items-center justify-center gap-xs">
-                Deploy Agent
-            </button>
-            <div class="flex flex-col gap-xs border-t border-primary/10 pt-sm">
-                <a class="flex items-center gap-sm px-sm py-xs rounded text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-all" href="#">
-                    <span class="material-symbols-outlined text-[18px]">settings</span>
-                    Settings
-                </a>
-                <a class="flex items-center gap-sm px-sm py-xs rounded text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-all" href="#">
-                    <span class="material-symbols-outlined text-[18px]">help</span>
-                    Support
-                </a>
-                <a class="flex items-center gap-sm px-sm py-xs rounded text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-all" href="#">
-                    <span class="material-symbols-outlined text-[18px]">logout</span>
-                    Logout
-                </a>
-            </div>
-        </div>
-    </nav>
         <!-- TopAppBar (Shared Component) -->
-        <header class="flex flex-col gap-sm p-md bg-surface-dim/50 backdrop-blur-xl text-primary font-headline-lg text-headline-lg full-width border-b border-primary/20 shadow-lg shadow-primary/5 sticky top-0 z-30">
+        <header class="flex flex-col gap-sm p-md bg-surface-dim/50 backdrop-blur-xl text-primary font-headline-lg text-headline-lg full-width border-b border-primary/20 shadow-lg shadow-primary/5 sticky top-16 md:top-0 z-30">
             <div class="flex justify-between items-center w-full max-w-container-max mx-auto">
                 <div class="flex items-center gap-sm">
                     <span class="material-symbols-outlined text-4xl">analytics</span>
@@ -71,6 +22,7 @@
                     </button>
                 </div>
             </div>
+    <AnalysisTabs AnalysisId="AnalysisId" />
         </header>
         <!-- Content Canvas -->
         <div class="flex-1 p-md max-w-container-max mx-auto w-full flex flex-col gap-md">
@@ -249,3 +201,7 @@
                 </div>
             </div>
         </div>
+
+@code {
+    [Parameter] public Guid AnalysisId { get; set; }
+}

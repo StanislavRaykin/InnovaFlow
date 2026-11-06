@@ -1,6 +1,4 @@
 @inherits LayoutComponentBase
-@inject JwtAuthenticationStateProvider AuthState
-@inject NavigationManager Navigation
 
 @* Default layout for every public (unauthenticated) page: Landing, Login,
    Registration, NotFound. It owns the chrome that used to live inside
@@ -10,17 +8,13 @@
    Design tokens (surface/primary/on-* colours, the xs..xl spacing scale and
    the font-*/text-* pairs) come from wwwroot/js/tailwind.config.js, which is
    loaded once from index.html. The .grid-bg / .glow-effect / .scanning-line
-   helpers come from css/landing.css, linked below. *@
+   helpers come from css/landing.css, linked below.
 
-<HeadContent>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap"
-        rel="stylesheet" />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
-        rel="stylesheet" />
-    <link rel="stylesheet" href="css/landing.css" />
-</HeadContent>
+   Fonts are in index.html. The stylesheet is a plain <link> rather than
+   <HeadContent>: only the last-rendered HeadContent reaches <head>, so a page
+   with its own (Login, Registration) would otherwise drop this one. *@
+
+<link rel="stylesheet" href="css/landing.css" />
 
 <div class="dark bg-surface text-on-surface font-body-md min-h-screen flex flex-col relative grid-bg">
     <!-- TopNavBar -->
@@ -53,17 +47,6 @@
         <div>© 2026 InnovaFlow</div>
     </footer>
 </div>
-@code{
-
-    protected override async Task OnInitializedAsync()
-    {
-        var authState = await AuthState.GetAuthenticationStateAsync();
-        bool isAuthenticated = authState.User.Identity?.IsAuthenticated ?? false;
-
-        if (isAuthenticated)
-        {
-            Navigation.NavigateTo("/home", replace: true);
-        }
-
-    }
-}
+@* No signed-in redirect here: NotFound renders in this layout too, and sending
+   every signed-in user to /home made any unmatched URL look like a redirect.
+   Landing, Login and Registration each redirect a signed-in user themselves. *@

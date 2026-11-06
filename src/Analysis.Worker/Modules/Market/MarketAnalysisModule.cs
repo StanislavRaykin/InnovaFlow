@@ -5,7 +5,6 @@ using Contracts.AnalysisDtos;
 using InnovaFlow.Analysis.Data;
 using MassTransit.Internals.GraphValidation;
 using Microsoft.EntityFrameworkCore;
-using static Analysis.Worker.Modules.AnalyzerPromptRules;
 
 namespace Analysis.Worker.Modules.Market;
 
@@ -16,55 +15,57 @@ public class MarketAnalysisModule(AnalysisDbContext db, IAIClientFactory aiFacto
 
     public string Name => "MarketAnalysis";
 
-    private const string SystemPrompt = """
-        Използвай входните полета на бизнес идеята, подадени от потребителя, за да направиш анализ на пазара и конкурентната среда. 
-        Определи вероятните категории преки и косвени конкуренти, съществуващи алтернативи, релевантни пазарни тенденции и възможни ниши. 
-        Не приемай, че идеята е уникална без доказателства и не измисляй конкретни конкуренти или пазарни статистики.
-         Ако имаш достъп до надеждно актуално търсене, използвай го и разграничавай проверените източници от собствените си изводи; ако нямаш, изрично посочи, че това е предварителна оценка. 
-         Оцени от 1 до 100 пазарния потенциал, интензивността на конкуренцията, възможността за намиране на ниша и потенциала за диференциация. 
-         За всяка оценка обясни основанието и увереността. Посочи какво е известно, какво е допускане, кои важни данни липсват и как те могат да бъдат събрани. 
-         Завърши с най-обещаващата хипотеза за пазарен сегмент и три конкретни проверки, които трябва да се направят преди инвестиция.
- 
-        Формат на отговора:
-        - Пазарният потенциал и интензивността на конкуренцията се връщат като отделни оценки с обяснение.
-        - Възможността за ниша, потенциалът за диференциация, известното, допусканията, липсващите данни, хипотезата за сегмент и трите проверки се включват в обобщението (summary), в реда, описан в схемата.
-        - Съществуващите алтернативи се връщат като конкуренти (косвени), а не като отделен списък.
-        """
-    + AnalyzerPromptRules.Common
-    + AnalyzerPromptRules.NoLiveSearch;
-
-    public const string Task = "Направи анализ на пазара и конкурентната среда за тази идея.";
-
 
     public async Task RunAsync(AnalysisRequested req, CancellationToken ct)
     {
-        AIRequest aiRequest = new AIRequest
+        AIRequest researchRequest = new AIRequest
         {
             AnalysisId = req.AnalysisId,
             AgentType = NodeType.Market,
             Status = Enum.GetName(AnalysisStatus.Running),
             StartedAt = DateTimeOffset.UtcNow
         };
+        AIRequest scoreRequest = researchRequest;
 
 
-        db.Requests.Add(aiRequest);
+        db.Requests.Add(researchRequest);
+        db.Requests.Add(scoreRequest);
+        
         await db.SaveChangesAsync(ct);
 
-        AiResult<MarketAnalysisResult> result = null;
-        var ai = aiFactory.GetAiClient("Claude");
+        AiResponse researchResult = null;
+        AiResult<MarketAnalysisResult> scoreResult = null;
+        
+        var researcher = aiFactory.GetAiClient("Kimi");
         try
         {
-            string user = IdeaPromptBuilder.Build(req, Task);
-            result = await ai.CompleteAsync<MarketAnalysisResult>(SystemPrompt, user, ct);
+            string user = IdeaPromptBuilder.Build(req, MarketPrompt.ResearchTask);
+            researchResult = await researcher.CompleteTextAsync(MarketPrompt.ResearchSystem, user, ct);
 
         }
         catch (Exception ex)
         {
-            await MarkFailedAsync(aiRequest, ex, ct);
+            await MarkFailedAsync(researchRequest, ex, ct);
+
+        }
+
+        var scorer = aiFactory.GetAiClient("Claude");
+        try
+        {
+            string sources = string.Join("\n", researchResult?.Sources?.Select(s => $"[{s.Number}] {s.Title} ({s.Url})") ?? Array.Empty<string>());
+            string user = IdeaPromptBuilder.Build(req, MarketPrompt.ScoreTask) + 
+            $"<research>\n{(researchResult is null ? "No research available" : researchResult.Text)}\n</research>"
+            + $"<sources>\n{sources}\n</sources>";
+            scoreResult = await scorer.CompleteAsync<MarketAnalysisResult>(MarketPrompt.ScoreSystem, user, ct);
+            // End result processing
+        }
+        catch (Exception ex)
+        {
+            await MarkFailedAsync(scoreRequest, ex, ct);
             throw;
         }
 
-        var marketAnalysis = result.Value;
+        var marketAnalysis = scoreResult.Value;
         var execStrategy = db.Database.CreateExecutionStrategy();
         await execStrategy.ExecuteAsync(async () =>
         {
@@ -101,11 +102,8 @@ public class MarketAnalysisModule(AnalysisDbContext db, IAIClientFactory aiFacto
                 NewScore(req.AnalysisId, ScoreType.Market, marketAnalysis.MarketOpportunity, marketAnalysis.MarketOpportunityExplanation),
                 NewScore(req.AnalysisId, ScoreType.Competition, marketAnalysis.CompetitionIntensity, marketAnalysis.CompetitionExplanation));
 
-            aiRequest.Status = AnalysisStatus.Completed.ToString();
-            aiRequest.CompletedAt = DateTime.UtcNow;
-            aiRequest.Model = result.Raw.Model;
-            aiRequest.PromptTokens = (int)result.Raw.InputTokens;
-            aiRequest.CompletionTokens = (int)result.Raw.OutputTokens;
+            await MarkSucceededAsync(scoreRequest, researchResult, ct);
+            await MarkSucceededAsync(researchRequest, researchResult, ct);
 
             await db.SaveChangesAsync(ct);
             await t.CommitAsync(ct);
@@ -113,9 +111,9 @@ public class MarketAnalysisModule(AnalysisDbContext db, IAIClientFactory aiFacto
 
         logger.LogInformation($"Market analysis completed. {marketAnalysis.Competitors.Count} competitors found, market opportunity: {marketAnalysis.MarketOpportunity}, competition intensity: {marketAnalysis.CompetitionIntensity}");
 
-
     }
 
+    // in case of a rerun
     private async Task DeletePreviousResultsAsync(Guid analysisId, CancellationToken ct)
     {
         await db.MarketAnalyses.Where(m => m.AnalysisId == analysisId).ExecuteDeleteAsync(ct);
@@ -139,6 +137,17 @@ public class MarketAnalysisModule(AnalysisDbContext db, IAIClientFactory aiFacto
             aiRequest.PromptTokens = (int)aiEx.Response.InputTokens;
             aiRequest.CompletionTokens = (int)aiEx.Response.OutputTokens;
         }
+
+        await db.SaveChangesAsync(ct);
+    }
+
+    private async Task MarkSucceededAsync(AIRequest aiRequest, AiResponse result, CancellationToken ct)
+    {
+        aiRequest.Status = AnalysisStatus.Completed.ToString();
+        aiRequest.CompletedAt = DateTimeOffset.UtcNow;
+        aiRequest.Model = result.Model;
+        aiRequest.PromptTokens = (int)result.InputTokens;
+        aiRequest.CompletionTokens = (int)result.OutputTokens;
 
         await db.SaveChangesAsync(ct);
     }

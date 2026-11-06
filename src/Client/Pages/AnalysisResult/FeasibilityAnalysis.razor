@@ -1,67 +1,11 @@
+@page "/analyses/{AnalysisId:guid}/feasibility"
+@layout AccountLayout
+@attribute [Authorize]
 
-<title>Feasibility Analysis - SmartWear</title>
+<PageTitle>Осъществимост | InnovaFlow</PageTitle>
 
-
-<!-- SideNavBar (Shared Component) -->
-<nav class="hidden md:flex flex-col justify-between py-md fixed h-full left-0 w-sidebar-width bg-surface-container border-r border-primary/10 z-40">
-    <div>
-        <div class="px-md mb-xl flex items-center gap-sm">
-            <span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">generating_tokens</span>
-            <div>
-                <h1 class="font-headline-md text-headline-md font-bold text-primary">InnovaFlow</h1>
-                <p class="font-label-caps text-label-caps text-on-surface-variant">AI OS v2.4</p>
-            </div>
-        </div>
-        <ul class="flex flex-col font-data-mono text-data-mono">
-            <li>
-                <a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-colors" href="#">
-                    <span class="material-symbols-outlined">dashboard</span>
-                    Dashboard
-                </a>
-            </li>
-            <li>
-                <!-- Active State Logic Applied: Intent mapped to 'My Ideas' or specific Idea view -->
-                <a class="flex items-center gap-sm px-md py-sm bg-primary/10 text-primary border-l-4 border-primary transition-colors" href="#" style="border-color: rgba(107, 251, 154, 1); box-shadow: 0 0 15px rgba(107,251,154,0.2);">
-                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">lightbulb</span>
-                    My Ideas
-                </a>
-            </li>
-            <li>
-                <a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-colors" href="#">
-                    <span class="material-symbols-outlined">add_circle</span>
-                    Create Idea
-                </a>
-            </li>
-        </ul>
-    </div>
-    <div class="px-md flex flex-col gap-sm">
-        <button class="w-full py-xs px-sm bg-primary text-on-primary font-bold rounded-DEFAULT hover:opacity-90 transition-opacity font-data-mono text-data-mono uppercase tracking-wider mb-md">
-            Deploy Agent
-        </button>
-        <ul class="flex flex-col font-data-mono text-data-mono border-t border-primary/10 pt-sm">
-            <li>
-                <a class="flex items-center gap-sm py-xs text-on-surface-variant hover:text-on-surface transition-colors" href="#">
-                    <span class="material-symbols-outlined text-[18px]">settings</span>
-                    Settings
-                </a>
-            </li>
-            <li>
-                <a class="flex items-center gap-sm py-xs text-on-surface-variant hover:text-on-surface transition-colors" href="#">
-                    <span class="material-symbols-outlined text-[18px]">help</span>
-                    Support
-                </a>
-            </li>
-            <li>
-                <a class="flex items-center gap-sm py-xs text-error hover:text-error-container transition-colors mt-xs" href="#">
-                    <span class="material-symbols-outlined text-[18px]">logout</span>
-                    Logout
-                </a>
-            </li>
-        </ul>
-    </div>
-</nav>
     <!-- TopAppBar (Shared Component) -->
-    <header class="flex flex-col gap-sm p-md full-width border-b border-primary/20 bg-surface-dim/50 backdrop-blur-xl shadow-lg shadow-primary/5 sticky top-0 z-30">
+    <header class="flex flex-col gap-sm p-md full-width border-b border-primary/20 bg-surface-dim/50 backdrop-blur-xl shadow-lg shadow-primary/5 sticky top-16 md:top-0 z-30">
         <div class="flex justify-between items-center w-full max-w-container-max mx-auto">
             <div class="flex items-center gap-md">
                 <span class="material-symbols-outlined text-primary text-4xl" style="font-variation-settings: 'FILL' 1;">analytics</span>
@@ -79,12 +23,9 @@
                     <span class="material-symbols-outlined">ios_share</span>
                     <div class="absolute inset-0 bg-gradient-to-r from-transparent via-primary/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
                 </button>
-                <!-- Mobile Nav Trigger -->
-                <button class="md:hidden p-xs text-primary">
-                    <span class="material-symbols-outlined">menu</span>
-                </button>
             </div>
         </div>
+    <AnalysisTabs AnalysisId="AnalysisId" />
     </header>
     <!-- Canvas -->
     <div class="flex-1 p-md md:p-xl w-full max-w-container-max mx-auto overflow-y-auto">
@@ -212,7 +153,7 @@
                     <div class="space-y-sm">
                         <div>
                             <div class="flex justify-between mb-xs">
-                                <span class="" хар="font-label-caps text-label-caps text-on-surface-variant">Капитал за R&amp;D</span>
+                                <span class="font-label-caps text-label-caps text-on-surface-variant">Капитал за R&amp;D</span>
                                 <span class="font-data-mono text-data-mono text-secondary">Висок</span>
                             </div>
                             <div class="w-full bg-surface-container-highest h-1 rounded-full"><div class="bg-secondary h-full w-[85%] rounded-full"></div></div>
@@ -292,3 +233,7 @@
             </div>
         </div>
     </div>
+
+@code {
+    [Parameter] public Guid AnalysisId { get; set; }
+}

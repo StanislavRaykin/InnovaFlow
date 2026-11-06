@@ -1,73 +1,11 @@
-@page "/analyses-result/market-analysis"
+@page "/analyses/{AnalysisId:guid}/market"
 @layout AccountLayout
 @attribute [Authorize]
 
+<PageTitle>Пазарен анализ | InnovaFlow</PageTitle>
 
-    <!-- SideNavBar -->
-    <nav class="fixed h-full left-0 w-sidebar-width border-r border-primary/10 flat no shadows bg-surface-container flex flex-col justify-between py-md z-40 hidden md:flex">
-        <div>
-            <div class="px-md mb-xl flex items-center gap-sm">
-                <span class="material-symbols-outlined text-primary text-4xl" data-weight="fill" style="font-variation-settings: 'FILL' 1;">analytics</span>
-                <div>
-                    <h1 class="font-headline-md text-headline-md font-bold text-primary">InnovaFlow</h1>
-                    <p class="font-data-mono text-data-mono text-on-surface-variant">AI OS v2.4</p>
-                </div>
-            </div>
-            <ul class="flex flex-col gap-2 px-sm">
-                <li>
-                    <a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface font-data-mono text-data-mono transition-colors" href="#">
-                        <span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
-                        Dashboard
-                    </a>
-                </li>
-                <li>
-                    <a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface font-data-mono text-data-mono transition-colors" href="#">
-                        <span class="material-symbols-outlined" data-icon="lightbulb">lightbulb</span>
-                        My Ideas
-                    </a>
-                </li>
-                <li>
-                    <a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface font-data-mono text-data-mono transition-colors" href="#">
-                        <span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
-                        Create Idea
-                    </a>
-                </li>
-                <li>
-                    <a class="flex items-center gap-md px-md py-sm rounded-lg bg-primary/10 text-primary border-l-4 border-primary font-data-mono text-data-mono transition-colors" href="#">
-                        <span class="material-symbols-outlined" data-icon="query_stats">query_stats</span>
-                        Пазарен Анализ
-                    </a>
-                </li>
-            </ul>
-        </div>
-        <div class="px-sm">
-            <button class="w-full bg-primary-container text-on-primary-container font-headline-md text-headline-md font-bold py-sm rounded-lg mb-md hover:bg-primary transition-colors flex justify-center items-center gap-2">
-                Deploy Agent
-            </button>
-            <ul class="flex flex-col gap-2">
-                <li>
-                    <a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface font-data-mono text-data-mono transition-colors" href="#">
-                        <span class="material-symbols-outlined" data-icon="settings">settings</span>
-                        Settings
-                    </a>
-                </li>
-                <li>
-                    <a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface font-data-mono text-data-mono transition-colors" href="#">
-                        <span class="material-symbols-outlined" data-icon="help">help</span>
-                        Support
-                    </a>
-                </li>
-                <li>
-                    <a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface font-data-mono text-data-mono transition-colors" href="#">
-                        <span class="material-symbols-outlined" data-icon="logout">logout</span>
-                        Logout
-                    </a>
-                </li>
-            </ul>
-        </div>
-    </nav>
         <!-- TopAppBar -->
-        <header class="bg-surface-dim/50 backdrop-blur-xl full-width border-b border-primary/20 shadow-lg shadow-primary/5 flex flex-col gap-sm p-md sticky top-0 z-30">
+        <header class="bg-surface-dim/50 backdrop-blur-xl full-width border-b border-primary/20 shadow-lg shadow-primary/5 flex flex-col gap-sm p-md sticky top-16 md:top-0 z-30">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-sm">
                     <span class="material-symbols-outlined text-primary text-3xl" data-icon="analytics">analytics</span>
@@ -88,6 +26,7 @@
                     </button>
                 </div>
             </div>
+    <AnalysisTabs AnalysisId="AnalysisId" />
         </header>
         <!-- Canvas -->
         <div class="p-md lg:p-xl flex-1 flex flex-col gap-xl max-w-[1440px] mx-auto w-full">
@@ -158,3 +97,7 @@
                 </div>
             </section>
         </div>
+
+@code {
+    [Parameter] public Guid AnalysisId { get; set; }
+}

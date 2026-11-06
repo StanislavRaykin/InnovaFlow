@@ -1,63 +1,11 @@
-@page "/innovation-analysis"
+@page "/analyses/{AnalysisId:guid}/innovation"
 @layout AccountLayout
 @attribute [Authorize]
 
+<PageTitle>Иновации | InnovaFlow</PageTitle>
 
-<title>Innovation Analysis - SmartWear</title>
-
-    <!-- TopNavBar (Mobile Only) -->
-    <nav class="md:hidden fixed top-0 left-0 w-full z-50 flex justify-between items-center px-md h-16 bg-surface/80 backdrop-blur-md border-b border-primary/10 flat no shadows text-on-surface-variant">
-        <div class="flex items-center gap-xs">
-            <span class="font-headline-md text-headline-md font-bold text-primary">Innovation Studio</span>
-        </div>
-        <div class="flex gap-sm">
-            <span class="material-symbols-outlined text-primary cursor-pointer hover:text-primary transition-colors">menu</span>
-        </div>
-    </nav>
-    <div class="flex flex-1 pt-16 md:pt-0">
-        <!-- SideNavBar (Desktop) -->
-        <aside class="hidden md:flex flex-col justify-between py-md bg-surface-container border-r border-primary/10 flat no shadows fixed h-full left-0 w-sidebar-width z-40">
-            <div>
-                <div class="px-md pb-lg flex flex-col gap-1">
-                    <h1 class="font-headline-md text-headline-md font-bold text-primary">InnovaFlow</h1>
-                    <span class="font-data-mono text-data-mono text-on-surface-variant">AI OS v2.4</span>
-                </div>
-                <nav class="flex flex-col gap-2 px-sm">
-                    <a class="flex items-center gap-sm px-sm py-xs text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface rounded-DEFAULT transition-all font-data-mono text-data-mono" href="#">
-                        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">dashboard</span>
-                        Dashboard
-                    </a>
-                    <!-- Active State: 'Dashboard' logic implies My Ideas is the closest fit for looking at a specific idea -->
-                    <a class="flex items-center gap-sm px-sm py-xs bg-primary/10 text-primary border-l-4 border-primary rounded-r-DEFAULT transition-all font-data-mono text-data-mono" href="#">
-                        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">lightbulb</span>
-                        My Ideas
-                    </a>
-                    <a class="flex items-center gap-sm px-sm py-xs text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface rounded-DEFAULT transition-all font-data-mono text-data-mono" href="#">
-                        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">add_circle</span>
-                        Create Idea
-                    </a>
-                </nav>
-            </div>
-            <div class="px-sm flex flex-col gap-2">
-                <button class="w-full bg-primary-container text-surface font-bold py-xs rounded-DEFAULT font-label-caps text-label-caps hover:brightness-110 transition-all shadow-[0_0_10px_rgba(74,222,128,0.3)]">Deploy Agent</button>
-                <div class="mt-4 border-t border-primary/10 pt-4 flex flex-col gap-2">
-                    <a class="flex items-center gap-sm px-sm py-xs text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface rounded-DEFAULT transition-all font-data-mono text-data-mono" href="#">
-                        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">settings</span>
-                        Settings
-                    </a>
-                    <a class="flex items-center gap-sm px-sm py-xs text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface rounded-DEFAULT transition-all font-data-mono text-data-mono" href="#">
-                        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">help</span>
-                        Support
-                    </a>
-                    <a class="flex items-center gap-sm px-sm py-xs text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface rounded-DEFAULT transition-all font-data-mono text-data-mono" href="#">
-                        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">logout</span>
-                        Logout
-                    </a>
-                </div>
-            </div>
-        </aside>
             <!-- TopAppBar -->
-            <header class="flex flex-col gap-sm p-md bg-surface-dim/50 backdrop-blur-xl border-b border-primary/20 shadow-lg shadow-primary/5 sticky top-0 z-30">
+            <header class="flex flex-col gap-sm p-md bg-surface-dim/50 backdrop-blur-xl border-b border-primary/20 shadow-lg shadow-primary/5 sticky top-16 md:top-0 z-30">
                 <div class="flex justify-between items-center w-full">
                     <div class="flex items-center gap-sm">
                         <span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">analytics</span>
@@ -74,6 +22,7 @@
                         </button>
                     </div>
                 </div>
+    <AnalysisTabs AnalysisId="AnalysisId" />
             </header>
             <!-- Dashboard Content Grid -->
             <div class="p-md flex-1 grid grid-cols-1 lg:grid-cols-12 gap-md items-start max-w-container-max mx-auto w-full">
@@ -114,4 +63,7 @@
                     </section>
                 </div>
             </div>
-    </div>
+
+@code {
+    [Parameter] public Guid AnalysisId { get; set; }
+}

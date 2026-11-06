@@ -1,4 +1,6 @@
 using Contracts.AnalysisDtos;
+using Contracts;
+using InnovaFlow.Analysis.Data;
 
 namespace Analysis.Worker.Modules;
 

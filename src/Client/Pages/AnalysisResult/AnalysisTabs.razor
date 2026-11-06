@@ -1,0 +1,40 @@
+@* Section tabs shared by every analysis-result page, rendered at the bottom of each
+   page's TopAppBar. The mock-ups each carried their own copy of the side nav with
+   href="#" links; those resolved to "/" against <base href="/">, and Landing sent a
+   signed-in user straight on to /home. AccountLayout owns the side nav now, and
+   moving between sections goes through these tabs.
+
+*@
+
+<HeadContent>
+    <link rel="stylesheet" href="css/analysis.css" />
+</HeadContent>
+
+<nav class="flex gap-md mt-sm overflow-x-auto no-scrollbar max-w-container-max mx-auto w-full font-data-mono text-data-mono border-b border-surface-variant">
+    @foreach (var (path, label) in Sections)
+    {
+        <NavLink class="@Tab" ActiveClass="@TabActive" href="@($"analyses/{AnalysisId}{path}")" Match="NavLinkMatch.All">
+            @label
+        </NavLink>
+    }
+</nav>
+
+@code {
+    [Parameter, EditorRequired] public Guid AnalysisId { get; set; }
+
+    // Suffixes of /analyses/{AnalysisId}; must match the @page routes in this folder.
+    private static readonly (string Path, string Label)[] Sections =
+    [
+        ("", "Overview"),
+        ("/market", "Market"),
+        ("/innovation", "Innovation"),
+        ("/audience", "Audience"),
+        ("/feasibility", "Feasibility"),
+        ("/risks", "Risks"),
+    ];
+
+    private const string Tab =
+        "py-xs pb-1 whitespace-nowrap text-on-surface-variant hover:text-primary transition-colors";
+
+    private const string TabActive = "text-primary border-b-2 border-primary font-bold";
+}

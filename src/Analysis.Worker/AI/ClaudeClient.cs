@@ -28,7 +28,28 @@ public sealed class ClaudeAiClient : IAiClient
         _client = new AnthropicClient { ApiKey = _options.ApiKey, MaxRetries = _options.MaxRetries, Timeout = TimeSpan.FromSeconds(_options.TimeoutSeconds) };
     }
 
+    public Task<AiResponse> CompleteTextAsync(string systemPrompt, string userPrompt, CancellationToken ct = default)
+        => SendAsync(systemPrompt, userPrompt, outputConfig: null, ct);
+
     public async Task<AiResult<T>> CompleteAsync<T>(string systemPrompt, string userPrompt, CancellationToken ct = default) where T : class, new()
+    {
+        var response = await SendAsync(systemPrompt, userPrompt,
+            new OutputConfig { Format = StructuredOutput.CreateJsonFormat<T>() }, ct);
+
+        try
+        {
+            var result = StructuredOutput.Parse<T>(response.Text);
+            return new AiResult<T>(result, response);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to parse Claude response. Response text: {ResponseText}", response.Text);
+            throw new AiClientException("Failed to parse Claude response", ex, response);
+        }
+    }
+
+    /// <summary>One Messages call. <paramref name="outputConfig"/> null = free text.</summary>
+    private async Task<AiResponse> SendAsync(string systemPrompt, string userPrompt, OutputConfig? outputConfig, CancellationToken ct)
     {
         if (userPrompt == null)
             throw new ArgumentException("User prompt cannot be null", nameof(userPrompt));
@@ -45,7 +66,7 @@ public sealed class ClaudeAiClient : IAiClient
             MaxTokens = _options.MaxTokens,
             System = systemPrompt,
             Messages = userMessages,
-            OutputConfig = new OutputConfig { Format = StructuredOutput.CreateJsonFormat<T>() }
+            OutputConfig = outputConfig
         };
 
         Stopwatch sw = Stopwatch.StartNew();
@@ -75,12 +96,12 @@ public sealed class ClaudeAiClient : IAiClient
             }
 
         AiResponse response = new AiResponse(
-            Provider: "Claude",
             Text: text.ToString(),
             Model: message.Model.Raw(),
             StopReason: message.StopReason?.Raw(),
             InputTokens: message.Usage.InputTokens,
             OutputTokens: message.Usage.OutputTokens,
+            Sources: null, // Claude doesn't search here
             Duration: sw.Elapsed
         );
 
@@ -97,17 +118,9 @@ public sealed class ClaudeAiClient : IAiClient
             throw new AiClientException($"Claude hit max tokens usage. StopReason: {response.StopReason}", response: response);
         }
 
-        try
-        {
-            var result = StructuredOutput.Parse<T>(response.Text);
-            return new AiResult<T>(result, response);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to parse Claude response. Response text: {ResponseText}", response.Text);
-            throw new AiClientException("Failed to parse Claude response", ex, response);
-        }
+        _logger.LogWarning("Claude finished scoring {Scoring}", response.Text);
 
+        return response;
     }
 
 }

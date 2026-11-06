@@ -353,6 +353,65 @@ namespace Analysis.Data.Migrations
                     b.ToTable("FeasibilityAnalyses", "Analysis");
                 });
 
+            modelBuilder.Entity("InnovaFlow.Analysis.Data.InnovationAnalysis", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<Guid>("AnalysisId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("BusinessInnovationExplanation")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("BusinessInnovationScore")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("numeric(5,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<string>("GrowthPotentialExplanation")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("GrowthPotentialScore")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("numeric(5,2)");
+
+                    b.Property<string>("OriginalityExplanation")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("OriginalityScore")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("numeric(5,2)");
+
+                    b.Property<string>("Summary")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("TechnologicalInnovationExplanation")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("TechnologicalInnovationScore")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("numeric(5,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AnalysisId")
+                        .IsUnique();
+
+                    b.ToTable("InnovationAnalyses", "Analysis");
+                });
+
             modelBuilder.Entity("InnovaFlow.Analysis.Data.MarketAnalysis", b =>
                 {
                     b.Property<Guid>("Id")
@@ -878,6 +937,17 @@ namespace Analysis.Data.Migrations
                 });
 
             modelBuilder.Entity("InnovaFlow.Analysis.Data.FeasibilityAnalysis", b =>
+                {
+                    b.HasOne("InnovaFlow.Analysis.Data.Analysis", "Analysis")
+                        .WithMany()
+                        .HasForeignKey("AnalysisId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Analysis");
+                });
+
+            modelBuilder.Entity("InnovaFlow.Analysis.Data.InnovationAnalysis", b =>
                 {
                     b.HasOne("InnovaFlow.Analysis.Data.Analysis", "Analysis")
                         .WithMany()

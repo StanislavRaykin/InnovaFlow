@@ -2,28 +2,35 @@ namespace Analysis.Worker.AI;
 
 public interface IAiClient
 {
-    /// <summary>
-    /// Sends a prompt and deserializes the reply into T. The implementation is responsible
-    /// for forcing JSON output and for stripping markdown fences if the model adds them.
-    /// </summary>
+    /// <summary>Structured answer, deserialized into T.</summary>
     Task<AiResult<T>> CompleteAsync<T>(
         string systemPrompt,
         string userPrompt,
         CancellationToken ct = default) where T : class, new();
+
+    /// <summary>Free-text answer (e.g. research notes). The text is in <see cref="AiResponse.Text"/>.</summary>
+    Task<AiResponse> CompleteTextAsync(
+        string systemPrompt,
+        string userPrompt,
+        CancellationToken ct = default);
 }
 
+/// <summary>A web page the model was shown. <see cref="Number"/> is what the model cites, e.g. [3].</summary>
+public sealed record AiSource(int Number, string Title, string Url);
+
 public sealed record AiResponse(
-    string Provider,
     string Text,
     string Model,
     string? StopReason,
     long InputTokens,
     long OutputTokens,
+    IReadOnlyList<AiSource>? Sources,
     TimeSpan Duration)
 {
     public long TotalTokens => InputTokens + OutputTokens;
-    public bool WasTruncated => StopReason == "max_tokens";
-    public bool WasRefused => StopReason == "refusal";
+    // Anthropic stop reasons / OpenAI-compatible finish reasons
+    public bool WasTruncated => StopReason == "max_tokens" || StopReason == "length";
+    public bool WasRefused => StopReason == "refusal" || StopReason == "content_filter";
 }
 
 

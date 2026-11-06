@@ -1,5 +1,6 @@
 @page "/signup"
 @inject IdentityClient Auth
+@inject JwtAuthenticationStateProvider AuthState
 @inject NavigationManager Navigation
 
 @* Uses the default MainLayout (public shell). *@
@@ -163,6 +164,15 @@
     private bool acceptedTerms;
     private string? error;
     private bool submitting;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthState.GetAuthenticationStateAsync();
+        if (authState.User.Identity?.IsAuthenticated ?? false)
+        {
+            Navigation.NavigateTo("/home", replace: true);
+        }
+    }
 
     private async Task HandleSubmitAsync()
     {

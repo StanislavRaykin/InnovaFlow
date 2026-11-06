@@ -13,17 +13,13 @@
    sidebar-width value and the font-*/text-* pairs) come from
    wwwroot/js/tailwind.config.js, loaded once from index.html. The .cyber-glow /
    .glass-panel / .shimmer-progress helpers come from css/createidea.css, which
-   also paints the dark grid background the mock-ups put on <body>. *@
+   also paints the dark grid background the mock-ups put on <body>.
 
-<HeadContent>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap"
-        rel="stylesheet" />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
-        rel="stylesheet" />
-    <link rel="stylesheet" href="css/createidea.css" />
-</HeadContent>
+   Fonts are in index.html. The stylesheet is a plain <link> rather than
+   <HeadContent>: only the last-rendered HeadContent reaches <head>, so a page
+   with its own (My Ideas, the analysis pages) would otherwise drop this one. *@
+
+<link rel="stylesheet" href="css/createidea.css" />
 
 <div class="dark bg-surface text-on-surface font-body-md text-body-md antialiased min-h-screen flex flex-col md:flex-row overflow-x-hidden">
 

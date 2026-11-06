@@ -18,6 +18,8 @@ builder.Services.AddAnalysisData(dbConnection);
 
 // AI
 builder.Services.AddAIClient<ClaudeOptions, ClaudeAiClient>(builder.Configuration, "Claude");
+builder.Services.AddAIClient<KimiOptions, KimiClient>(builder.Configuration, "Kimi");
+
 builder.Services.AddSingleton<IAIClientFactory, AIClientFactory>();
 
 // Modules

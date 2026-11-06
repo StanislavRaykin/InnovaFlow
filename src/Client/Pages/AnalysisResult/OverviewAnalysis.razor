@@ -1,8 +1,8 @@
-@page "/overview-analysis"
+@page "/analyses/{AnalysisId:guid}"
 @layout AccountLayout
 @attribute [Authorize]
-@* for logged in users *@
 
+<PageTitle>Обзор на анализа | InnovaFlow</PageTitle>
 
 <!-- Subtle Grid Background -->
 <div class="fixed inset-0 pointer-events-none z-0"
@@ -10,7 +10,7 @@
 </div>
 <!-- TopAppBar -->
 <header
-    class="bg-surface-dim/50 backdrop-blur-xl text-primary font-headline-lg text-headline-lg font-headline-lg text-headline-lg font-bold text-primary full-width border-b border-primary/20 shadow-lg shadow-primary/5 flex flex-col gap-sm p-md sticky top-0 z-30">
+    class="bg-surface-dim/50 backdrop-blur-xl text-primary font-headline-lg text-headline-lg font-headline-lg text-headline-lg font-bold text-primary full-width border-b border-primary/20 shadow-lg shadow-primary/5 flex flex-col gap-sm p-md sticky top-16 md:top-0 z-30">
     <div class="flex justify-between items-center w-full max-w-container-max mx-auto">
         <div class="flex items-center gap-sm">
             <span class="material-symbols-outlined text-[32px]">analytics</span>
@@ -32,23 +32,7 @@
             </button>
         </div>
     </div>
-    <!-- Internal Navigation Tabs -->
-    <div
-        class="flex gap-md mt-sm overflow-x-auto no-scrollbar max-w-container-max mx-auto w-full font-data-mono text-data-mono border-b border-surface-variant">
-        <button class="py-xs text-primary border-b-2 border-primary pb-1 font-bold whitespace-nowrap">Overview</button>
-        <button
-        class="py-xs text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap">Market</button>
-        <button
-        class="py-xs text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap">Innovation</button>
-        <button
-        class="py-xs text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap">Audience</button>
-        <button
-        class="py-xs text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap">Feasibility</button>
-        <button
-        class="py-xs text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap">Risks</button>
-        <button
-        class="py-xs text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap">Recommendations</button>
-    </div>
+    <AnalysisTabs AnalysisId="AnalysisId" />
 </header>
 <div class="p-md max-w-container-max mx-auto w-full grid grid-cols-12 gap-md mt-md">
     <!-- Primary Score - Left Column -->
@@ -238,3 +222,7 @@
                     </div>
                 </div>
             </div>
+
+@code {
+    [Parameter] public Guid AnalysisId { get; set; }
+}

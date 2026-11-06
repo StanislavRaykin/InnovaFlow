@@ -3,11 +3,12 @@ using Contracts;
 using Contracts.AnalysisDtos;
 using InnovaFlow.Analysis.Data;
 using MassTransit;
+using MassTransit.Clients;
 using Microsoft.EntityFrameworkCore;
 namespace Analysis.Worker.Consumer;
 
 public class AnalysisRequestedConsumer(AnalysisDbContext db,
-    IEnumerable<IAnalysisModule> modules,
+    IServiceScopeFactory scopeFactory,
     IPublishEndpoint bus,
     ILogger<AnalysisRequestedConsumer> logger) : IConsumer<AnalysisRequested>
 {
@@ -15,6 +16,7 @@ public class AnalysisRequestedConsumer(AnalysisDbContext db,
 
     public async Task Consume(ConsumeContext<AnalysisRequested> context)
     {
+        
         var msg = context.Message;
         var ct = context.CancellationToken;
 
@@ -30,9 +32,13 @@ public class AnalysisRequestedConsumer(AnalysisDbContext db,
             logger.LogInformation("Analysis {Id} already {Status} — skipping.", msg.AnalysisId, analysis.Status);
             return;
         }
+        Dictionary<string, int> modules;
+        using var scope = scopeFactory.CreateScope();
+        modules = scope.ServiceProvider.GetServices<IAnalysisModule>()
+            .ToDictionary(m => m.Name, m => m.Stage);
 
         analysis.Status = AnalysisStatus.Running;
-        analysis.TotalModules = modules.Count();
+        analysis.TotalModules = modules.Count;
         analysis.CompletedModules = 0;
         await db.SaveChangesAsync(ct);
 
@@ -42,18 +48,16 @@ public class AnalysisRequestedConsumer(AnalysisDbContext db,
 
         try
         {
-            foreach (var stage in modules.GroupBy(m => m.Stage).OrderBy(g => g.Key))
+            foreach (var stage in modules.GroupBy(m => m.Value).OrderBy(g => g.Key))
             {
-                // Within a stage modules are independent, so run them together.
-                // With 10+ analyzers this is the difference between 30s and 5 minutes.
                 await Task.WhenAll(stage.Select(async module =>
                 {
-                    logger.LogInformation("Running {Module} for analysis {Id}", module.Name, msg.AnalysisId);
-                    await module.RunAsync(msg, ct);
+                    logger.LogInformation("Running {Module} for analysis {Id}", module.Key, msg.AnalysisId);
+                    await RunInOwnScopeAsync(module.Key, msg, ct);
 
                     var done = Interlocked.Increment(ref completed);
                     await bus.Publish(new AnalysisModuleCompleted(
-                        msg.AnalysisId, msg.IdeaId, module.Name, done, modules.Count()), ct);
+                        msg.AnalysisId, msg.IdeaId, module.Key, done, modules.Count()), ct);
                 }));
 
                 // Persist progress after each stage so polling clients see movement.
@@ -133,4 +137,17 @@ public class AnalysisRequestedConsumer(AnalysisDbContext db,
         return weightUsed == 0 ? 0 : Math.Round(total / weightUsed, 2);
     }
 
+    private async Task RunInOwnScopeAsync(string name, AnalysisRequested msg, CancellationToken ct)
+    {
+        await using var scope = scopeFactory.CreateAsyncScope();     // own DbContext per module
+        var module = scope.ServiceProvider.GetServices<IAnalysisModule>().Single(m => m.Name == name);
+
+        using var _ = logger.BeginScope(new Dictionary<string, object>
+        {
+            ["AnalysisId"] = msg.AnalysisId,
+            ["Module"] = name
+        });
+
+        await module.RunAsync(msg, ct);
+    }
 }
