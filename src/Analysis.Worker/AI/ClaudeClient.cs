@@ -51,6 +51,7 @@ public sealed class ClaudeAiClient : IAiClient
     /// <summary>One Messages call. <paramref name="outputConfig"/> null = free text.</summary>
     private async Task<AiResponse> SendAsync(string systemPrompt, string userPrompt, OutputConfig? outputConfig, CancellationToken ct)
     {
+        _logger.LogInformation($"Claude started scoring");
         if (userPrompt == null)
             throw new ArgumentException("User prompt cannot be null", nameof(userPrompt));
 
@@ -118,7 +119,7 @@ public sealed class ClaudeAiClient : IAiClient
             throw new AiClientException($"Claude hit max tokens usage. StopReason: {response.StopReason}", response: response);
         }
 
-        _logger.LogWarning("Claude finished scoring {Scoring}", response.Text);
+        _logger.LogInformation("Claude finished scoring {Scoring}", response.Text);
 
         return response;
     }

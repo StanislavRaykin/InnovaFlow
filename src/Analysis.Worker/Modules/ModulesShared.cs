@@ -16,7 +16,7 @@ public static class IdeaPromptBuilder
         sb.AppendLine();
         sb.AppendLine("<idea>");
 
-        sb.Append( "Име на идеята", idea.Title);
+        sb.Append("Име на идеята", idea.Title);
         sb.Append("Описание на идеята", idea.Description);
         sb.Append("Какъв проблем решава?", idea.ProblemStatement);
         sb.Append("Целева аудитория", idea.TargetAudience);
@@ -26,7 +26,6 @@ public static class IdeaPromptBuilder
         sb.AppendLine("</idea>");
         return sb.ToString();
     }
-
     private static void Append(this StringBuilder sb, string label, string? value)
     {
         var text = string.IsNullOrWhiteSpace(value)
@@ -35,6 +34,7 @@ public static class IdeaPromptBuilder
 
         sb.AppendLine($"{label}: {text}");
     }
+
 }
 
 /// <summary>Shared rule appended to every analyzer's system prompt</summary>

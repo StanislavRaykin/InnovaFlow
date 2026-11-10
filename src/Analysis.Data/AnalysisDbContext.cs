@@ -73,21 +73,11 @@ public class AnalysisDbContext(DbContextOptions<AnalysisDbContext> options) : Db
             e.Property(x => x.ScoreType).HasConversion<string>().HasMaxLength(32);
             e.Property(x => x.Score).HasPrecision(5, 2);
 
-            // One score per dimension per run - a rerun replaces, never appends.
-            e.HasIndex(x => new { x.AnalysisId, x.ScoreType }).IsUnique();
-
             e.HasOne(x => x.Analysis)
              .WithMany(a => a.Scores)
              .HasForeignKey(x => x.AnalysisId)
              .OnDelete(DeleteBehavior.Cascade);
         });
-
-        // -------------------------------------------------------------------
-        // Single-row node results
-        //
-        // Each has a unique AnalysisId: one result per node per run, which is
-        // what stops a rerun from duplicating them.
-        // -------------------------------------------------------------------
 
         b.Entity<MarketAnalysis>(e =>
         {

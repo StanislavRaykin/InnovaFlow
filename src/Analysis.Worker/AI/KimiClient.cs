@@ -49,6 +49,8 @@ public  class KimiClient : IAiClient
 
     private readonly ChatClient _chat;
     private readonly ClientPipeline _searchPipeline;
+    // The client is a singleton, so this throttles searches across every analysis running in the worker.
+    private readonly SemaphoreSlim _searchSlots;
     private readonly KimiOptions _options;
     private readonly ILogger<KimiClient> _logger;
     private readonly string _baseUrl;
@@ -72,6 +74,9 @@ public  class KimiClient : IAiClient
             NetworkTimeout = TimeSpan.FromSeconds(_options.TimeoutSeconds),
             RetryPolicy = new ClientRetryPolicy(_options.MaxRetries)
         });
+
+        int slots = Math.Max(1, _options.MaxConcurrentSearches);
+        _searchSlots = new SemaphoreSlim(slots, slots);
 
         // Searches get their own pipeline so they retry on rate limits (429) only.
         _searchPipeline = ClientPipeline.Create(
@@ -142,8 +147,13 @@ public  class KimiClient : IAiClient
         {
             for (int round = 0; ; round++)
             {
-                // Out of search rounds: keep the tool declared (history contains tool calls) but forbid new calls.
-                bool lastRound = round >= _options.MaxToolRounds;
+                // Out of search rounds or time: keep the tool declared (history contains tool calls) but forbid new calls.
+                bool overBudget = _options.SearchBudgetSeconds > 0 && sw.Elapsed.TotalSeconds >= _options.SearchBudgetSeconds;
+                bool lastRound = round >= _options.MaxToolRounds || overBudget;
+                if (overBudget && round < _options.MaxToolRounds)
+                    _logger.LogInformation("Kimi search budget ({Budget}s) used up after {Rounds} rounds, forcing an answer", _options.SearchBudgetSeconds, round);
+
+                var roundStart = sw.Elapsed;
 
                 var body = new JsonObject
                 {
@@ -174,6 +184,11 @@ public  class KimiClient : IAiClient
                 var message = choice["message"]?.AsObject()
                     ?? throw new AiClientException("Kimi returned no message", response: Snapshot());
 
+                var toolCallCount = (message["tool_calls"] as JsonArray)?.Count ?? 0;
+                _logger.LogInformation("Kimi round {Round}: model call took {Duration:0.0}s, finish {Finish}, {ToolCalls} tool calls, {Out} output tokens",
+                    round, (sw.Elapsed - roundStart).TotalSeconds, stopReason, toolCallCount,
+                    completion["usage"]?["completion_tokens"]?.GetValue<long>() ?? 0);
+
                 if (stopReason != "tool_calls" || message["tool_calls"] is not JsonArray { Count: > 0 } toolCalls)
                 {
                     text = AsText(message["content"]) ?? "";
@@ -187,7 +202,10 @@ public  class KimiClient : IAiClient
                 messages.Add(message.DeepClone());
 
                 // Searches run in parallel; numbering happens afterwards, in tool-call order, so it's deterministic.
+                var searchStart = sw.Elapsed;
                 var outcomes = await Task.WhenAll(toolCalls.Select(tc => RunToolCallAsync(tc!, ct)));
+                _logger.LogInformation("Kimi round {Round}: {Count} searches took {Duration:0.0}s",
+                    round, toolCalls.Count, (sw.Elapsed - searchStart).TotalSeconds);
                 foreach (var outcome in outcomes)
                 {
                     messages.Add(new JsonObject
@@ -273,11 +291,21 @@ public  class KimiClient : IAiClient
 
     private async Task<IReadOnlyList<SearchHit>> SearchAsync(string query, CancellationToken ct)
     {
-        var json = await SendAsync("POST", "tools/search_pro", new JsonObject
+        // The slot is held through retries too, so a rate-limited search doesn't let another one in to pile on.
+        JsonNode json;
+        await _searchSlots.WaitAsync(ct);
+        try
         {
-            ["text_query"] = query,
-            ["limit"] = _options.SearchResultsPerQuery
-        }, ct);
+            json = await SendAsync("POST", "tools/search_pro", new JsonObject
+            {
+                ["text_query"] = query,
+                ["limit"] = _options.SearchResultsPerQuery
+            }, ct);
+        }
+        finally
+        {
+            _searchSlots.Release();
+        }
 
         var hits = new List<SearchHit>();
         foreach (var item in json["search_results"] as JsonArray ?? [])
@@ -386,6 +414,13 @@ public  class KimiClient : IAiClient
         protected override async ValueTask<bool> ShouldRetryAsync(PipelineMessage message, Exception? exception)
             => IsRateLimited(message, exception) && LogRetry(message, await base.ShouldRetryAsync(message, exception));
 
+        /// <summary>
+        /// Base delay (exponential, or Retry-After when the server sends one) plus up to 1s of random jitter,
+        /// so searches rejected together don't all retry at the same instant and get rejected again.
+        /// </summary>
+        protected override TimeSpan GetNextDelay(PipelineMessage message, int tryCount)
+            => base.GetNextDelay(message, tryCount) + TimeSpan.FromMilliseconds(Random.Shared.Next(0, 1000));
+
         private static bool IsRateLimited(PipelineMessage message, Exception? exception)
             => exception is null && message.Response?.Status == 429;
 
@@ -404,18 +439,6 @@ public  class KimiClient : IAiClient
         _ => node.ToJsonString()
     };
 
-    private static string StripCodeFences(string text)
-    {
-        text = text.Trim();
-        if (!text.StartsWith("```"))
-            return text;
-
-        int firstNewLine = text.IndexOf('\n');
-        int closing = text.LastIndexOf("```", StringComparison.Ordinal);
-        return firstNewLine >= 0 && closing > firstNewLine
-            ? text[(firstNewLine + 1)..closing].Trim()
-            : text;
-    }
 }
 
 

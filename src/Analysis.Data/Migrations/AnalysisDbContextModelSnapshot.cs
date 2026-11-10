@@ -150,8 +150,7 @@ namespace Analysis.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AnalysisId", "ScoreType")
-                        .IsUnique();
+                    b.HasIndex("AnalysisId");
 
                     b.ToTable("AnalysisScores", "Analysis");
                 });

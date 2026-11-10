@@ -1,5 +1,5 @@
+using System.Diagnostics;
 using Analysis.Worker.AI;
-using Anthropic.Exceptions;
 using Contracts;
 using Contracts.AnalysisDtos;
 using InnovaFlow.Analysis.Data;
@@ -18,6 +18,7 @@ public class MarketAnalysisModule(AnalysisDbContext db, IAIClientFactory aiFacto
 
     public async Task RunAsync(AnalysisRequested req, CancellationToken ct)
     {
+        Stopwatch sw = Stopwatch.StartNew();
         AIRequest researchRequest = new AIRequest
         {
             AnalysisId = req.AnalysisId,
@@ -25,22 +26,30 @@ public class MarketAnalysisModule(AnalysisDbContext db, IAIClientFactory aiFacto
             Status = Enum.GetName(AnalysisStatus.Running),
             StartedAt = DateTimeOffset.UtcNow
         };
-        AIRequest scoreRequest = researchRequest;
+        AIRequest scoreRequest = new AIRequest
+        {
+            AnalysisId = req.AnalysisId,
+            AgentType = NodeType.Market,
+            Status = Enum.GetName(AnalysisStatus.Running),
+            StartedAt = DateTimeOffset.UtcNow
+        };
 
 
         db.Requests.Add(researchRequest);
         db.Requests.Add(scoreRequest);
-        
+
         await db.SaveChangesAsync(ct);
 
         AiResponse researchResult = null;
         AiResult<MarketAnalysisResult> scoreResult = null;
-        
+
         var researcher = aiFactory.GetAiClient("Kimi");
         try
         {
             string user = IdeaPromptBuilder.Build(req, MarketPrompt.ResearchTask);
             researchResult = await researcher.CompleteTextAsync(MarketPrompt.ResearchSystem, user, ct);
+            await MarkSucceededAsync(researchRequest, researchResult, ct);
+
 
         }
         catch (Exception ex)
@@ -53,10 +62,13 @@ public class MarketAnalysisModule(AnalysisDbContext db, IAIClientFactory aiFacto
         try
         {
             string sources = string.Join("\n", researchResult?.Sources?.Select(s => $"[{s.Number}] {s.Title} ({s.Url})") ?? Array.Empty<string>());
-            string user = IdeaPromptBuilder.Build(req, MarketPrompt.ScoreTask) + 
+
+            string user = IdeaPromptBuilder.Build(req, MarketPrompt.ScoreTask) +
             $"<research>\n{(researchResult is null ? "No research available" : researchResult.Text)}\n</research>"
             + $"<sources>\n{sources}\n</sources>";
             scoreResult = await scorer.CompleteAsync<MarketAnalysisResult>(MarketPrompt.ScoreSystem, user, ct);
+            await MarkSucceededAsync(scoreRequest, scoreResult.Raw, ct);
+
             // End result processing
         }
         catch (Exception ex)
@@ -69,9 +81,9 @@ public class MarketAnalysisModule(AnalysisDbContext db, IAIClientFactory aiFacto
         var execStrategy = db.Database.CreateExecutionStrategy();
         await execStrategy.ExecuteAsync(async () =>
         {
-            using var t = db.Database.BeginTransaction();
+            await using var t = db.Database.BeginTransaction();
 
-            DeletePreviousResultsAsync(req.AnalysisId, ct).Wait(ct);
+            await DeletePreviousResultsAsync(req.AnalysisId, ct);
 
             db.MarketAnalyses.Add(new MarketAnalysis
             {
@@ -85,7 +97,6 @@ public class MarketAnalysisModule(AnalysisDbContext db, IAIClientFactory aiFacto
 
             db.Competitors.AddRange(marketAnalysis.Competitors.Select(c => new Competitor
             {
-                Id = Guid.CreateVersion7(),
                 AnalysisId = req.AnalysisId,
                 Source = Name,
                 Name = c.Name,
@@ -102,14 +113,29 @@ public class MarketAnalysisModule(AnalysisDbContext db, IAIClientFactory aiFacto
                 NewScore(req.AnalysisId, ScoreType.Market, marketAnalysis.MarketOpportunity, marketAnalysis.MarketOpportunityExplanation),
                 NewScore(req.AnalysisId, ScoreType.Competition, marketAnalysis.CompetitionIntensity, marketAnalysis.CompetitionExplanation));
 
-            await MarkSucceededAsync(scoreRequest, researchResult, ct);
-            await MarkSucceededAsync(researchRequest, researchResult, ct);
+
+            if(researchResult?.Sources?.Count > 0)
+            {
+                List<Source> dbSources = new List<Source>();
+            foreach (var s in researchResult.Sources)
+            {
+                dbSources.Add(new Source
+                {
+                    AnalysisId = req.AnalysisId,
+                    SourceType = "text",
+                    Title = s.Title,
+                    Url = s.Url
+                });
+            }
+            db.Sources.AddRange(dbSources);
+            }
+
 
             await db.SaveChangesAsync(ct);
             await t.CommitAsync(ct);
         });
 
-        logger.LogInformation($"Market analysis completed. {marketAnalysis.Competitors.Count} competitors found, market opportunity: {marketAnalysis.MarketOpportunity}, competition intensity: {marketAnalysis.CompetitionIntensity}");
+        logger.LogInformation("Market analysis completed and took {Elapsed}. {MarketAnalysisCompetitorsCount} competitors found, market opportunity: {MarketAnalysisMarketOpportunity}, competition intensity: {MarketAnalysisCompetitionIntensity}",sw.Elapsed, marketAnalysis.Competitors.Count, marketAnalysis.MarketOpportunity, marketAnalysis.CompetitionIntensity);
 
     }
 

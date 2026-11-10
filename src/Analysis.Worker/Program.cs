@@ -2,6 +2,7 @@ using Analysis.Worker;
 using Analysis.Worker.AI;
 using Analysis.Worker.Consumer;
 using Analysis.Worker.Modules;
+using Analysis.Worker.Modules.Innovation;
 using Analysis.Worker.Modules.Market;
 using InnovaFlow.Analysis.Data;
 using MassTransit;
@@ -24,6 +25,7 @@ builder.Services.AddSingleton<IAIClientFactory, AIClientFactory>();
 
 // Modules
 builder.Services.AddScoped<IAnalysisModule, MarketAnalysisModule>();
+builder.Services.AddScoped<IAnalysisModule, InnovationAnalysisModule>();
 
 // Messaging
 builder.Services.AddMassTransit(x =>
