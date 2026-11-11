@@ -5,7 +5,7 @@
 @inject DraftAutosave Autosave
 @implements IAsyncDisposable
 
-@* Steps 01 Idea / 02 Problem of the create-idea wizard.
+@* Steps 01 Idea / 02 Problem & Description of the create-idea wizard.
 
    The side nav, the mobile top bar and the footer now live in AccountLayout;
    so does the css/createidea.css link that supplies .glass-panel, .cyber-glow
@@ -24,7 +24,8 @@
         <div class="flex items-center gap-sm">
             <span class="material-symbols-outlined text-primary text-2xl">analytics</span>
             <h1 class="font-headline-lg text-headline-lg font-bold text-primary hidden md:block">Idea Analysis</h1>
-            <h1 class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary md:hidden">Idea Analysis</h1>
+            <h1 class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary md:hidden">Idea Analysis
+            </h1>
         </div>
         <div class="flex gap-sm">
             <button class="p-xs text-on-surface-variant hover:bg-primary/10 rounded-lg transition-colors">
@@ -39,7 +40,7 @@
     <div class="mt-sm">
         <div class="flex justify-between mb-xs font-data-mono text-data-mono text-xs">
             <span class="text-primary">01 Idea</span>
-            <span class="text-on-surface-variant">02 Problem</span>
+            <span class="text-on-surface-variant">02 Problem & Description</span>
             <span class="text-on-surface-variant">03 Audience</span>
             <span class="text-on-surface-variant">04 Review</span>
         </div>
@@ -54,67 +55,106 @@
 <!-- Canvas -->
 <div class="flex-1 p-md md:p-lg flex flex-col items-center justify-center">
     <!-- Step 1 Wizard -->
-    <div class="w-full max-w-3xl glass-panel rounded-xl p-md md:p-lg flex flex-col gap-lg cyber-glow relative overflow-hidden">
+    <div
+        class="w-full max-w-3xl glass-panel rounded-xl p-md md:p-lg flex flex-col gap-lg cyber-glow relative overflow-hidden">
         <!-- Decorative background elements -->
         <div class="absolute -top-10 -right-10 w-32 h-32 bg-primary/5 rounded-full blur-2xl pointer-events-none"></div>
-        <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-secondary/5 rounded-full blur-2xl pointer-events-none"></div>
+        <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-secondary/5 rounded-full blur-2xl pointer-events-none">
+        </div>
         <div>
-            <h2 class="font-headline-md text-headline-md font-bold text-on-surface mb-xs">Нека започнем с вашата идея.</h2>
-            <p class="font-body-md text-body-md text-on-surface-variant">Дефинирайте основните параметри на вашия проект.</p>
-        </div>
-        <div class="flex flex-col gap-md">
-            <!-- Input Field -->
-            <div class="flex flex-col gap-xs">
-                <label class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider" for="idea-name">Как се казва вашата идея?</label>
-                <div class="relative group">
-                    <input class="w-full bg-surface-container-low border border-outline-variant rounded-DEFAULT p-sm text-on-surface font-body-md text-body-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all shadow-inner placeholder-on-surface-variant/50" id="idea-name" placeholder="Въведете име..." type="text" @bind="Draft.Name" @bind:event="oninput"/>
-                    <!-- Input glow effect on focus -->
-                    <div class="absolute inset-0 rounded-DEFAULT pointer-events-none group-focus-within:cyber-glow-active transition-all opacity-0 group-focus-within:opacity-100"></div>
+            <h2 class="font-headline-md text-headline-md font-bold text-on-surface mb-xs">Нека започнем с вашата идея.
+            </h2>
+            <p class="font-body-md text-body-md text-on-surface-variant">Дефинирайте основните параметри на вашия
+                проект.</p>
+            </div>
+            <div class="flex flex-col gap-md">
+                <!-- Input Field -->
+                <div class="flex flex-col gap-xs">
+                    <label class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider"
+                           for="idea-name">Как се казва вашата идея?</label>
+                    <div class="relative group">
+                        <input
+                        class="w-full bg-surface-container-low border border-outline-variant rounded-DEFAULT p-sm text-on-surface font-body-md text-body-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all shadow-inner placeholder-on-surface-variant/50"
+                        id="idea-name" placeholder="Въведете име..." type="text" @bind="Draft.Name"
+                        @bind:event="oninput" />
+                        <!-- Input glow effect on focus -->
+                        <div
+                            class="absolute inset-0 rounded-DEFAULT pointer-events-none group-focus-within:cyber-glow-active transition-all opacity-0 group-focus-within:opacity-100">
+                        </div>
+                    </div>
+                </div>
+                <!-- Type Selection (Bento Grid Style) -->
+                <div class="flex flex-col gap-xs">
+                    <label
+                        class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider mb-xs">Какъв
+                        тип е идеята?</label>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-sm">
+                            @foreach (var type in IdeaDraft.Types)
+                            {
+                                @if (Draft.Type == type.Name)
+                                {
+                                    <button type="button" @onclick="() => Draft.Type = type.Name"
+                                            class="glass-panel p-sm rounded-DEFAULT border border-primary/40 bg-primary/10 flex flex-col items-center justify-center gap-xs hover:border-primary/60 transition-all cyber-glow-active">
+                                        <span class="material-symbols-outlined text-primary text-2xl"
+                                              style="font-variation-settings: 'FILL' 1;">@type.Icon</span>
+                                        <span class="font-data-mono text-data-mono text-primary">@type.Name</span>
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="button" @onclick="() => Draft.Type = type.Name"
+                                            class="glass-panel p-sm rounded-DEFAULT border border-outline-variant bg-surface-container-low flex flex-col items-center justify-center gap-xs hover:border-secondary/40 hover:bg-surface-variant/30 transition-all group">
+                                        <span
+                                        class="material-symbols-outlined text-on-surface-variant group-hover:text-secondary text-2xl transition-colors">@type.Icon</span>
+                                        <span
+                                        class="font-data-mono text-data-mono text-on-surface-variant group-hover:text-on-surface transition-colors">@type.Name</span>
+                                    </button>
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Step 2: Problem -->
+                <div class="mt-md pt-md border-t border-primary/10 flex flex-col gap-xs">
+                    <label class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider"
+                           for="idea-problem">Какъв проблем решава вашата идея?
+                    </label>
+                    <textarea rows="4"
+                              class="w-full bg-surface-container-low border border-outline-variant rounded-DEFAULT p-sm text-on-surface font-body-md text-body-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all resize-none shadow-inner placeholder-on-surface-variant/50"
+                              id="idea-problem" 
+                              placeholder="Опишете проблема..." 
+                              @bind="Draft.Problem"
+                              @bind:event="oninput"></textarea>
+                </div>
+                <!-- Step 2: Idea Description -->
+                <div class="mt-md pt-md border-t border-primary/10 flex flex-col gap-xs">
+                    <label class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider"
+                           for="idea-description">
+                        Опишете вашата идея
+                    </label>
+                    <textarea rows="4"
+                              class="w-full bg-surface-container-low border border-outline-variant rounded-DEFAULT p-sm text-on-surface font-body-md text-body-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all resize-none shadow-inner placeholder-on-surface-variant/50"
+                              id="idea-description" 
+                              placeholder="Опишете как работи вашата идея и какво я прави полезна..." 
+                              @bind="Draft.Description"
+                              @bind:event="oninput"></textarea>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex justify-between items-center mt-md pt-sm border-t border-primary/10">
+                    <a class="px-md py-sm rounded-DEFAULT border border-primary/30 text-primary font-label-caps text-label-caps font-bold hover:bg-primary/5 transition-colors"
+                       href="ideas">
+                        Назад
+                    </a>
+                    <a class="px-md py-sm rounded-DEFAULT bg-primary-container text-surface font-label-caps text-label-caps font-bold hover:opacity-90 transition-opacity flex items-center gap-xs shadow-[0_0_15px_rgba(74,222,128,0.3)]"
+                       href="ideas/create/review">
+                        Напред
+                        <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                    </a>
                 </div>
             </div>
-            <!-- Type Selection (Bento Grid Style) -->
-            <div class="flex flex-col gap-xs">
-                <label class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider mb-xs">Какъв тип е идеята?</label>
-                <div class="grid grid-cols-2 md:grid-cols-3 gap-sm">
-                    @foreach (var type in IdeaDraft.Types)
-                    {
-                        @if (Draft.Type == type.Name)
-                        {
-                            <button type="button" @onclick="() => Draft.Type = type.Name" class="glass-panel p-sm rounded-DEFAULT border border-primary/40 bg-primary/10 flex flex-col items-center justify-center gap-xs hover:border-primary/60 transition-all cyber-glow-active">
-                                <span class="material-symbols-outlined text-primary text-2xl" style="font-variation-settings: 'FILL' 1;">@type.Icon</span>
-                                <span class="font-data-mono text-data-mono text-primary">@type.Name</span>
-                            </button>
-                        }
-                        else
-                        {
-                            <button type="button" @onclick="() => Draft.Type = type.Name" class="glass-panel p-sm rounded-DEFAULT border border-outline-variant bg-surface-container-low flex flex-col items-center justify-center gap-xs hover:border-secondary/40 hover:bg-surface-variant/30 transition-all group">
-                                <span class="material-symbols-outlined text-on-surface-variant group-hover:text-secondary text-2xl transition-colors">@type.Icon</span>
-                                <span class="font-data-mono text-data-mono text-on-surface-variant group-hover:text-on-surface transition-colors">@type.Name</span>
-                            </button>
-                        }
-                    }
-                </div>
-            </div>
         </div>
-        <!-- Step 2: Problem -->
-        <div class="mt-md pt-md border-t border-primary/10 flex flex-col gap-xs">
-            <label class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider" for="idea-problem">Какъв проблем решава вашата идея?</label>
-            <textarea rows="4" class="w-full bg-surface-container-low border border-outline-variant rounded-DEFAULT p-sm text-on-surface font-body-md text-body-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all resize-none shadow-inner placeholder-on-surface-variant/50" id="idea-problem" placeholder="Опишете проблема..." @bind="Draft.Problem" @bind:event="oninput"></textarea>
-        </div>
-        <!-- Action Buttons -->
-        <div class="flex justify-between items-center mt-md pt-sm border-t border-primary/10">
-            <a class="px-md py-sm rounded-DEFAULT border border-primary/30 text-primary font-label-caps text-label-caps font-bold hover:bg-primary/5 transition-colors"
-               href="ideas">
-                Назад
-            </a>
-            <a class="px-md py-sm rounded-DEFAULT bg-primary-container text-surface font-label-caps text-label-caps font-bold hover:opacity-90 transition-opacity flex items-center gap-xs shadow-[0_0_15px_rgba(74,222,128,0.3)]"
-               href="ideas/create/review">
-                Напред
-                <span class="material-symbols-outlined text-sm">arrow_forward</span>
-            </a>
-        </div>
-    </div>
-</div>
 
 @code {
     protected override void OnInitialized() => Autosave.Start();

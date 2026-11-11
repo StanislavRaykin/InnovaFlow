@@ -25,6 +25,26 @@ public class IdeaDraft
         "Здравеопазване и фитнес",
         "Финанси и финтех",
         "Образование и развитие",
+        "Изкуствен интелект и машинно обучение (AI & ML)",
+        "Киберсигурност и защита на данни",
+        "Електронна търговия и онлайн магазини",
+        "Маркетинг и дигитална реклама",
+        "Недвижими имоти и строителство",
+        "Транспорт и мобилност",
+        "Автомобилна индустрия",
+        "Туризъм и хотелиерство",
+        "Храни, напитки и ресторантьорство",
+        "Земеделие и агротехнологии (AgTech)",
+        "Енергетика и възобновяема енергия",
+        "Мода, красота и козметика",
+        "Медии и развлечения",
+        "Гейминг и разработка на игри",
+        "Производство и индустриални технологии",
+        "Екология и устойчиво развитие",
+        "Логистика и доставки",
+        "Телекомуникации",
+        "Биотехнологии и фармация",
+        "Спорт и активен начин на живот"
     ];
 
     // chosen here rather than by the server so every autosave can PUT to the
@@ -32,6 +52,7 @@ public class IdeaDraft
     public Guid Id { get; set; } = Guid.NewGuid();
 
     public string Name { get; set; } = "";
+    public string Description { get; set; } = "";
     public string Type { get; set; } = Types[0].Name;
     public string Problem { get; set; } = "";
     public string Industry { get; set; } = Industries[0];
@@ -40,7 +61,7 @@ public class IdeaDraft
     // a record, so two snapshots compare equal when every field matches
     public SaveDraftRequest ToRequest() => new(
         Title: Name,
-        Description: null,
+        Description: Description,
         ProblemStatement: Problem,
         TargetAudience: Audience,
         Category: Enum.Parse<IdeaCategory>(Type),
@@ -50,7 +71,7 @@ public class IdeaDraft
     public CreateIdeaRequest ToCreateIdeaRequest() => new CreateIdeaRequest(
     Id: Id,
     Title: Name,
-    Description: string.Empty,
+    Description: Description,
     ProblemStatement: Problem,
     TargetAudience: Audience,
     Category: Enum.Parse<IdeaCategory>(Type),
@@ -61,6 +82,7 @@ public class IdeaDraft
     {
         Id = Guid.NewGuid();
         Name = "";
+        Description = "";
         Type = Types[0].Name;
         Problem = "";
         Industry = Industries[0];
