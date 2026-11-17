@@ -28,5 +28,6 @@ public enum NodeType
 /// </summary>
 public enum ScoreType
 {
-    Market, Innovation, Feasibility, Scalability, Competition, Risk
+    Market, Innovation, Feasibility, Competition, Risk,
+    Audience
 }

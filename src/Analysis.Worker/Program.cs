@@ -6,14 +6,16 @@ using Analysis.Worker.Modules.Innovation;
 using Analysis.Worker.Modules.Market;
 using InnovaFlow.Analysis.Data;
 using MassTransit;
+using Analysis.Worker.Modules.Audience;
+using Analysis.Worker.Publishers;
 
 var builder = Host.CreateApplicationBuilder(args);
 builder.AddServiceDefaults();
 
 var dbConnection = builder.Configuration.GetConnectionString("innovaflow")
-    ?? throw new InvalidOperationException("Missing 'innovaflow' connection string. Check AppHost .WithReference(db).");
+    ?? throw new ArgumentNullException("Missing 'innovaflow' connection string. Check AppHost .WithReference(db).");
 var rabbitConnection = builder.Configuration.GetConnectionString("messaging")
-    ?? throw new InvalidOperationException("Missing 'messaging' connection string. Check AppHost .WithReference(rabbit).");
+    ?? throw new ArgumentNullException("Missing 'messaging' connection string. Check AppHost .WithReference(rabbit).");
 
 builder.Services.AddAnalysisData(dbConnection);
 
@@ -25,6 +27,7 @@ builder.Services.AddSingleton<IAIClientFactory, AIClientFactory>();
 
 // Modules
 builder.Services.AddScoped<IAnalysisModule, MarketAnalysisModule>();
+builder.Services.AddScoped<IAnalysisModule, AudienceAnalysisModule>();
 builder.Services.AddScoped<IAnalysisModule, InnovationAnalysisModule>();
 
 // Messaging
@@ -40,6 +43,9 @@ builder.Services.AddMassTransit(x =>
         cfg.ConfigureEndpoints(context);
     });
 });
+
+builder.Services.AddScoped<PartialPublisher>();
+builder.Services.AddScoped<ProgressPublisher>();
 
 var host = builder.Build();
 host.Services.GetRequiredService<ILogger<Program>>().LogInformation("Analysis.Worker starting");

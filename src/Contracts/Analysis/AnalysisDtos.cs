@@ -1,3 +1,4 @@
+using System.Text.Json;
 namespace Contracts.AnalysisDtos;
 
 public record AnalysisAcceptedDto(Guid Id, AnalysisStatus Status);
@@ -62,3 +63,38 @@ public sealed record AnalysisFailed(
     Guid AnalysisId,
     Guid IdeaId,
     string Reason);
+
+// analysis events
+
+/// <summary>
+/// Stages each modules goes through while analysing
+/// </summary>
+
+
+public enum ProgressStage
+{
+    ResearchStarted,
+    Searching,          // Message = the search query
+    ResearchCompleted,  // sources are saved → client can load them
+    ScoringStarted,
+    Partial,            // Partial = snapshot of the AI result so far (Redis only)
+    Restarted,          // a retry started - client clears the draft
+    Completed,
+    Failed              // Message = short error text
+}
+
+/// <summary>One event for the client. Milestones go over RabbitMQ, Partial over Redis pub/sub.</summary>
+public record AnalysisEvent(
+    Guid AnalysisId,
+    Guid UserId,
+    string Module,
+    ProgressStage Stage,
+    string? Message = null,
+    JsonElement? Partial = null);
+
+    public record AnalysisPartial(
+    Guid AnalysisId,
+    Guid UserId,
+    string Module,
+    int Seq,
+    JsonElement Snapshot);

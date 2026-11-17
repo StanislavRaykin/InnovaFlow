@@ -1,6 +1,8 @@
 using System.ClientModel;
 using System.ClientModel.Primitives;
 using System.Diagnostics;
+using System.Net.ServerSentEvents;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json.Nodes;
 using Anthropic.Helpers;
@@ -90,10 +92,14 @@ public  class KimiClient : IAiClient
             beforeTransportPolicies: []);
     }
 
-    public Task<AiResponse> CompleteTextAsync(string systemPrompt, string userPrompt, CancellationToken ct = default)
-        => RunAsync(systemPrompt, userPrompt, responseFormat: null, ct);
+    public IAsyncEnumerable<AiStreamEvent> StreamTextAsync(string systemPrompt, string userPrompt, CancellationToken ct = default)
+        => StreamCoreAsync(systemPrompt, userPrompt, responseFormat: null, ct);
 
-    public async Task<AiResult<T>> CompleteAsync<T>(string systemPrompt, string userPrompt, CancellationToken ct = default) where T : class, new()
+    public Task<AiResponse> CompleteTextAsync(string systemPrompt, string userPrompt, CancellationToken ct = default)
+        => AiStream.CollectAsync(StreamTextAsync(systemPrompt, userPrompt, ct), ct);
+
+    // With a json_schema response_format the content deltas are the JSON itself, streamed as it is generated.
+    public IAsyncEnumerable<AiStreamEvent> StreamAsync<T>(string systemPrompt, string userPrompt, CancellationToken ct = default) where T : class, new()
     {
         var responseFormat = new JsonObject
         {
@@ -106,22 +112,20 @@ public  class KimiClient : IAiClient
             }
         };
 
-        var response = await RunAsync(systemPrompt, userPrompt, responseFormat, ct);
-
-        try
-        {
-            var result = StructuredOutput.Parse<T>(response.Text);
-            return new AiResult<T>(result, response);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to parse Kimi response. Response text: {ResponseText}", response.Text);
-            throw new AiClientException("Failed to parse Kimi response", ex, response);
-        }
+        return AiStream.ParseCompleted<T>(StreamCoreAsync(systemPrompt, userPrompt, responseFormat, ct), "Kimi", _logger, ct);
     }
 
-    /// <summary>The chat + web_search loop shared by both modes. <paramref name="responseFormat"/> null = free text.</summary>
-    private async Task<AiResponse> RunAsync(string systemPrompt, string userPrompt, JsonObject? responseFormat, CancellationToken ct)
+    public Task<AiResult<T>> CompleteAsync<T>(string systemPrompt, string userPrompt, CancellationToken ct = default) where T : class, new()
+        => AiStream.CollectAsync<T>(StreamAsync<T>(systemPrompt, userPrompt, ct), ct);
+
+    /// <summary>
+    /// The chat + web_search loop shared by both modes, streamed. <paramref name="responseFormat"/> null = free text.
+    /// Every round is a streamed request; its text is forwarded as it arrives and the round's assistant message
+    /// (content, reasoning_content, tool_calls) is rebuilt from the deltas to go back into the history.
+    /// The answer is only the last round's text: text from a round that ends in tool calls is dropped with an <see cref="AiTextReset"/>.
+    /// </summary>
+    private async IAsyncEnumerable<AiStreamEvent> StreamCoreAsync(string systemPrompt, string userPrompt, JsonObject? responseFormat,
+        [EnumeratorCancellation] CancellationToken ct)
     {
         if (userPrompt == null)
             throw new ArgumentException("User prompt cannot be null", nameof(userPrompt));
@@ -136,95 +140,140 @@ public  class KimiClient : IAiClient
         long inputTokens = 0, outputTokens = 0;
         string model = _options.Model;
         string? stopReason = null;
-        string text = "";
+        var text = new StringBuilder();
         int searches = 0;
         var sources = new SourceCollector();
 
         Stopwatch sw = Stopwatch.StartNew();
-        AiResponse Snapshot() => new(text, model, stopReason, inputTokens, outputTokens, sources.ToList(), sw.Elapsed);
+        AiResponse Snapshot() => new(text.ToString(), model, stopReason, inputTokens, outputTokens, sources.ToList(), sw.Elapsed);
 
-        try
+        for (int round = 0; ; round++)
         {
-            for (int round = 0; ; round++)
+            // Out of search rounds or time: keep the tool declared (history contains tool calls) but forbid new calls.
+            bool overBudget = _options.SearchBudgetSeconds > 0 && sw.Elapsed.TotalSeconds >= _options.SearchBudgetSeconds;
+            bool lastRound = round >= _options.MaxToolRounds || overBudget;
+            if (overBudget && round < _options.MaxToolRounds)
+                _logger.LogInformation("Kimi search budget ({Budget}s) used up after {Rounds} rounds, forcing an answer", _options.SearchBudgetSeconds, round);
+
+            var roundStart = sw.Elapsed;
+
+            var body = new JsonObject
             {
-                // Out of search rounds or time: keep the tool declared (history contains tool calls) but forbid new calls.
-                bool overBudget = _options.SearchBudgetSeconds > 0 && sw.Elapsed.TotalSeconds >= _options.SearchBudgetSeconds;
-                bool lastRound = round >= _options.MaxToolRounds || overBudget;
-                if (overBudget && round < _options.MaxToolRounds)
-                    _logger.LogInformation("Kimi search budget ({Budget}s) used up after {Rounds} rounds, forcing an answer", _options.SearchBudgetSeconds, round);
+                ["model"] = _options.Model,
+                ["messages"] = messages.DeepClone(),
+                ["max_completion_tokens"] = _options.MaxTokens,
+                ["reasoning_effort"] = _options.ReasoningEffort,
+                ["tools"] = JsonNode.Parse(WebSearchToolJson),
+                ["tool_choice"] = lastRound ? "none" : "auto",
+                ["stream"] = true,
+                ["stream_options"] = new JsonObject { ["include_usage"] = true }
+            };
+            if (responseFormat is not null)
+                body["response_format"] = responseFormat.DeepClone();
 
-                var roundStart = sw.Elapsed;
-
-                var body = new JsonObject
-                {
-                    ["model"] = _options.Model,
-                    ["messages"] = messages.DeepClone(),
-                    ["max_completion_tokens"] = _options.MaxTokens,
-                    ["reasoning_effort"] = _options.ReasoningEffort,
-                    ["tools"] = JsonNode.Parse(WebSearchToolJson),
-                    ["tool_choice"] = lastRound ? "none" : "auto"
-                };
-                if (responseFormat is not null)
-                    body["response_format"] = responseFormat.DeepClone();
-
-                ClientResult result = await _chat.CompleteChatAsync(
+            ClientResult result;
+            try
+            {
+                // BufferResponse = false: the body is read as it arrives instead of after the whole answer.
+                result = await _chat.CompleteChatAsync(
                     BinaryContent.Create(BinaryData.FromString(body.ToJsonString())),
-                    new RequestOptions { CancellationToken = ct });
-
-                var completion = JsonNode.Parse(result.GetRawResponse().Content.ToString())
-                    ?? throw new AiClientException("Kimi returned an empty response", response: Snapshot());
-
-                inputTokens += completion["usage"]?["prompt_tokens"]?.GetValue<long>() ?? 0;
-                outputTokens += completion["usage"]?["completion_tokens"]?.GetValue<long>() ?? 0;
-                model = completion["model"]?.GetValue<string>() ?? model;
-
-                var choice = completion["choices"]?[0]
-                    ?? throw new AiClientException("Kimi returned no choices", response: Snapshot());
-                stopReason = choice["finish_reason"]?.GetValue<string>();
-                var message = choice["message"]?.AsObject()
-                    ?? throw new AiClientException("Kimi returned no message", response: Snapshot());
-
-                var toolCallCount = (message["tool_calls"] as JsonArray)?.Count ?? 0;
-                _logger.LogInformation("Kimi round {Round}: model call took {Duration:0.0}s, finish {Finish}, {ToolCalls} tool calls, {Out} output tokens",
-                    round, (sw.Elapsed - roundStart).TotalSeconds, stopReason, toolCallCount,
-                    completion["usage"]?["completion_tokens"]?.GetValue<long>() ?? 0);
-
-                if (stopReason != "tool_calls" || message["tool_calls"] is not JsonArray { Count: > 0 } toolCalls)
-                {
-                    text = AsText(message["content"]) ?? "";
-                    break;
-                }
-
-                if (lastRound)
-                    throw new AiClientException($"Kimi kept calling tools after {_options.MaxToolRounds} rounds", response: Snapshot());
-
-                // The full assistant message (with reasoning_content and tool_calls) goes back as-is.
-                messages.Add(message.DeepClone());
-
-                // Searches run in parallel; numbering happens afterwards, in tool-call order, so it's deterministic.
-                var searchStart = sw.Elapsed;
-                var outcomes = await Task.WhenAll(toolCalls.Select(tc => RunToolCallAsync(tc!, ct)));
-                _logger.LogInformation("Kimi round {Round}: {Count} searches took {Duration:0.0}s",
-                    round, toolCalls.Count, (sw.Elapsed - searchStart).TotalSeconds);
-                foreach (var outcome in outcomes)
-                {
-                    messages.Add(new JsonObject
-                    {
-                        ["role"] = "tool",
-                        ["tool_call_id"] = outcome.ToolCallId,
-                        ["name"] = outcome.Name,
-                        ["content"] = outcome.Error ?? FormatResults(outcome.Hits!, sources)
-                    });
-                }
-
-                searches += toolCalls.Count;
+                    new RequestOptions { CancellationToken = ct, BufferResponse = false });
             }
-        }
-        catch (ClientResultException ex)
-        {
-            var errorBody = ex.GetRawResponse()?.Content?.ToString();
-            _logger.LogError(ex, "Kimi API error occurred. Status: {Status}. Body: {Body}", ex.Status, errorBody);
-            throw new AiClientException($"Kimi API error occurred (HTTP {ex.Status})", ex, Snapshot());
+            catch (ClientResultException ex)
+            {
+                var errorBody = ex.GetRawResponse()?.Content?.ToString();
+                _logger.LogError(ex, "Kimi API error occurred. Status: {Status}. Body: {Body}", ex.Status, errorBody);
+                throw new AiClientException($"Kimi API error occurred (HTTP {ex.Status})", ex, Snapshot());
+            }
+
+            using PipelineResponse rawResponse = result.GetRawResponse();
+            Stream responseStream = rawResponse.ContentStream
+                ?? throw new AiClientException("Kimi returned an empty response", response: Snapshot());
+
+            var streamed = new StreamedRound();
+            await using (var events = SseParser.Create(responseStream).EnumerateAsync(ct).GetAsyncEnumerator(ct))
+            {
+                while (true)
+                {
+                    // yield can't sit inside a try/catch, so only the read is wrapped.
+                    string data;
+                    try
+                    {
+                        if (!await events.MoveNextAsync())
+                            break;
+                        data = events.Current.Data;
+                    }
+                    catch (Exception ex) when (ex is IOException or HttpRequestException)
+                    {
+                        _logger.LogError(ex, "Kimi stream broke off in round {Round}", round);
+                        throw new AiClientException("Kimi stream broke off", ex, Snapshot());
+                    }
+
+                    if (data == "[DONE]")
+                        break;
+
+                    var chunk = JsonNode.Parse(data);
+                    if (chunk is null)
+                        continue;
+                    if (chunk["error"] is JsonNode error)
+                        throw new AiClientException($"Kimi stream error: {error.ToJsonString()}", response: Snapshot());
+
+                    string? delta = streamed.Add(chunk);
+                    if (!string.IsNullOrEmpty(delta))
+                    {
+                        text.Append(delta);
+                        yield return new AiTextDelta(delta);
+                    }
+                }
+            }
+
+            inputTokens += streamed.InputTokens;
+            outputTokens += streamed.OutputTokens;
+            model = streamed.Model ?? model;
+            stopReason = streamed.FinishReason;
+
+            _logger.LogInformation("Kimi round {Round}: model call took {Duration:0.0}s, finish {Finish}, {ToolCalls} tool calls, {Out} output tokens",
+                round, (sw.Elapsed - roundStart).TotalSeconds, stopReason, streamed.ToolCalls.Count, streamed.OutputTokens);
+
+            if (stopReason != "tool_calls" || streamed.ToolCalls.Count == 0)
+                break;
+
+            if (lastRound)
+                throw new AiClientException($"Kimi kept calling tools after {_options.MaxToolRounds} rounds", response: Snapshot());
+
+            // The full assistant message (with reasoning_content and tool_calls) goes back into the history.
+            messages.Add(streamed.ToAssistantMessage());
+
+            // Text written before tool calls isn't the answer; in JSON mode it would also break the JSON.
+            if (text.Length > 0)
+            {
+                text.Clear();
+                yield return new AiTextReset();
+            }
+
+            foreach (var call in streamed.ToolCalls)
+            {
+                if (call.Name == WebSearchToolName && GetQuery(call.Arguments) is { } query)
+                    yield return new AiWebSearch(query);
+            }
+
+            // Searches run in parallel; numbering happens afterwards, in tool-call order, so it's deterministic.
+            var searchStart = sw.Elapsed;
+            var outcomes = await Task.WhenAll(streamed.ToolCalls.Select(tc => RunToolCallAsync(tc, ct)));
+            _logger.LogInformation("Kimi round {Round}: {Count} searches took {Duration:0.0}s",
+                round, streamed.ToolCalls.Count, (sw.Elapsed - searchStart).TotalSeconds);
+            foreach (var outcome in outcomes)
+            {
+                messages.Add(new JsonObject
+                {
+                    ["role"] = "tool",
+                    ["tool_call_id"] = outcome.ToolCallId,
+                    ["name"] = outcome.Name,
+                    ["content"] = outcome.Error ?? FormatResults(outcome.Hits!, sources)
+                });
+            }
+
+            searches += streamed.ToolCalls.Count;
         }
 
         AiResponse response = Snapshot();
@@ -243,7 +292,113 @@ public  class KimiClient : IAiClient
             throw new AiClientException($"Kimi hit max tokens usage. StopReason: {response.StopReason}", response: response);
         }
 
-        return response;
+        yield return new AiStreamCompleted(response);
+    }
+
+    private record ToolCall(string Id, string Name, string Arguments);
+
+    /// <summary>
+    /// One streamed round, put back together from its chunks. Usage can arrive both top-level and inside the
+    /// choice (Moonshot sends the same totals in both), so it's overwritten, never summed.
+    /// </summary>
+    private sealed class StreamedRound
+    {
+        private sealed class ToolCallBuilder
+        {
+            public string? Id;
+            public string? Name;
+            public readonly StringBuilder Arguments = new();
+        }
+
+        private readonly StringBuilder _content = new();
+        private readonly StringBuilder _reasoning = new();
+        private bool _hasReasoning;
+        // Keyed by the delta's "index", so tool calls keep the order the model gave them.
+        private readonly SortedDictionary<int, ToolCallBuilder> _toolCalls = new();
+
+        public string? Model { get; private set; }
+        public string? FinishReason { get; private set; }
+        public long InputTokens { get; private set; }
+        public long OutputTokens { get; private set; }
+
+        public IReadOnlyList<ToolCall> ToolCalls => _toolCalls.Values
+            .Select(b => new ToolCall(b.Id ?? "", b.Name ?? "", b.Arguments.Length == 0 ? "{}" : b.Arguments.ToString()))
+            .ToList();
+
+        /// <summary>Takes in one chunk; returns its answer text, if it has any.</summary>
+        public string? Add(JsonNode chunk)
+        {
+            Model = AsText(chunk["model"]) ?? Model;
+            ReadUsage(chunk["usage"]);
+
+            if (chunk["choices"] is not JsonArray { Count: > 0 } choices || choices[0] is not JsonObject choice)
+                return null;
+
+            ReadUsage(choice["usage"]);
+            FinishReason = AsText(choice["finish_reason"]) ?? FinishReason;
+
+            if (choice["delta"] is not JsonObject delta)
+                return null;
+
+            if (delta.ContainsKey("reasoning_content"))
+            {
+                _hasReasoning = true;
+                _reasoning.Append(AsText(delta["reasoning_content"]));
+            }
+
+            if (delta["tool_calls"] is JsonArray calls)
+            {
+                foreach (var call in calls)
+                {
+                    if (call is null)
+                        continue;
+                    int index = call["index"]?.GetValue<int>() ?? _toolCalls.Count;
+                    if (!_toolCalls.TryGetValue(index, out var builder))
+                        _toolCalls[index] = builder = new ToolCallBuilder();
+
+                    builder.Id ??= AsText(call["id"]);
+                    builder.Name ??= AsText(call["function"]?["name"]);
+                    builder.Arguments.Append(AsText(call["function"]?["arguments"]));
+                }
+            }
+
+            string? content = AsText(delta["content"]);
+            if (!string.IsNullOrEmpty(content))
+                _content.Append(content);
+            return content;
+        }
+
+        public JsonObject ToAssistantMessage()
+        {
+            var message = new JsonObject
+            {
+                ["role"] = "assistant",
+                ["content"] = _content.ToString()
+            };
+            if (_hasReasoning)
+                message["reasoning_content"] = _reasoning.ToString();
+
+            var toolCalls = new JsonArray();
+            foreach (var call in ToolCalls)
+            {
+                toolCalls.Add(new JsonObject
+                {
+                    ["id"] = call.Id,
+                    ["type"] = "function",
+                    ["function"] = new JsonObject { ["name"] = call.Name, ["arguments"] = call.Arguments }
+                });
+            }
+            message["tool_calls"] = toolCalls;
+            return message;
+        }
+
+        private void ReadUsage(JsonNode? usage)
+        {
+            if (usage is not JsonObject)
+                return;
+            InputTokens = usage["prompt_tokens"]?.GetValue<long>() ?? InputTokens;
+            OutputTokens = usage["completion_tokens"]?.GetValue<long>() ?? OutputTokens;
+        }
     }
 
     private record SearchHit(string Title, string Url, string Site, string Date, string Content);
@@ -251,41 +406,41 @@ public  class KimiClient : IAiClient
     /// <summary>Either Hits (possibly empty) or Error is set.</summary>
     private record ToolOutcome(string ToolCallId, string Name, IReadOnlyList<SearchHit>? Hits, string? Error);
 
-    private async Task<ToolOutcome> RunToolCallAsync(JsonNode toolCall, CancellationToken ct)
+    private static string? GetQuery(string arguments)
     {
-        string id = toolCall["id"]!.GetValue<string>();
-        string name = toolCall["function"]?["name"]?.GetValue<string>() ?? "";
-        string arguments = toolCall["function"]?["arguments"]?.GetValue<string>() ?? "{}";
-
-        if (name != WebSearchToolName)
-        {
-            _logger.LogWarning("Kimi called unknown tool {Tool}", name);
-            return new ToolOutcome(id, name, null, $"Error: unknown tool '{name}'.");
-        }
-
-        string? query;
         try
         {
-            query = JsonNode.Parse(arguments)?["query"]?.GetValue<string>();
+            var query = JsonNode.Parse(arguments)?["query"]?.GetValue<string>();
+            return string.IsNullOrWhiteSpace(query) ? null : query;
         }
         catch (Exception)
         {
-            query = null;
+            return null;
+        }
+    }
+
+    private async Task<ToolOutcome> RunToolCallAsync(ToolCall call, CancellationToken ct)
+    {
+        if (call.Name != WebSearchToolName)
+        {
+            _logger.LogWarning("Kimi called unknown tool {Tool}", call.Name);
+            return new ToolOutcome(call.Id, call.Name, null, $"Error: unknown tool '{call.Name}'.");
         }
 
-        if (string.IsNullOrWhiteSpace(query))
-            return new ToolOutcome(id, name, null, "Error: 'query' is required.");
+        string? query = GetQuery(call.Arguments);
+        if (query is null)
+            return new ToolOutcome(call.Id, call.Name, null, "Error: 'query' is required.");
 
         _logger.LogInformation("Kimi web_search: {Query}", query);
         try
         {
-            return new ToolOutcome(id, name, await SearchAsync(query, ct), null);
+            return new ToolOutcome(call.Id, call.Name, await SearchAsync(query, ct), null);
         }
         catch (ClientResultException ex)
         {
             // One failed search shouldn't kill the whole analysis; let the model carry on without it.
             _logger.LogWarning(ex, "Kimi web_search failed. Status: {Status}. Query: {Query}", ex.Status, query);
-            return new ToolOutcome(id, name, null, "Error: web_search failed. Continue without this result.");
+            return new ToolOutcome(call.Id, call.Name, null, "Error: web_search failed. Continue without this result.");
         }
     }
 

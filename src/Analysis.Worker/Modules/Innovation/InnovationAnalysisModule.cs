@@ -1,5 +1,8 @@
 using Analysis.Worker.AI;
+using Analysis.Worker.Modules.Audience;
 using Analysis.Worker.Modules.Market;
+using Analysis.Worker.Publishers;
+using Anthropic.Helpers;
 using Contracts;
 using Contracts.AnalysisDtos;
 using InnovaFlow.Analysis.Data;
@@ -8,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Analysis.Worker.Modules.Innovation;
 
-public class InnovationAnalysisModule(AnalysisDbContext db, IAIClientFactory aiFactory, ILogger<InnovationAnalysisModule> logger) : IAnalysisModule
+public class InnovationAnalysisModule(AnalysisDbContext db, ProgressPublisher progress, PartialPublisher partials, IAIClientFactory aiFactory, ILogger<AudienceAnalysisModule> logger) : IAnalysisModule
 {
 
     public int Stage => 2; //depends on competitors(market and competition analyses)
@@ -56,22 +59,24 @@ public class InnovationAnalysisModule(AnalysisDbContext db, IAIClientFactory aiF
 
         string promptFriendly = string.Join("\n", competitors.Select(c => $" - {c.Name}: {c.Description} (сходство {c.SimilarityScore}/100)"));
 
-        AiResult<InnovationAnalysisResult> analysisResult = null;
+        AiStreamResult analysisResult = null;
 
         var ai = aiFactory.GetAiClient("Claude");
         try
         {
+            await progress.ReportAsync(req, Name, ProgressStage.ScoringStarted, ct:ct);
             string user = IdeaPromptBuilder.Build(req, Task) + $"<competitors>\n {promptFriendly} \n</competitors>";
-            analysisResult = await ai.CompleteAsync<InnovationAnalysisResult>(System, user, ct);
-
+            var stream = ai.StreamAsync<InnovationAnalysisResult>(System, user, ct);
+            analysisResult = await partials.PumpAsync(req, Name, stream, ct); 
         }
         catch (Exception ex)
         {
+            await progress.ReportAsync(req, Name, ProgressStage.Failed, ct:ct);
             await MarkFailedAsync(aiRequest, ex, ct);
 
         }
 
-        var innovationAnalysis = analysisResult.Value;
+        var innovationAnalysis = StructuredOutput.Parse<InnovationAnalysisResult>(analysisResult.Json);
         var execStrategy = db.Database.CreateExecutionStrategy();
         await execStrategy.ExecuteAsync(async () =>
         {
@@ -95,14 +100,11 @@ public class InnovationAnalysisModule(AnalysisDbContext db, IAIClientFactory aiF
             });
 
 
-            db.Scores.AddRange(
-                NewScore(req.AnalysisId, ScoreType.Innovation, innovationAnalysis.TechnologicalInnovationScore, innovationAnalysis.TechnologicalInnovationExplanation),
-                NewScore(req.AnalysisId, ScoreType.Innovation, innovationAnalysis.BusinessInnovationScore, innovationAnalysis.BusinessInnovationExplanation),
-                NewScore(req.AnalysisId, ScoreType.Innovation, innovationAnalysis.GrowthPotentialScore, innovationAnalysis.GrowthPotentialExplanation),
-                NewScore(req.AnalysisId, ScoreType.Innovation, innovationAnalysis.OriginalityScore, innovationAnalysis.OriginalityExplanation),
+            db.Scores.Add(
                 NewScore(req.AnalysisId, ScoreType.Innovation, innovationAnalysis.OverallScore, innovationAnalysis.OverallExplanation));
 
-            await MarkSucceededAsync(aiRequest, analysisResult.Raw, ct);
+            await MarkSucceededAsync(aiRequest, analysisResult.Info.Response, ct);
+            await progress.ReportAsync(req, Name, ProgressStage.Completed, ct:ct);
 
             await db.SaveChangesAsync(ct);
             await t.CommitAsync(ct);

@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Analysis.Worker.AI;
+using Analysis.Worker.Publishers;
 using Contracts;
 using Contracts.AnalysisDtos;
 using InnovaFlow.Analysis.Data;
@@ -8,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Analysis.Worker.Modules.Market;
 
-public class MarketAnalysisModule(AnalysisDbContext db, IAIClientFactory aiFactory, ILogger<MarketAnalysisModule> logger) : IAnalysisModule
+public class MarketAnalysisModule(AnalysisDbContext db, PartialPublisher partials, ProgressPublisher progress, IAIClientFactory aiFactory, ILogger<MarketAnalysisModule> logger) : IAnalysisModule
 {
 
     public int Stage => 1;
@@ -46,6 +47,7 @@ public class MarketAnalysisModule(AnalysisDbContext db, IAIClientFactory aiFacto
         var researcher = aiFactory.GetAiClient("Kimi");
         try
         {
+
             string user = IdeaPromptBuilder.Build(req, MarketPrompt.ResearchTask);
             researchResult = await researcher.CompleteTextAsync(MarketPrompt.ResearchSystem, user, ct);
             await MarkSucceededAsync(researchRequest, researchResult, ct);

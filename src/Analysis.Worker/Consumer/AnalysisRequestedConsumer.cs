@@ -16,7 +16,6 @@ public class AnalysisRequestedConsumer(AnalysisDbContext db,
 
     public async Task Consume(ConsumeContext<AnalysisRequested> context)
     {
-        
         var msg = context.Message;
         var ct = context.CancellationToken;
 
@@ -83,7 +82,7 @@ public class AnalysisRequestedConsumer(AnalysisDbContext db,
                 msg.AnalysisId, completed, modules.Count());
 
             // A failed module leaves its rejected entities tracked on this shared context,
-            // and saving them again would throw here and strand the analysis as Running.
+            // and saving them again would throw here and strand the analysis as Running
             db.ChangeTracker.Clear();
             db.Analyses.Attach(analysis);
 
@@ -113,7 +112,7 @@ public class AnalysisRequestedConsumer(AnalysisDbContext db,
             [ScoreType.Market] = 0.25m,
             [ScoreType.Innovation]        = 0.20m,
             [ScoreType.Feasibility]       = 0.20m,
-            [ScoreType.Scalability]       = 0.15m,
+            [ScoreType.Audience]       = 0.15m,
             [ScoreType.Competition]       = 0.10m,
             [ScoreType.Risk]              = 0.10m
         };
