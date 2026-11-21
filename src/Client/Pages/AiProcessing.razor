@@ -89,61 +89,62 @@
             <h3 class="font-label-caps text-label-caps text-on-surface-variant mb-xs z-10">АКТИВНИ AI АГЕНТИ</h3>
             <div class="grid grid-cols-2 gap-sm z-10 flex-1 content-start">
                 <!-- Agent 1: Completed -->
-                <div class="bg-surface-container border border-primary/10 rounded-lg p-sm flex items-center gap-sm">
-                    <div class="w-8 h-8 rounded-full bg-surface-variant flex items-center justify-center">
-                        <span class="material-symbols-outlined text-sm text-primary" data-icon="trending_up">trending_up</span>
+                <div class="bg-surface-container border border-primary/10 rounded-lg p-3 flex items-center gap-sm">
+                    <div class="w-9 h-9 rounded-full bg-surface-variant flex items-center justify-center">
+                        <span class="material-symbols-outlined text-base text-primary" data-icon="trending_up">trending_up</span>
                     </div>
                     <div>
                         <div class="font-label-caps text-label-caps text-primary">Market Agent</div>
-                        <div class="font-data-mono text-[10px] text-on-surface-variant">ПРИКЛЮЧЕН</div>
+                        <div class="font-data-mono text-[13px] text-on-surface-variant">ПРИКЛЮЧЕН</div>
                     </div>
                 </div>
                 <!-- Agent 2: Active (Innovation) -->
-                <div class="bg-surface-container border border-primary/40 rounded-lg p-sm flex items-center gap-sm agent-active relative overflow-hidden">
+                <div class="bg-surface-container border border-primary/40 rounded-lg p-3 flex items-center gap-sm agent-active relative overflow-hidden">
                     <div class="absolute inset-0 bg-primary/5"></div>
-                    <div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center border border-primary relative z-10">
-                        <span class="material-symbols-outlined text-sm text-primary" data-icon="tips_and_updates">tips_and_updates</span>
+                    <div class="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center border border-primary relative z-10">
+                        <span class="material-symbols-outlined text-base text-primary" data-icon="tips_and_updates">tips_and_updates</span>
                     </div>
                     <div class="relative z-10">
                         <div class="font-label-caps text-label-caps text-primary shadow-primary">Innovation Agent</div>
-                        <div class="font-data-mono text-[10px] text-secondary">СКАНИРАНЕ...</div>
+                        <div class="font-data-mono text-[13px] text-secondary">СКАНИРАНЕ...</div>
                     </div>
                 </div>
                 <!-- Agent 3: Completed -->
-                <div class="bg-surface-container border border-primary/10 rounded-lg p-sm flex items-center gap-sm">
-                    <div class="w-8 h-8 rounded-full bg-surface-variant flex items-center justify-center">
-                        <span class="material-symbols-outlined text-sm text-primary" data-icon="groups">groups</span>
+                <div class="bg-surface-container border border-primary/10 rounded-lg p-3 flex items-center gap-sm">
+                    <div class="w-9 h-9 rounded-full bg-surface-variant flex items-center justify-center">
+                        <span class="material-symbols-outlined text-base text-primary" data-icon="groups">groups</span>
                     </div>
                     <div>
                         <div class="font-label-caps text-label-caps text-primary">Audience Agent</div>
-                        <div class="font-data-mono text-[10px] text-on-surface-variant">ПРИКЛЮЧЕН</div>
+                        <div class="font-data-mono text-[13px] text-on-surface-variant">ПРИКЛЮЧЕН</div>
                     </div>
                 </div>
                 <!-- Agent 4: Pending -->
-                <div class="bg-surface-container border border-surface-bright rounded-lg p-sm flex items-center gap-sm opacity-50">
-                    <div class="w-8 h-8 rounded-full bg-surface-bright flex items-center justify-center">
-                        <span class="material-symbols-outlined text-sm text-on-surface-variant" data-icon="construction">construction</span>
+                <div class="bg-surface-container border border-surface-bright rounded-lg p-3 flex items-center gap-sm opacity-50">
+                    <div class="w-9 h-9 rounded-full bg-surface-bright flex items-center justify-center">
+                        <span class="material-symbols-outlined text-base text-on-surface-variant" data-icon="construction">construction</span>
                     </div>
                     <div>
                         <div class="font-label-caps text-label-caps text-on-surface-variant">Feasibility Agent</div>
-                        <div class="font-data-mono text-[10px] text-surface-bright">ИЗЧАКВАНЕ</div>
+                        <div class="font-data-mono text-[13px] text-surface-bright">ИЗЧАКВАНЕ</div>
                     </div>
                 </div>
                 <!-- Agent 5: Pending -->
-                <div class="bg-surface-container border border-surface-bright rounded-lg p-sm flex items-center gap-sm opacity-50">
-                    <div class="w-8 h-8 rounded-full bg-surface-bright flex items-center justify-center">
-                        <span class="material-symbols-outlined text-sm text-on-surface-variant" data-icon="warning">warning</span>
+                <div class="bg-surface-container border border-surface-bright rounded-lg p-3 flex items-center gap-sm opacity-50">
+                    <div class="w-9 h-9 rounded-full bg-surface-bright flex items-center justify-center">
+                        <span class="material-symbols-outlined text-base text-on-surface-variant" data-icon="warning">warning</span>
                     </div>
                     <div>
                         <div class="font-label-caps text-label-caps text-on-surface-variant">Risk Agent</div>
-                        <div class="font-data-mono text-[10px] text-surface-bright">ИЗЧАКВАНЕ</div>
+                        <div class="font-data-mono text-[13px] text-surface-bright">ИЗЧАКВАНЕ</div>
                     </div>
                 </div>
             </div>
             <!-- Network Visualizer Output Box -->
-            <div class="mt-auto bg-[#040812] border border-primary/20 rounded-DEFAULT p-sm font-data-mono text-[10px] text-secondary-fixed-dim z-10 h-24 overflow-hidden relative">
+            <div class="mt-auto bg-[#040812] border border-primary/20 rounded-DEFAULT p-sm font-data-mono text-[12px] text-secondary-fixed-dim z-10 h-28
+             overflow-hidden relative">
                 <div class="absolute inset-0 bg-gradient-to-b from-transparent to-[#040812] z-10 pointer-events-none"></div>
-                <div class="space-y-1 opacity-80" id="terminal-output">
+                <div class="space-y-1.5 opacity-80" id="terminal-output">
                     <div>&gt; Инициализиране на модул 'Иновации'... OK</div>
                     <div>&gt; Зареждане на патентни бази данни... OK</div>
                     <div>&gt; Търсене на семантични съвпадения...</div>
