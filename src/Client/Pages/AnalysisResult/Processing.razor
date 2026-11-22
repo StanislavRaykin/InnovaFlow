@@ -97,165 +97,68 @@
             <h3 class="font-label-caps text-label-caps text-on-surface-variant mb-xs z-10">АКТИВНИ AI АГЕНТИ</h3>
             <div class="grid grid-cols-2 gap-sm z-10 flex-1 content-start">
                 <!-- Agent 1: Completed -->
-                <div class="bg-surface-container border border-primary/10 rounded-lg p-sm flex items-center gap-sm">
-                    <div class="w-8 h-8 rounded-full bg-surface-variant flex items-center justify-center">
-                        <span class="material-symbols-outlined text-sm text-primary" data-icon="trending_up">trending_up</span>
+                <div class="bg-surface-container border border-primary/10 rounded-lg p-3 flex items-center gap-sm">
+                    <div class="w-9 h-9 rounded-full bg-surface-variant flex items-center justify-center">
+                        <span class="material-symbols-outlined text-base text-primary" data-icon="trending_up">trending_up</span>
                     </div>
                     <div>
                         <div class="font-label-caps text-label-caps text-primary">Market Agent</div>
-                        <div class="font-data-mono text-[10px] text-on-surface-variant">ПРИКЛЮЧЕН</div>
+                        <div class="font-data-mono text-[13px] text-on-surface-variant">ПРИКЛЮЧЕН</div>
                     </div>
                 </div>
                 <!-- Agent 2: Active (Innovation) -->
-                <div class="bg-surface-container border border-primary/40 rounded-lg p-sm flex items-center gap-sm agent-active relative overflow-hidden">
+                <div class="bg-surface-container border border-primary/40 rounded-lg p-3 flex items-center gap-sm agent-active relative overflow-hidden">
                     <div class="absolute inset-0 bg-primary/5"></div>
-                    <div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center border border-primary relative z-10">
-                        <span class="material-symbols-outlined text-sm text-primary" data-icon="tips_and_updates">tips_and_updates</span>
+                    <div class="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center border border-primary relative z-10">
+                        <span class="material-symbols-outlined text-base text-primary" data-icon="tips_and_updates">tips_and_updates</span>
                     </div>
                     <div class="relative z-10">
                         <div class="font-label-caps text-label-caps text-primary shadow-primary">Innovation Agent</div>
-                        <div class="font-data-mono text-[10px] text-secondary">СКАНИРАНЕ...</div>
+                        <div class="font-data-mono text-[13px] text-secondary">СКАНИРАНЕ...</div>
                     </div>
                 </div>
                 <!-- Agent 3: Completed -->
-                <div class="bg-surface-container border border-primary/10 rounded-lg p-sm flex items-center gap-sm">
-                    <div class="w-8 h-8 rounded-full bg-surface-variant flex items-center justify-center">
-                        <span class="material-symbols-outlined text-sm text-primary" data-icon="groups">groups</span>
+                <div class="bg-surface-container border border-primary/10 rounded-lg p-3 flex items-center gap-sm">
+                    <div class="w-9 h-9 rounded-full bg-surface-variant flex items-center justify-center">
+                        <span class="material-symbols-outlined text-base text-primary" data-icon="groups">groups</span>
                     </div>
                     <div>
                         <div class="font-label-caps text-label-caps text-primary">Audience Agent</div>
-                        <div class="font-data-mono text-[10px] text-on-surface-variant">ПРИКЛЮЧЕН</div>
+                        <div class="font-data-mono text-[13px] text-on-surface-variant">ПРИКЛЮЧЕН</div>
                     </div>
                 </div>
                 <!-- Agent 4: Pending -->
-                <div class="bg-surface-container border border-surface-bright rounded-lg p-sm flex items-center gap-sm opacity-50">
-                    <div class="w-8 h-8 rounded-full bg-surface-bright flex items-center justify-center">
-                        <span class="material-symbols-outlined text-sm text-on-surface-variant" data-icon="construction">construction</span>
+                <div class="bg-surface-container border border-surface-bright rounded-lg p-3 flex items-center gap-sm opacity-50">
+                    <div class="w-9 h-9 rounded-full bg-surface-bright flex items-center justify-center">
+                        <span class="material-symbols-outlined text-base text-on-surface-variant" data-icon="construction">construction</span>
                     </div>
                     <div>
                         <div class="font-label-caps text-label-caps text-on-surface-variant">Feasibility Agent</div>
-                        <div class="font-data-mono text-[10px] text-surface-bright">ИЗЧАКВАНЕ</div>
+                        <div class="font-data-mono text-[13px] text-surface-bright">ИЗЧАКВАНЕ</div>
                     </div>
                 </div>
                 <!-- Agent 5: Pending -->
-                <div class="bg-surface-container border border-surface-bright rounded-lg p-sm flex items-center gap-sm opacity-50">
-                    <div class="w-8 h-8 rounded-full bg-surface-bright flex items-center justify-center">
-                        <span class="material-symbols-outlined text-sm text-on-surface-variant" data-icon="warning">warning</span>
+                <div class="bg-surface-container border border-surface-bright rounded-lg p-3 flex items-center gap-sm opacity-50">
+                    <div class="w-9 h-9 rounded-full bg-surface-bright flex items-center justify-center">
+                        <span class="material-symbols-outlined text-base text-on-surface-variant" data-icon="warning">warning</span>
                     </div>
                     <div>
                         <div class="font-label-caps text-label-caps text-on-surface-variant">Risk Agent</div>
-                        <div class="font-data-mono text-[10px] text-surface-bright">ИЗЧАКВАНЕ</div>
+                        <div class="font-data-mono text-[13px] text-surface-bright">ИЗЧАКВАНЕ</div>
                     </div>
                 </div>
             </div>
             <!-- Network Visualizer Output Box -->
-            <div class="mt-auto bg-[#040812] border border-primary/20 rounded-DEFAULT font-data-mono text-[10px] text-secondary-fixed-dim z-10 h-32 relative overflow-hidden">
-                <!-- Fade at the top so older lines dissolve; stays fixed while the log scrolls -->
-                <div class="absolute inset-x-0 top-0 h-6 bg-gradient-to-b from-[#040812] to-transparent z-10 pointer-events-none"></div>
-                <!-- flex-col-reverse keeps the scroll anchored to the newest line -->
-                <div class="h-full overflow-y-auto p-sm flex flex-col-reverse [scrollbar-width:thin] [scrollbar-color:rgba(74,222,128,0.3)_transparent]">
-                    <div class="space-y-1 opacity-80" id="terminal-output">
-                        <div>&gt; Стартиране на сесия за анализ... OK</div>
-                        <div>&gt; Зареждане на описанието на идеята... OK</div>
-                        <div>&gt; Токенизиране на входните данни... OK</div>
-                        <div>&gt; Инициализиране на модул 'Аудитория'... OK</div>
-                        <div>&gt; Сегментиране на потенциални потребители...</div>
-                        <div class="text-primary">&gt; Идентифицирани 4 основни потребителски сегмента.</div>
-                        <div>&gt; Модул 'Аудитория' приключи. OK</div>
-                        <div>&gt; Инициализиране на модул 'Пазар'... OK</div>
-                        <div>&gt; Извличане на пазарни данни... OK</div>
-                        <div>&gt; Оценка на размера на пазара (TAM/SAM/SOM)...</div>
-                        <div class="text-primary">&gt; Пазарен потенциал: висок.</div>
-                        <div>&gt; Търсене на директни конкуренти...</div>
-                        <div class="text-primary">&gt; Открити 7 конкурента, 2 с директно припокриване.</div>
-                        <div>&gt; Модул 'Пазар' приключи. OK</div>
-                        <div>&gt; Инициализиране на модул 'Иновации'... OK</div>
-                        <div>&gt; Зареждане на патентни бази данни... OK</div>
-                        <div>&gt; Търсене на семантични съвпадения...</div>
-                        <div class="text-primary">&gt; Открити 3 потенциални вектора за диференциация.</div>
-                        <div>&gt; Изчисляване на индекс на уникалност...</div>
-                    </div>
+            <div class="mt-auto bg-[#040812] border border-primary/20 rounded-DEFAULT p-sm font-data-mono text-[10px] text-secondary-fixed-dim z-10 h-24 overflow-hidden relative">
+                <div class="absolute inset-0 bg-gradient-to-b from-transparent to-[#040812] z-10 pointer-events-none"></div>
+                <div class="space-y-1 opacity-80" id="terminal-output">
+                    <div>&gt; Инициализиране на модул 'Иновации'... OK</div>
+                    <div>&gt; Зареждане на патентни бази данни... OK</div>
+                    <div>&gt; Търсене на семантични съвпадения...</div>
+                    <div class="text-primary">&gt; Открити 3 потенциални вектора за диференциация.</div>
+                    <div>&gt; Изчисляване на индекс на уникалност...</div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-@code
-{
-     [Parameter]public Guid Id {get;set;}
-
-     private HubConnection hub;
-     private AnalysisStatusView status;
-     private List<string> logs = new List<string>();
-
-      protected override async Task OnInitializedAsync()
-    {
-        // 1. Connect and start listening
-        hub = new HubConnectionBuilder()
-            .WithUrl(Nav.ToAbsoluteUri("/hubs/analysis"),
-                     o => o.AccessTokenProvider = () => Auth.GetTokenAsync())
-            .WithAutomaticReconnect()
-            .Build();
-
-        hub.On<AnalysisEvent>("AnalysisEvent", OnEventAsync);
-        hub.Reconnected += async _ => await LoadStatusAsync();   // catch up after a dropped connection
-
-        await hub.StartAsync();
-        logs.Add("> Свързано. Изчакване на събития…");
-
-        // 2. Then load the current state (the endpoint)
-        await LoadStatusAsync();
-    }
-
-     private async Task LoadStatusAsync()
-    {
-        status = await analyses.GetStatusAsync(Id);
-        await InvokeAsync(StateHasChanged);
-    }
-
-    private async Task OnEventAsync(AnalysisEvent e)
-    {
-        if (e.AnalysisId != Id || status is null) return;
-
-        var module = status.Modules.FirstOrDefault(m => m.Key == e.Module);
-        if (module == null || module.Status == "Completed" || module.Status == "Failed")
-        {
-            return;
-        }  // already done
-
-        switch (e.Stage)
-        {
-            case ProgressStage.Log:
-                logs.Add($"> {e.Message}");
-                if (logs.Count > 100) logs.RemoveAt(0);
-                break;
-            case ProgressStage.Completed:
-            case ProgressStage.Failed:
-                module.Status = e.Stage.ToString();
-                status.Done++;
-
-                if (status.Done == status.Total) Nav.NavigateTo($"/analyses/{Id}");   // results page
-                break;
-            default:
-                module.Status = "Running";
-                module.Label = e.Stage switch
-                {
-                    ProgressStage.ResearchStarted => "ПРОУЧВАНЕ…",
-                    ProgressStage.Searching       => "ТЪРСЕНЕ…",
-                    ProgressStage.ScoringStarted  => "ОЦЕНЯВАНЕ…",
-                    ProgressStage.Partial         => "ПИШЕ…",
-                    _ => module.Label
-                };
-                break;
-        }
-
-        await InvokeAsync(StateHasChanged);
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        if (hub != null) await hub.DisposeAsync();
-    }
-
-}
