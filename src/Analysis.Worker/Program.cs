@@ -26,6 +26,8 @@ builder.Services.AddAIClient<KimiOptions, KimiClient>(builder.Configuration, "Ki
 builder.Services.AddSingleton<IAIClientFactory, AIClientFactory>();
 
 // Modules
+builder.Services.AddScoped<ModuleRunTracker>();
+
 builder.Services.AddScoped<IAnalysisModule, MarketAnalysisModule>();
 builder.Services.AddScoped<IAnalysisModule, AudienceAnalysisModule>();
 builder.Services.AddScoped<IAnalysisModule, InnovationAnalysisModule>();

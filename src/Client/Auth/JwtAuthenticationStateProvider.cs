@@ -33,6 +33,11 @@ public class JwtAuthenticationStateProvider(TokenStorage storage) : Authenticati
         return new AuthenticationState(new ClaimsPrincipal(identity));
     }
 
+    public async Task<string?> GetTokenAsync()
+    {
+        return await storage.GetTokenAsync();
+    }
+
     public async Task SignInAsync(string token)
     {
         await storage.SetTokenAsync(token);

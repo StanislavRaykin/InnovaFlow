@@ -1,14 +1,11 @@
+using Analysis.Data.Entities;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 
 namespace InnovaFlow.Analysis.Data;
 
-/// <summary>
-/// No query filter anywhere in this context. Access is decided by the Projects
-/// service before an analysis is ever requested, and the Worker runs with no
-/// user at all - filtering here would only give a false sense of enforcement.
-/// Analysis.Api must check membership through Projects before returning results.
-/// </summary>
+
 public class AnalysisDbContext(DbContextOptions<AnalysisDbContext> options) : DbContext(options)
 {
     public DbSet<Analysis> Analyses => Set<Analysis>();
@@ -32,6 +29,8 @@ public class AnalysisDbContext(DbContextOptions<AnalysisDbContext> options) : Db
     public DbSet<Recommendation> Recommendations => Set<Recommendation>();
     public DbSet<Source> Sources => Set<Source>();
     public DbSet<AIRequest> Requests => Set<AIRequest>();
+
+    public DbSet<ModuleRun> ModuleRuns => Set<ModuleRun>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -360,6 +359,21 @@ public class AnalysisDbContext(DbContextOptions<AnalysisDbContext> options) : Db
              .HasForeignKey(x => x.AnalysisId)
              .OnDelete(DeleteBehavior.Cascade);
         });
+
+        b.Entity<ModuleRun>(e =>
+        
+        {
+            e.ToTable("ModuleRuns");
+        e.HasKey(x => new { x.AnalysisId, x.Module });
+        e.Property(x => x.Module).HasMaxLength(50);
+        e.Property(x => x.Status).HasMaxLength(20);
+
+        e.HasOne<Analysis>()
+            .WithMany()
+            .HasForeignKey(x => x.AnalysisId)
+            .OnDelete(DeleteBehavior.Cascade);
+        });
+        
         
     }
 }

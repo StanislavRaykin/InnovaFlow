@@ -23,6 +23,34 @@ namespace Analysis.Data.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Analysis.Data.Entities.ModuleRun", b =>
+                {
+                    b.Property<Guid>("AnalysisId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Module")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Error")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("StartedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.HasKey("AnalysisId", "Module");
+
+                    b.ToTable("ModuleRuns", "Analysis");
+                });
+
             modelBuilder.Entity("InnovaFlow.Analysis.Data.AIRequest", b =>
                 {
                     b.Property<Guid>("Id")
@@ -867,6 +895,15 @@ namespace Analysis.Data.Migrations
                     b.HasIndex("Created");
 
                     b.ToTable("OutboxState", "Analysis");
+                });
+
+            modelBuilder.Entity("Analysis.Data.Entities.ModuleRun", b =>
+                {
+                    b.HasOne("InnovaFlow.Analysis.Data.Analysis", null)
+                        .WithMany()
+                        .HasForeignKey("AnalysisId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("InnovaFlow.Analysis.Data.AIRequest", b =>

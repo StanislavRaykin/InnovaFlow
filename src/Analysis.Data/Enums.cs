@@ -31,3 +31,13 @@ public enum ScoreType
     Market, Innovation, Feasibility, Competition, Risk,
     Audience
 }
+
+public enum ModuleRunStatus
+{
+    Pending,
+    Running,
+
+    Completed,
+    Failed
+    
+}

@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.AspNetCore.Authentication;
 
 
 
@@ -135,13 +136,13 @@ public static class Extensions
         return app;
     }
 
-    public static IHostApplicationBuilder AddJwtAuthentication(this IHostApplicationBuilder builder)
+    public static AuthenticationBuilder AddJwtAuthentication(this IHostApplicationBuilder builder)
     {
         var options = builder.Configuration
             .GetSection("Jwt")
             .Get<JwtValidationOptions>() ?? new JwtValidationOptions();
 
-        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        var auth = builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(jwt =>
             {
                 jwt.MapInboundClaims = false;
@@ -168,8 +169,7 @@ public static class Extensions
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddScoped<ICurrentUser, CurrentUser>();
         builder.Services.AddAuthorization();
-
-        return builder;
+        return auth;
     }
 
 

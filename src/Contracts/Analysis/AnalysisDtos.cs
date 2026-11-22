@@ -80,7 +80,8 @@ public enum ProgressStage
     Partial,            // Partial = snapshot of the AI result so far (Redis only)
     Restarted,          // a retry started - client clears the draft
     Completed,
-    Failed              // Message = short error text
+    Failed,              // Message = short error text
+    Log // A log message for the client
 }
 
 /// <summary>One event for the client. Milestones go over RabbitMQ, Partial over Redis pub/sub.</summary>

@@ -7,6 +7,7 @@ using ServiceDefaults;
 using Analysis.Api.Clients;
 using Contracts.AnalysisDtos;
 using AnalysisRequested = Contracts.AnalysisDtos.AnalysisRequested;
+using Microsoft.EntityFrameworkCore;
 
 namespace Analysis.Api.Endpoints;
 
@@ -20,11 +21,13 @@ public static class Analysis
 
         g.MapPost("/", HandleStartAnalysis)
          .WithName("StartAnalysis")
-         .WithSummary("Queues an analysis for the worker");
+         .WithSummary("Queues an analysis for the worker")
+         .RequireAuthorization();
 
-        // g.MapGet("/{id:guid}", HandleGetAnalysis)
-        //  .WithName("GetAnalysis")
-        //  .WithSummary("What the client polls with signalR");
+        g.MapGet("/{id:guid}", HandleGetAnalysis)
+         .WithName("GetAnalysis")
+         .WithSummary("What the client polls with signalR")
+         .RequireAuthorization();
 
         return app;
     }
@@ -36,8 +39,7 @@ public static class Analysis
         CancellationToken ct,
         ICurrentUser currentUser,
         IdeasClient ideas
-        )
-    {
+        ){
 
         var idea = await ideas.GetAsync(ideaId, ct);
         if (idea == null)
@@ -83,5 +85,33 @@ public static class Analysis
 
 
         return Results.Accepted($"/api/analyses/{analysis.Id}", new AnalysisAcceptedDto(analysis.Id, analysis.Status));
+    }
+
+    private static async Task<IResult> HandleGetAnalysis(Guid id,
+        AnalysisDbContext db,
+        CancellationToken ct,
+        ICurrentUser currentUser)
+    
+    {
+        var analysis = await db.Analyses.FirstOrDefaultAsync(a => a.Id == id && a.UserId == currentUser.Id, ct);
+    if (analysis is null) return Results.NotFound();
+
+    var modules = await db.ModuleRuns
+    .Where(r => r.AnalysisId == id)
+    .ToListAsync(ct);
+
+var list = AnalysisModules.All.Select(m => new
+{
+    m.Key, m.Value,
+    Status = modules.FirstOrDefault(r => r.Module == m.Key)
+}).ToList();
+
+    return Results.Ok(new
+    {
+        analysis.Id,
+        Total = modules.Count,
+        Done = modules.Count(m => m.Status is "Completed" or "Failed"),
+        Modules = modules
+    });
     }
 }

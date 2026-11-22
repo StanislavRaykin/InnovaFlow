@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Analysis.Worker.Modules.Audience;
 
-public class AudienceAnalysisModule(AnalysisDbContext db, ProgressPublisher progress, PartialPublisher partials, IAIClientFactory aiFactory, ILogger<AudienceAnalysisModule> logger) : IAnalysisModule
+public class AudienceAnalysisModule(AnalysisDbContext db, ProgressPublisher progress, ModuleRunTracker runs, PartialPublisher partials, IAIClientFactory aiFactory, ILogger<AudienceAnalysisModule> logger) : IAnalysisModule
 {
 
     public int Stage => 1;
@@ -43,34 +43,53 @@ public class AudienceAnalysisModule(AnalysisDbContext db, ProgressPublisher prog
 
     public async Task RunAsync(AnalysisRequested req, CancellationToken ct)
     {
+        await runs.StartAsync(req.AnalysisId, Name, ct);
+        try
+        {
+            await RunCoreAsync(req, ct);
+        }
+        catch (Exception ex)
+        {
+            await runs.FailAsync(req.AnalysisId, Name, ex);
+            throw;
+        }
+        await runs.CompleteAsync(req.AnalysisId, Name);
+    }
+
+    private async Task RunCoreAsync(AnalysisRequested req, CancellationToken ct)
+    {
         AIRequest aiRequest = new AIRequest
         {
             AnalysisId = req.AnalysisId,
             AgentType = NodeType.Audience,
-            Status = Enum.GetName(AnalysisStatus.Running),
+            Status = AnalysisStatus.Running.ToString(),
             StartedAt = DateTimeOffset.UtcNow
         };
         db.Requests.Add(aiRequest);
 
         await db.SaveChangesAsync(ct);
+        await progress.LogAsync(req, Name, "Инициализиране на модул 'Аудитория'... OK", ct);
 
         var ai = aiFactory.GetAiClient("Claude");
-        AiStreamResult? aiResult = null;
+        AiStreamResult aiResult;
         try
         {
             await progress.ReportAsync(req, Name, ProgressStage.ScoringStarted,ct: ct);
+            await progress.LogAsync(req, Name, "Категоризиране на потенциалните потребители и създаване на личности...", ct);
             string user = IdeaPromptBuilder.Build(req, Task);
             var stream = ai.StreamAsync<AudienceAnalysisResult>(System, user, ct);
             aiResult = await partials.PumpAsync(req, Name, stream, ct);
         }
         catch (Exception ex)
         {
-            await progress.ReportAsync(req, Name, ProgressStage.Failed, "Анализът на аудияторията се провали", ct);
-            await MarkFailedAsync(aiRequest, ex, ct);
-
+            await progress.ReportAsync(req, Name, ProgressStage.Failed, "Анализът на аудиторията се провали", CancellationToken.None);
+            await MarkFailedAsync(aiRequest, ex, CancellationToken.None);
+            throw;
         }
 
-        var audienceAnalysis = StructuredOutput.Parse<AudienceAnalysisResult>(aiResult.Json);
+        var audienceAnalysis = aiResult.Info is AiStreamCompleted<AudienceAnalysisResult> typed
+            ? typed.Value
+            : StructuredOutput.Parse<AudienceAnalysisResult>(aiResult.Json);
         var execStrategy = db.Database.CreateExecutionStrategy();
         await execStrategy.ExecuteAsync(async () =>
         {
@@ -106,10 +125,12 @@ public class AudienceAnalysisModule(AnalysisDbContext db, ProgressPublisher prog
         });
 
         await progress.ReportAsync(req, Name, ProgressStage.Completed, ct:ct);
-        logger.LogInformation("Audience analysis completed. Overall score: ${Score}", audienceAnalysis.OverallScore);
+        await progress.LogAsync(req, Name,
+            $"Модул 'Аудитория' приключи. Категории: {1 + audienceAnalysis.SecondarySegments.Count}, личности: {audienceAnalysis.Personas.Count}, оценка: {audienceAnalysis.OverallScore}/100.", ct);
+        logger.LogInformation("Audience analysis completed. Overall score: {Score}", audienceAnalysis.OverallScore);
     }
 
-    // in case of a rerun
+    // incase of a rerun
     private async Task DeletePreviousResultsAsync(Guid analysisId, CancellationToken ct)
     {
         await db.AudienceAnalyses.Where(m => m.AnalysisId == analysisId).ExecuteDeleteAsync(ct);
@@ -125,13 +146,13 @@ public class AudienceAnalysisModule(AnalysisDbContext db, ProgressPublisher prog
         aiRequest.ErrorMessage = ex is OperationCanceledException ? "canceled" : ex.Message;
         aiRequest.CompletedAt = DateTimeOffset.UtcNow;
 
-        if (ex is AiClientException aiEx)
+        if (ex is AiClientException { Response: { } response })
         {
-            aiRequest.Model = aiEx.Response.Model;
-            aiRequest.PromptTokens = (int)aiEx.Response.InputTokens;
-            aiRequest.CompletionTokens = (int)aiEx.Response.OutputTokens;
+            aiRequest.Model = response.Model;
+            aiRequest.PromptTokens = (int)response.InputTokens;
+            aiRequest.CompletionTokens = (int)response.OutputTokens;
 
-            logger.LogWarning("Request for model {AiExResponseModel} failed.", aiEx.Response.Model);
+            logger.LogWarning("Request for model {AiExResponseModel} failed.", response.Model);
 
         }
         await db.SaveChangesAsync(ct);
