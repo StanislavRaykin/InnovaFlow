@@ -1,0 +1,40 @@
+@* One persona, filled in as it streams. *@
+
+<div class="glass-panel p-md rounded-xl flex flex-col gap-sm @(Active ? "ring-1 ring-primary/40" : "")">
+    <div class="flex items-center gap-sm border-b border-primary/10 pb-sm">
+        <div class="w-12 h-12 shrink-0 rounded-full flex items-center justify-center border @Border bg-surface-container font-headline-md text-[18px] @Text">
+            @Initials
+        </div>
+        <div class="min-w-0">
+            <h4 class="font-headline-md text-[20px] text-on-surface truncate">
+                <Loading Ready="@(!string.IsNullOrEmpty(Persona.Name))">@Persona.Name</Loading>
+            </h4>
+            <p class="font-data-mono text-[12px] @Text">
+                @* AgeRange comes before Occupation, so it's complete by the time Occupation starts *@
+                <Loading Ready="@(Persona.Occupation is not null)" Size="sm">@Persona.Occupation, @Persona.AgeRange</Loading>
+            </p>
+        </div>
+    </div>
+
+    <StreamText Value="@Persona.Description" Active="@(Active && Persona.Goals is null)" Lines="3" />
+
+    <ListBlock Title="Goals" TitleClass="text-secondary" Items="Persona.Goals" Done="!Active" />
+    <ListBlock Title="Pain Points" TitleClass="text-error" Items="Persona.PainPoints" Done="!Active" />
+    <ListBlock Title="Behaviors" TitleClass="text-tertiary" Items="Persona.Behaviors" Done="!Active" />
+</div>
+
+@code {
+    [Parameter, EditorRequired] public PersonaDraft Persona { get; set; } = default!;
+    [Parameter] public int Index { get; set; }
+    [Parameter] public bool Active { get; set; }
+
+    private static readonly string[] TextColors = ["text-primary", "text-secondary", "text-tertiary"];
+    private static readonly string[] BorderColors = ["border-primary/50", "border-secondary/50", "border-tertiary/50"];
+
+    private string Text => TextColors[Index % 3];
+    private string Border => BorderColors[Index % 3];
+
+    /// "Мария — заета студентка" → "М"
+    private string Initials =>
+        string.IsNullOrWhiteSpace(Persona.Name) ? "…" : Persona.Name.Trim()[..1].ToUpperInvariant();
+}

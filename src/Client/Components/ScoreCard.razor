@@ -1,0 +1,53 @@
+@* A 1-100 score with its bar and the AI's explanation, filled in as they stream.
+   ScoreDone: a number streams digit by digit ("7" → "75"), so it shows only once the AI has moved past it. *@
+
+<div class="glass-panel rounded-xl p-md flex flex-col gap-sm transition-all duration-300 @(Writing ? "ring-1 ring-primary/40" : "") @Class">
+    <div class="flex items-center justify-between gap-sm">
+        <div class="flex items-center gap-xs min-w-0">
+            @if (Icon is not null)
+            {
+                <span class="material-symbols-outlined text-[18px] @Text">@Icon</span>
+            }
+            <h4 class="font-label-caps text-label-caps text-on-surface-variant truncate">@Title</h4>
+        </div>
+        <span class="font-headline-md text-headline-md @Text">
+            <Loading Ready="Ready" Size="sm">@Score<span class="font-data-mono text-[12px] text-on-surface-variant">/100</span></Loading>
+        </span>
+    </div>
+    <div class="w-full h-1 bg-surface-container-highest rounded-full overflow-hidden">
+        <div class="h-full @Bar transition-[width] duration-500" style="width: @(Ready ? Score : 0)%"></div>
+    </div>
+    <StreamText Value="@Explanation" Active="ExplanationActive" />
+</div>
+
+@code {
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public string? Icon { get; set; }
+    [Parameter] public int? Score { get; set; }
+    [Parameter] public bool ScoreDone { get; set; }
+    [Parameter] public string? Explanation { get; set; }
+    [Parameter] public bool ExplanationActive { get; set; }
+
+    /// <summary>primary | secondary | tertiary | error</summary>
+    [Parameter] public string Color { get; set; } = "primary";
+    [Parameter] public string? Class { get; set; }
+
+    private bool Ready => Score is not null && ScoreDone;
+    private bool Writing => ExplanationActive || (Score is not null && !ScoreDone);
+
+    private string Text => Color switch
+    {
+        "secondary" => "text-secondary",
+        "tertiary" => "text-tertiary",
+        "error" => "text-error",
+        _ => "text-primary"
+    };
+
+    private string Bar => Color switch
+    {
+        "secondary" => "bg-secondary",
+        "tertiary" => "bg-tertiary",
+        "error" => "bg-error",
+        _ => "bg-primary"
+    };
+}

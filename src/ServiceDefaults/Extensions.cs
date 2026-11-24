@@ -136,7 +136,7 @@ public static class Extensions
         return app;
     }
 
-    public static AuthenticationBuilder AddJwtAuthentication(this IHostApplicationBuilder builder)
+    public static AuthenticationBuilder AddJwtAuthentication(this IHostApplicationBuilder builder, bool addNotifierOptions = false)
     {
         var options = builder.Configuration
             .GetSection("Jwt")
@@ -164,6 +164,21 @@ public static class Extensions
                     NameClaimType = JwtRegisteredClaimNames.Sub,
                     RoleClaimType = "role"
                 };
+
+                if (addNotifierOptions)
+                {
+                    jwt.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = ctx =>
+                        {
+                            var token = ctx.Request.Query["access_token"];
+                            if (!string.IsNullOrEmpty(token) && ctx.HttpContext.Request.Path.StartsWithSegments("/hubs"))
+                                ctx.Token = token;
+                            return Task.CompletedTask;
+                        }
+                    };
+                }
+
             });
 
         builder.Services.AddHttpContextAccessor();

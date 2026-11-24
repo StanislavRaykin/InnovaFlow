@@ -29,8 +29,115 @@ public static class Analysis
          .WithSummary("What the client polls with signalR")
          .RequireAuthorization();
 
+        // Saved module results, each in the same shape the client streams. 404 until the module has completed.
+        g.MapGet("/{id:guid}/audience", HandleGetAudience)
+         .WithName("GetAudienceAnalysis")
+         .WithSummary("Saved audience result, in the same shape the client streams")
+         .RequireAuthorization();
+
+        g.MapGet("/{id:guid}/market", HandleGetMarket)
+         .WithName("GetMarketAnalysis")
+         .WithSummary("Saved market result, in the same shape the client streams")
+         .RequireAuthorization();
+
+        g.MapGet("/{id:guid}/innovation", HandleGetInnovation)
+         .WithName("GetInnovationAnalysis")
+         .WithSummary("Saved innovation result, in the same shape the client streams")
+         .RequireAuthorization();
+
         return app;
     }
+
+    private static async Task<IResult> HandleGetAudience(Guid id,
+        AnalysisDbContext db,
+        ICurrentUser currentUser,
+        CancellationToken ct)
+    {
+        if (!await OwnsAsync(db, id, currentUser, ct)) return Results.NotFound();
+
+        var audience = await db.AudienceAnalyses.AsNoTracking()
+            .Include(a => a.Personas)
+            .FirstOrDefaultAsync(a => a.AnalysisId == id, ct);
+        if (audience is null) return Results.NotFound();   // module hasn't finished (or failed)
+
+        var scores = await ScoresAsync(db, id, ct);
+        var score = scores.GetValueOrDefault(ScoreType.Audience);
+
+        return Results.Ok(new AudienceAnalysisDto(
+            Score100(score?.Score),
+            score?.Explanation,
+            AudienceText.ParseSegments(audience.PrimaryAudience).FirstOrDefault(),
+            AudienceText.ParseSegments(audience.SecondaryAudience),
+            [.. audience.Personas.Select(p => new PersonaDto(
+                p.Name, p.AgeRange, p.Occupation, p.Description, p.Goals, p.PainPoints, p.Behaviors))],
+            audience.Description));
+    }
+
+    private static async Task<IResult> HandleGetMarket(Guid id,
+        AnalysisDbContext db,
+        ICurrentUser currentUser,
+        CancellationToken ct)
+    {
+        if (!await OwnsAsync(db, id, currentUser, ct)) return Results.NotFound();
+
+        var market = await db.MarketAnalyses.AsNoTracking().FirstOrDefaultAsync(m => m.AnalysisId == id, ct);
+        if (market is null) return Results.NotFound();
+
+        // only the Market module's own competitors; Innovation reads them all
+        var competitors = await db.Competitors.AsNoTracking()
+            .Where(c => c.AnalysisId == id && c.Source == "Market")
+            .ToListAsync(ct);
+
+        var scores = await ScoresAsync(db, id, ct);
+        var opportunity = scores.GetValueOrDefault(ScoreType.Market);
+        var competition = scores.GetValueOrDefault(ScoreType.Competition);
+
+        return Results.Ok(new MarketAnalysisDto(
+            market.MarketSize,
+            market.MarketTrend,
+            Score100(market.MarketOpportunity),
+            market.Summary,
+            opportunity?.Explanation,
+            Score100(competition?.Score),
+            competition?.Explanation,
+            [.. competitors.Select(c => new CompetitorDto(
+                c.Name, c.Description, c.WebsiteUrl, c.Industry, c.PricingModel,
+                c.Strengths, c.Weaknesses, Score100(c.SimilarityScore)))]));
+    }
+
+    private static async Task<IResult> HandleGetInnovation(Guid id,
+        AnalysisDbContext db,
+        ICurrentUser currentUser,
+        CancellationToken ct)
+    {
+        if (!await OwnsAsync(db, id, currentUser, ct)) return Results.NotFound();
+
+        var i = await db.InnovationAnalyses.AsNoTracking().FirstOrDefaultAsync(x => x.AnalysisId == id, ct);
+        if (i is null) return Results.NotFound();
+
+        var scores = await ScoresAsync(db, id, ct);
+        var overall = scores.GetValueOrDefault(ScoreType.Innovation);
+
+        return Results.Ok(new InnovationAnalysisDto(
+            Score100(i.OriginalityScore)!.Value, i.OriginalityExplanation,
+            Score100(i.TechnologicalInnovationScore)!.Value, i.TechnologicalInnovationExplanation,
+            Score100(i.BusinessInnovationScore)!.Value, i.BusinessInnovationExplanation,
+            Score100(i.GrowthPotentialScore)!.Value, i.GrowthPotentialExplanation,
+            i.Summary,
+            Score100(overall?.Score),
+            overall?.Explanation));
+    }
+
+    private static Task<bool> OwnsAsync(AnalysisDbContext db, Guid id, ICurrentUser user, CancellationToken ct) =>
+        db.Analyses.AnyAsync(a => a.Id == id && a.UserId == user.Id, ct);
+
+    private static async Task<Dictionary<ScoreType, AnalysisScore>> ScoresAsync(AnalysisDbContext db, Guid id, CancellationToken ct) =>
+        (await db.Scores.AsNoTracking().Where(s => s.AnalysisId == id).ToListAsync(ct))
+            .GroupBy(s => s.ScoreType)
+            .ToDictionary(g => g.Key, g => g.First());
+
+    // The worker saves what the AI returned; the schema can't enforce the range
+    private static int? Score100(decimal? score) => score is null ? null : Math.Clamp((int)score.Value, 1, 100);
     
     private static async Task<IResult> HandleStartAnalysis(
         Guid ideaId,
@@ -102,16 +209,16 @@ public static class Analysis
 
 var list = AnalysisModules.All.Select(m => new
 {
-    m.Key, m.Value,
-    Status = modules.FirstOrDefault(r => r.Module == m.Key)
+    m.Key, m.Title, m.MiIcon,
+    Status = modules.FirstOrDefault(r => r.Module == m.Key)?.Status ?? "Pending"
 }).ToList();
 
     return Results.Ok(new
     {
         analysis.Id,
-        Total = modules.Count,
-        Done = modules.Count(m => m.Status is "Completed" or "Failed"),
-        Modules = modules
+        Total = list.Count,
+        Done = list.Count(m => m.Status is "Completed" or "Failed"),
+        Modules = list
     });
     }
 }

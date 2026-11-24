@@ -1,0 +1,11 @@
+@* "Title: value" row inside a <dl>. Renders nothing while the value is empty. *@
+
+@if (!string.IsNullOrEmpty(Value))
+{
+    <div><dt class="inline text-on-surface">@Title: </dt><dd class="inline">@Value</dd></div>
+}
+
+@code {
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public string? Value { get; set; }
+}

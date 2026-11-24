@@ -1,4 +1,5 @@
 using Analysis.Worker.AI;
+using Microsoft.Extensions.Options;
 
 namespace Analysis.Worker;
 
@@ -15,6 +16,21 @@ public static class ServiceCollectionExtensions
         services.AddKeyedSingleton<IAiClient, TClient>(sectionName);
         return services;
 
+    }
+
+    /// <summary>Registers a <see cref="FakeAiClient"/> under each name in place of the real client. No API keys needed.</summary>
+    public static IServiceCollection AddFakeAIClients(this IServiceCollection services, IConfiguration config, params string[] names)
+    {
+        services.AddOptions<FakeAiOptions>().Bind(config.GetSection("Ai:Fake"));
+
+        foreach (var name in names)
+        {
+            services.AddKeyedSingleton<IAiClient>(name, (sp, _) => new FakeAiClient(
+                name,
+                sp.GetRequiredService<IOptions<FakeAiOptions>>().Value,
+                sp.GetRequiredService<ILogger<FakeAiClient>>()));
+        }
+        return services;
     }
 
 

@@ -1,0 +1,142 @@
+@page "/analyses/{AnalysisId:guid}/audience"
+@layout AccountLayout
+@attribute [Authorize]
+@inherits LiveModulePage
+
+<PageTitle>Целева аудитория | InnovaFlow</PageTitle>
+
+@{
+    var card = Live.Audience;
+    var d = card.Draft;
+}
+
+<!-- TopAppBar -->
+<header class="flex flex-col gap-sm p-md bg-surface-dim/50 backdrop-blur-xl full-width border-b border-primary/20 shadow-lg shadow-primary/5 sticky top-16 md:top-0 z-30">
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-sm text-primary">
+            <span class="material-symbols-outlined text-[32px]">group</span>
+            <h2 class="font-headline-lg text-headline-lg font-bold">Target Audience</h2>
+            @if (!card.IsDone)
+            {
+                <span class="font-data-mono text-[12px] text-secondary animate-pulse">@(card.Label ?? "ИЗЧАКВАНЕ…")</span>
+            }
+        </div>
+        <div class="flex gap-sm">
+            <button class="p-xs text-on-surface-variant hover:bg-primary/10 rounded-lg transition-colors"><span class="material-symbols-outlined">refresh</span></button>
+            <button class="p-xs text-on-surface-variant hover:bg-primary/10 rounded-lg transition-colors"><span class="material-symbols-outlined">ios_share</span></button>
+        </div>
+    </div>
+    <AnalysisTabs AnalysisId="AnalysisId" />
+</header>
+
+@if (card.Status == "Failed")
+{
+    <div class="p-md max-w-container-max mx-auto w-full">
+        <div class="glass-panel p-md rounded-xl text-error">Анализът на аудиторията не успя. Опитайте отново.</div>
+    </div>
+}
+else
+{
+    <!-- Content Canvas -->
+    <div class="p-md flex flex-col gap-lg max-w-container-max mx-auto w-full flex-1">
+
+        <!-- Segmentation Overview -->
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-md">
+            <div class="lg:col-span-2 flex flex-col gap-md">
+                <h3 class="font-headline-md text-headline-md text-on-surface font-semibold border-b border-primary/20 pb-xs">Audience Segments</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+
+                    <!-- Primary Audience -->
+                    <SegmentCard Segment="d?.PrimarySegment" Primary="true"
+                                 Active="@card.IsActive("primarySegment")" />
+
+                    <!-- Secondary Audience(s) -->
+                    @if (d?.SecondarySegments is { Count: > 0 } secondaries)
+                    {
+                        @for (var i = 0; i < secondaries.Count; i++)
+                        {
+                            <SegmentCard Segment="secondaries[i]" Primary="false"
+                                         Active="@card.IsActive($"secondarySegments[{i}]")" />
+                        }
+                    }
+                    @if (!card.Done("secondarySegments") || d?.SecondarySegments is null)
+                    {
+                        @* skeleton for the next one *@
+                        <SegmentCard Segment="null" Primary="false" Active="false" />
+                    }
+                </div>
+            </div>
+
+            <!-- Segment attractiveness -->
+            <div class="glass-panel p-md rounded-xl flex flex-col gap-md">
+                <h4 class="font-label-caps text-label-caps text-on-surface">Segment Attractiveness</h4>
+
+                <div class="flex flex-col items-center py-sm">
+                    <span class="font-headline-lg text-headline-lg text-primary">
+                        @* a number streams digit by digit ("7" → "75"), so wait until it's finished *@
+                        <Loading Ready="@(d?.OverallScore is not null && card.Done("overallScore"))">@d?.OverallScore</Loading>
+                    </span>
+                    <span class="font-label-caps text-[10px] text-on-surface-variant">Audience score / 100</span>
+                </div>
+
+                @foreach (var (seg, primary) in Segments(d))
+                {
+                    // the explanation comes right after the score, so once it has started the score is final
+                    var ready = seg.AttractivenessScore is not null && seg.AttractivenessExplanation is not null;
+                    <div class="flex flex-col gap-xs">
+                        <div class="flex justify-between gap-sm font-data-mono text-[12px]">
+                            <span class="@(primary ? "text-primary" : "text-on-surface-variant") truncate">@(seg.Name ?? "…")</span>
+                            <Loading Ready="ready" Size="sm"><span class="text-on-surface">@seg.AttractivenessScore</span></Loading>
+                        </div>
+                        <div class="w-full h-1 bg-surface-container-highest rounded-full overflow-hidden">
+                            <div class="h-full @(primary ? "bg-primary" : "bg-secondary") transition-[width] duration-500"
+                                 style="width: @(ready ? seg.AttractivenessScore : 0)%"></div>
+                        </div>
+                    </div>
+                }
+
+                <StreamText Value="@d?.OverallExplanation" Active="@card.IsActive("overallExplanation")" Lines="3" />
+            </div>
+        </section>
+
+        <!-- AI Personas Section -->
+        <section class="flex flex-col gap-md mt-md">
+            <div class="flex items-center justify-between border-b border-primary/20 pb-xs">
+                <h3 class="font-headline-md text-headline-md text-on-surface font-semibold flex items-center gap-xs">
+                    <span class="material-symbols-outlined text-primary">smart_toy</span> AI Synthesized Personas
+                </h3>
+                <span class="px-xs py-[2px] bg-secondary/20 text-secondary font-label-caps text-[10px] rounded border border-secondary/30">
+                    Примерни персони, не реални хора
+                </span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+                @if (d?.Personas is { } personas)
+                {
+                    @for (var i = 0; i < personas.Count; i++)
+                    {
+                        <PersonaCard Persona="personas[i]" Index="i" Active="@card.IsActive($"personas[{i}]")" />
+                    }
+                }
+                @if (!card.Done("personas") || d?.Personas is null)
+                {
+                    <Loading Ready="false" Block Size="lg" Label="Създаване на персони…" Class="py-xl" />
+                }
+            </div>
+        </section>
+
+        <!-- Summary -->
+        <section class="glass-panel p-md rounded-xl flex flex-col gap-sm">
+            <h3 class="font-headline-md text-headline-md text-on-surface font-semibold">Обобщение</h3>
+            <StreamText Value="@d?.Description" Active="@card.IsActive("description")" Lines="6" />
+        </section>
+    </div>
+}
+
+@code {
+    private static IEnumerable<(SegmentDraft Seg, bool Primary)> Segments(AudienceDraft? d)
+    {
+        if (d?.PrimarySegment is { } p) yield return (p, true);
+        foreach (var s in d?.SecondarySegments ?? []) yield return (s, false);
+    }
+}

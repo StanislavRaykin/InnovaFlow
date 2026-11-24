@@ -12,6 +12,7 @@ public sealed class ModuleView
 {
     public string Key { get; set; } = "";         
     public string Title { get; set; } = "";
+    public string? MiIcon { get; set; }
     public string Status { get; set; } = "Pending";
     public string? Label { get; set; }             // client only: "ОЦЕНЯВАНЕ…"
 }

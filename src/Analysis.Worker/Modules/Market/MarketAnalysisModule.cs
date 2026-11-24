@@ -14,7 +14,7 @@ public class MarketAnalysisModule(AnalysisDbContext db, PartialPublisher partial
 
     public int Stage => 1;
 
-    public string Name => "MarketAnalysis";
+    public string Name => "Market";
 
 
     public async Task RunAsync(AnalysisRequested req, CancellationToken ct)

@@ -28,7 +28,7 @@
         <div class="flex-1 p-md max-w-container-max mx-auto w-full flex flex-col gap-md">
             <div class="flex items-center gap-sm mb-sm">
                 <span class="font-data-mono text-data-mono text-on-surface-variant">Проект:</span>
-                <span class="font-headline-md text-headline-md font-bold text-on-surface">SmartWear</span>
+                <span class="font-headline-md text-headline-md font-bold text-on-surface"><Loading Ready="loaded">SmartWear</Loading></span>
             </div>
             <!-- Dashboard Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-md">
@@ -39,16 +39,19 @@
                     <div class="relative w-32 h-32 flex items-center justify-center my-md">
                         <svg class="absolute inset-0 w-full h-full transform -rotate-90" viewbox="0 0 100 100">
                             <circle cx="50" cy="50" fill="none" r="45" stroke="#131b2e" stroke-width="8"></circle>
-                            <circle class="transition-all duration-1000 ease-out" cx="50" cy="50" fill="none" r="45" stroke="#4ade80" stroke-dasharray="283" stroke-dashoffset="192.44" stroke-width="8"></circle> <!-- 32% of 283 -->
+                            @if (loaded)
+                            {
+                                <circle class="transition-all duration-1000 ease-out" cx="50" cy="50" fill="none" r="45" stroke="#4ade80" stroke-dasharray="283" stroke-dashoffset="192.44" stroke-width="8"></circle> <!-- 32% of 283 -->
+                            }
                         </svg>
                         <div class="flex flex-col items-center">
-                            <span class="font-display-lg text-display-lg font-bold text-primary neon-glow">32</span>
+                            <span class="font-display-lg text-display-lg font-bold text-primary neon-glow"><Loading Ready="loaded" Size="lg">32</Loading></span>
                             <span class="font-data-mono text-data-mono text-on-surface-variant">/100</span>
                         </div>
                     </div>
                     <div class="flex items-center gap-xs mt-sm">
                         <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-                        <span class="font-body-md text-body-md text-primary font-bold">Нисък общ риск</span>
+                        <span class="font-body-md text-body-md text-primary font-bold"><Loading Ready="loaded" Size="sm">Нисък общ риск</Loading></span>
                     </div>
                 </div>
                 <!-- Radar Chart Area (Span 8) -->
@@ -59,6 +62,7 @@
                     </div>
                     <div class="flex-1 relative min-h-[250px] flex items-end gap-sm pb-xl px-sm">
                         <!-- Pseudo Bar Chart for Visual representation without heavy JS -->
+                        <Loading Ready="loaded" Block Size="lg" Label="Изчисляване на рисковете…" Class="flex-1 self-center">
                         <!-- Competition -->
                         <div class="flex-1 flex flex-col items-center justify-end h-full relative group">
                             <div class="w-full max-w-[40px] bg-primary/20 border border-primary/50 rounded-t-sm relative transition-all group-hover:bg-primary/40 group-hover:border-primary" style="height: 65%;">
@@ -99,6 +103,7 @@
                             </div>
                             <span class="absolute -bottom-8 font-label-caps text-[10px] text-on-surface-variant whitespace-nowrap">Правен</span>
                         </div>
+                        </Loading>
                         <!-- Grid Lines -->
                         <div class="absolute left-0 bottom-xl w-full border-t border-surface-variant/50 pointer-events-none"></div>
                         <div class="absolute left-0 bottom-[calc(64px+25%)] w-full border-t border-surface-variant/30 pointer-events-none"></div>
@@ -113,6 +118,7 @@
                     <span class="material-symbols-outlined text-primary">warning</span>
                     Детайлен Анализ на Рисковете
                 </h3>
+                <Loading Ready="loaded" Block Size="lg" Label="Анализиране на рисковете…" Class="py-xl">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-md">
                     <!-- Risk Card 1: Technical -->
                     <div class="glass-card rounded-lg flex flex-col overflow-hidden transition-all duration-300">
@@ -199,9 +205,13 @@
                         </div>
                     </div>
                 </div>
+                </Loading>
             </div>
         </div>
 
 @code {
     [Parameter] public Guid AnalysisId { get; set; }
+
+    // Every field shows a spinner until this is true. Set it (or give each <Loading> its own condition) once the data/events are wired.
+    private bool loaded;
 }

@@ -17,7 +17,7 @@ public class AnalysisPartialConsumer(IHubContext<AnalysisHub> hub) : IConsumer<A
     public Task Consume(ConsumeContext<AnalysisPartial> ctx)
     {
         var p = ctx.Message;
-        var e = new AnalysisEvent(p.AnalysisId, p.UserId, p.Module, ProgressStage.Partial, Partial: p.Snapshot);
+        var e = new AnalysisEvent(p.AnalysisId, p.UserId, p.Module, ProgressStage.Partial, Partial: p.Snapshot, Seq: p.Seq);
         return hub.Clients.User(p.UserId.ToString()).SendAsync("AnalysisEvent", e, ctx.CancellationToken);
     }
 }

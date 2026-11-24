@@ -16,7 +16,7 @@ public class InnovationAnalysisModule(AnalysisDbContext db, ProgressPublisher pr
 
     public int Stage => 2; //depends on competitors(market and competition analyses)
 
-    public string Name => "InnovationAnalysis";
+    public string Name => "Innovation";
 
     private const string System = """
         Използвай предоставените от потребителя полета, за да оцениш оригиналността и иновационния потенциал на идеята.

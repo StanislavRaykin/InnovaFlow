@@ -1,3 +1,5 @@
+using System.Net;
+using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
@@ -8,12 +10,23 @@ namespace Client.Auth;
 // Builds the signed-in user from the JWT in localStorage. The token's signature is not checked
 // here (the browser has no key to check it with); the Gateway validates it on every request,
 // and a 401 from the Gateway signs the user out (see BearerTokenHandler).
-public class JwtAuthenticationStateProvider(TokenStorage storage) : AuthenticationStateProvider
+//
+// An unexpired token is not enough on its own: the server also needs its session in Redis, which
+// disappears on sign-out elsewhere or when Redis restarts. So a token found in storage is checked
+// with the server once before the user counts as signed in.
+public class JwtAuthenticationStateProvider(TokenStorage storage, IHttpClientFactory httpFactory) : AuthenticationStateProvider, IDisposable
 {
+    // plain client without BearerTokenHandler; that handler depends on this class
+    public const string SessionClientName = "GatewaySession";
+
     private const string RoleClaim = "role";
     private const string LongRoleClaim = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role";
 
     private static readonly AuthenticationState Anonymous = new(new ClaimsPrincipal(new ClaimsIdentity()));
+
+    private string? checkedToken;
+    private Task<bool>? sessionCheck;
+    private Timer? expiryTimer;
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
@@ -22,12 +35,13 @@ public class JwtAuthenticationStateProvider(TokenStorage storage) : Authenticati
             return Anonymous;
 
         var claims = ParseClaims(token);
-        if (claims == null || IsExpired(claims))
+        if (claims == null || IsExpired(claims) || !await IsSessionActiveAsync(token))
         {
-            await storage.RemoveTokenAsync();
+            await ClearAsync();
             return Anonymous;
         }
 
+        ScheduleExpiry(claims);
 
         var identity = new ClaimsIdentity(claims, authenticationType: "jwt", nameType: "email", roleType: RoleClaim);
         return new AuthenticationState(new ClaimsPrincipal(identity));
@@ -41,21 +55,87 @@ public class JwtAuthenticationStateProvider(TokenStorage storage) : Authenticati
     public async Task SignInAsync(string token)
     {
         await storage.SetTokenAsync(token);
+
+        // just issued by the server, no need to ask about it
+        checkedToken = token;
+        sessionCheck = Task.FromResult(true);
+
         NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
     }
 
     public async Task SignOutAsync()
     {
-        await storage.RemoveTokenAsync();
+        await ClearAsync();
         NotifyAuthenticationStateChanged(Task.FromResult(Anonymous));
+    }
+
+    private async Task ClearAsync()
+    {
+        expiryTimer?.Dispose();
+        expiryTimer = null;
+        checkedToken = null;
+        sessionCheck = null;
+        await storage.RemoveTokenAsync();
+    }
+
+    private Task<bool> IsSessionActiveAsync(string token)
+    {
+        if (sessionCheck == null || checkedToken != token)
+        {
+            checkedToken = token;
+            sessionCheck = CheckSessionAsync(token);
+        }
+
+        return sessionCheck;
+    }
+
+    private async Task<bool> CheckSessionAsync(string token)
+    {
+        try
+        {
+            var http = httpFactory.CreateClient(SessionClientName);
+            using var request = new HttpRequestMessage(HttpMethod.Get, "api/auth/session");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            using var response = await http.SendAsync(request);
+            return response.StatusCode != HttpStatusCode.Unauthorized;
+        }
+        catch (HttpRequestException)
+        {
+            // server unreachable: don't sign out over a network blip; the next API call
+            // still gets a 401 if the session is really gone
+            sessionCheck = null;
+            return true;
+        }
+    }
+
+    // signs the user out the moment the token expires, instead of on the next API call
+    private void ScheduleExpiry(List<Claim> claims)
+    {
+        if (expiryTimer != null || !TryGetExpiry(claims, out var expiresAt))
+            return;
+
+        var due = expiresAt - DateTimeOffset.UtcNow;
+        // the browser's setTimeout fires immediately past ~24.8 days; longer tokens are covered by the check on reload
+        if (due > TimeSpan.FromDays(24)) return;
+
+        expiryTimer = new Timer(_ => _ = SignOutAsync(), null, due < TimeSpan.Zero ? TimeSpan.Zero : due, Timeout.InfiniteTimeSpan);
     }
 
     private static bool IsExpired(List<Claim> claims)
     {
+        return !TryGetExpiry(claims, out var expiresAt) || expiresAt <= DateTimeOffset.UtcNow;
+    }
+
+    private static bool TryGetExpiry(List<Claim> claims, out DateTimeOffset expiresAt)
+    {
+        expiresAt = default;
         var exp = claims.FirstOrDefault(c => c.Type == "exp")?.Value;
-        return exp == null
-            || !long.TryParse(exp, out var seconds)
-            || DateTimeOffset.FromUnixTimeSeconds(seconds) <= DateTimeOffset.UtcNow;
+        if (exp == null || !long.TryParse(exp, out var seconds))
+            return false;
+
+        expiresAt = DateTimeOffset.FromUnixTimeSeconds(seconds);
+        return true;
     }
 
     private static List<Claim>? ParseClaims(string token)
@@ -86,7 +166,7 @@ public class JwtAuthenticationStateProvider(TokenStorage storage) : Authenticati
 
             return claims;
         }
-        catch (Exception e)
+        catch (Exception)
         {
             return null;
         }
@@ -98,4 +178,6 @@ public class JwtAuthenticationStateProvider(TokenStorage storage) : Authenticati
         base64 += (base64.Length % 4) switch { 2 => "==", 3 => "=", _ => "" };
         return Convert.FromBase64String(base64);
     }
+
+    public void Dispose() => expiryTimer?.Dispose();
 }

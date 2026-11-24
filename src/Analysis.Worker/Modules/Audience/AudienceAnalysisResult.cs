@@ -84,7 +84,8 @@ public sealed class AudienceSegmentResult
 
     public void Normalize() => AttractivenessScore = Math.Clamp(AttractivenessScore, 1, 100);
 
-    /// <summary>Text saved into PrimaryAudience and SecondaryAudience.</summary>
+    /// <summary>Text saved into PrimaryAudience and SecondaryAudience.
+    /// Analysis.Api parses it back (Endpoints/AudienceText.cs), so keep the labels in sync.</summary>
     public string ToText()
     {
         var sb = new StringBuilder();

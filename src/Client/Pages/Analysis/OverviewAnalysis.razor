@@ -14,11 +14,11 @@
     <div class="flex justify-between items-center w-full max-w-container-max mx-auto">
         <div class="flex items-center gap-sm">
             <span class="material-symbols-outlined text-[32px]">analytics</span>
-            <h1 class="text-primary font-bold">SmartWear</h1>
+            <h1 class="text-primary font-bold"><Loading Ready="loaded">SmartWear</Loading></h1>
             <span
                 class="ml-sm px-xs py-[2px] bg-primary/20 border border-primary/40 rounded-sm font-label-caps text-label-caps text-primary flex items-center gap-1">
                 <div class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
-                AI Analysis #3
+                <Loading Ready="loaded" Size="sm">AI Analysis #3</Loading>
             </span>
         </div>
         <div class="flex gap-sm">
@@ -53,18 +53,21 @@
                     <svg class="w-full h-full transform -rotate-90" viewbox="0 0 100 100">
                         <circle class="text-surface-variant" cx="50" cy="50" fill="none" r="45" stroke="currentColor"
                                 stroke-width="8"></circle>
-                        <circle class="text-primary drop-shadow-[0_0_8px_rgba(107,251,154,0.5)]" cx="50" cy="50"
-                                fill="none" r="45" stroke="currentColor" stroke-dasharray="283" stroke-dashoffset="48"
-                                stroke-width="8"></circle>
+                        @if (loaded)
+                        {
+                            <circle class="text-primary drop-shadow-[0_0_8px_rgba(107,251,154,0.5)]" cx="50" cy="50"
+                                    fill="none" r="45" stroke="currentColor" stroke-dasharray="283" stroke-dashoffset="48"
+                                    stroke-width="8"></circle>
+                        }
                     </svg>
                     <div class="absolute inset-0 flex flex-col items-center justify-center">
-                        <span class="font-display-lg text-display-lg text-on-surface font-bold">83</span>
+                        <span class="font-display-lg text-display-lg text-on-surface font-bold"><Loading Ready="loaded" Size="lg">83</Loading></span>
                         <span class="font-data-mono text-data-mono text-on-surface-variant">/100</span>
                     </div>
                 </div>
                 <div
                     class="mt-sm px-sm py-xs bg-primary/10 border border-primary/30 rounded text-primary font-headline-md text-headline-md text-center">
-                    Силeн потенциал
+                    <Loading Ready="loaded" Size="sm">Силeн потенциал</Loading>
                 </div>
             </div>
         </div>
@@ -76,10 +79,12 @@
                 <span class="material-symbols-outlined text-[16px]">psychology</span>
                 AI ПРЕПОРЪКА
             </h2>
-            <p class="font-body-md text-body-md text-on-surface-variant mb-md">
-                Проектът показва висока пазарна пригодност, но изисква оптимизация на рисковия профил преди
-                стартиране.
-            </p>
+            <Loading Ready="loaded" Block Size="sm" Class="mb-md">
+                <p class="font-body-md text-body-md text-on-surface-variant mb-md">
+                    Проектът показва висока пазарна пригодност, но изисква оптимизация на рисковия профил преди
+                    стартиране.
+                </p>
+            </Loading>
             <button
                 class="w-full py-sm bg-transparent border border-secondary text-secondary font-bold rounded flex items-center justify-center gap-xs hover:bg-secondary/10 transition-colors">
                 <span class="material-symbols-outlined text-[20px]">assignment_turned_in</span>
@@ -96,11 +101,13 @@
                 class="bg-surface-container rounded-lg border border-primary/10 p-sm group hover:border-primary/40 hover:shadow-[0_0_15px_rgba(107,251,154,0.1)] transition-all">
                 <div class="font-label-caps text-label-caps text-on-surface-variant mb-xs">Пазар</div>
                 <div class="flex items-end gap-xs">
-                    <span class="font-headline-lg text-headline-lg text-on-surface">84</span>
-                    <span class="material-symbols-outlined text-primary text-[20px] mb-1">trending_up</span>
+                    <Loading Ready="loaded">
+                        <span class="font-headline-lg text-headline-lg text-on-surface">84</span>
+                        <span class="material-symbols-outlined text-primary text-[20px] mb-1">trending_up</span>
+                    </Loading>
                 </div>
                 <div class="w-full h-1 bg-surface-variant mt-sm rounded-full overflow-hidden">
-                    <div class="h-full bg-primary w-[84%]"></div>
+                    @if (loaded) { <div class="h-full bg-primary w-[84%]"></div> }
                 </div>
             </div>
             <!-- Card 2 -->
@@ -108,11 +115,13 @@
                 class="bg-surface-container rounded-lg border border-primary/10 p-sm group hover:border-primary/40 hover:shadow-[0_0_15px_rgba(107,251,154,0.1)] transition-all">
                 <div class="font-label-caps text-label-caps text-on-surface-variant mb-xs">Иновация</div>
                 <div class="flex items-end gap-xs">
-                    <span class="font-headline-lg text-headline-lg text-on-surface">87</span>
-                    <span class="material-symbols-outlined text-primary text-[20px] mb-1">trending_up</span>
+                    <Loading Ready="loaded">
+                        <span class="font-headline-lg text-headline-lg text-on-surface">87</span>
+                        <span class="material-symbols-outlined text-primary text-[20px] mb-1">trending_up</span>
+                    </Loading>
                 </div>
                 <div class="w-full h-1 bg-surface-variant mt-sm rounded-full overflow-hidden">
-                    <div class="h-full bg-primary w-[87%]"></div>
+                    @if (loaded) { <div class="h-full bg-primary w-[87%]"></div> }
                 </div>
             </div>
             <!-- Card 3 -->
@@ -120,11 +129,13 @@
                 class="bg-surface-container rounded-lg border border-primary/10 p-sm group hover:border-primary/40 hover:shadow-[0_0_15px_rgba(107,251,154,0.1)] transition-all">
                 <div class="font-label-caps text-label-caps text-on-surface-variant mb-xs">Аудитория</div>
                 <div class="flex items-end gap-xs">
-                    <span class="font-headline-lg text-headline-lg text-on-surface">82</span>
-                    <span class="material-symbols-outlined text-primary text-[20px] mb-1">trending_flat</span>
+                    <Loading Ready="loaded">
+                        <span class="font-headline-lg text-headline-lg text-on-surface">82</span>
+                        <span class="material-symbols-outlined text-primary text-[20px] mb-1">trending_flat</span>
+                    </Loading>
                 </div>
                 <div class="w-full h-1 bg-surface-variant mt-sm rounded-full overflow-hidden">
-                    <div class="h-full bg-primary w-[82%]"></div>
+                    @if (loaded) { <div class="h-full bg-primary w-[82%]"></div> }
                 </div>
             </div>
             <!-- Card 4 -->
@@ -132,15 +143,20 @@
                 class="bg-surface-container rounded-lg border border-primary/10 p-sm group hover:border-primary/40 hover:shadow-[0_0_15px_rgba(107,251,154,0.1)] transition-all">
                 <div class="font-label-caps text-label-caps text-on-surface-variant mb-xs">Осъществимост</div>
                 <div class="flex items-end gap-xs">
-                    <span class="font-headline-lg text-headline-lg text-on-surface">91</span>
-                    <span class="material-symbols-outlined text-primary text-[20px] mb-1">trending_up</span>
+                    <Loading Ready="loaded">
+                        <span class="font-headline-lg text-headline-lg text-on-surface">91</span>
+                        <span class="material-symbols-outlined text-primary text-[20px] mb-1">trending_up</span>
+                    </Loading>
                 </div>
                 <div class="w-full h-1 bg-surface-variant mt-sm rounded-full overflow-hidden">
-                    <div class="h-full bg-primary w-[91%] relative">
-                        <div
-                            class="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full animate-[shimmer_2s_infinite]">
+                    @if (loaded)
+                    {
+                        <div class="h-full bg-primary w-[91%] relative">
+                            <div
+                                class="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full animate-[shimmer_2s_infinite]">
+                            </div>
                         </div>
-                    </div>
+                    }
                 </div>
             </div>
             <!-- Card 5 -->
@@ -148,11 +164,13 @@
                 class="bg-surface-container rounded-lg border border-primary/10 p-sm group hover:border-primary/40 hover:shadow-[0_0_15px_rgba(107,251,154,0.1)] transition-all">
                 <div class="font-label-caps text-label-caps text-on-surface-variant mb-xs">Мащабируемост</div>
                 <div class="flex items-end gap-xs">
-                    <span class="font-headline-lg text-headline-lg text-on-surface">79</span>
-                    <span class="material-symbols-outlined text-tertiary text-[20px] mb-1">trending_flat</span>
+                    <Loading Ready="loaded">
+                        <span class="font-headline-lg text-headline-lg text-on-surface">79</span>
+                        <span class="material-symbols-outlined text-tertiary text-[20px] mb-1">trending_flat</span>
+                    </Loading>
                 </div>
                 <div class="w-full h-1 bg-surface-variant mt-sm rounded-full overflow-hidden">
-                    <div class="h-full bg-tertiary w-[79%]"></div>
+                    @if (loaded) { <div class="h-full bg-tertiary w-[79%]"></div> }
                 </div>
             </div>
             <!-- Card 6 -->
@@ -160,11 +178,13 @@
                 class="bg-surface-container rounded-lg border border-error/20 p-sm group hover:border-error/40 hover:shadow-[0_0_15px_rgba(255,180,171,0.1)] transition-all">
                 <div class="font-label-caps text-label-caps text-on-surface-variant mb-xs">Риск</div>
                 <div class="flex items-end gap-xs">
-                    <span class="font-headline-lg text-headline-lg text-error">32</span>
-                    <span class="material-symbols-outlined text-error text-[20px] mb-1">warning</span>
+                    <Loading Ready="loaded">
+                        <span class="font-headline-lg text-headline-lg text-error">32</span>
+                        <span class="material-symbols-outlined text-error text-[20px] mb-1">warning</span>
+                    </Loading>
                 </div>
                 <div class="w-full h-1 bg-surface-variant mt-sm rounded-full overflow-hidden flex flex-row-reverse">
-                    <div class="h-full bg-error w-[32%]"></div>
+                    @if (loaded) { <div class="h-full bg-error w-[32%]"></div> }
                 </div>
             </div>
         </div>
@@ -175,6 +195,7 @@
                 <span class="material-symbols-outlined text-primary">neurology</span>
                 Защо тази оценка?
             </h3>
+            <Loading Ready="loaded" Block Label="Анализ на данните…">
             <p class="font-body-md text-body-md text-on-surface-variant leading-relaxed font-data-mono text-data-mono">
                 <span class="text-primary">> Анализ на данните...</span><br />
                 SmartWear демонстрира изключителен баланс между технологична иновация (87/100) и практическа
@@ -183,6 +204,7 @@
                 целевата аудитория с предложената ценова категория. Рисковият профил е умерен (32/100), свързан
                 предимно с веригата на доставки на специфични сензори.
             </p>
+            </Loading>
         </div>
         <!-- Key Findings -->
         <div class="bg-surface-container rounded-xl border border-primary/10 p-md">
@@ -191,6 +213,7 @@
                 <span class="material-symbols-outlined text-secondary">fact_check</span>
                 Ключови открития
             </h3>
+            <Loading Ready="loaded" Block Label="Събиране на ключовите открития…">
             <div class="flex flex-col gap-sm mt-sm">
                 <div class="flex gap-sm p-sm bg-surface rounded border border-surface-variant">
                     <span class="material-symbols-outlined text-primary mt-1">check_circle</span>
@@ -219,10 +242,14 @@
                                 </div>
                             </div>
                         </div>
+            </Loading>
                     </div>
                 </div>
             </div>
 
 @code {
     [Parameter] public Guid AnalysisId { get; set; }
+
+    // Every field shows a spinner until this is true. Set it (or give each <Loading> its own condition) once the data/events are wired.
+    private bool loaded;
 }

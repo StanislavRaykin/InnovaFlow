@@ -40,12 +40,27 @@ public class AnalysisClient(HttpClient http, ILogger<AnalysisClient> logger)
         }
     }
 
-     public async Task<AnalysisStatusView?> GetStatusAsync(Guid id, CancellationToken ct = default)
+    public Task<AnalysisStatusView?> GetStatusAsync(Guid id, CancellationToken ct = default) =>
+        GetOrNullAsync<AnalysisStatusView>($"api/analyses/{id}", ct);
+
+    // Saved module results, in the same shape as the live drafts; null until the module has completed.
+
+    public Task<AudienceDraft?> GetAudienceAsync(Guid id, CancellationToken ct = default) =>
+        GetOrNullAsync<AudienceDraft>($"api/analyses/{id}/audience", ct);
+
+    public Task<MarketDraft?> GetMarketAsync(Guid id, CancellationToken ct = default) =>
+        GetOrNullAsync<MarketDraft>($"api/analyses/{id}/market", ct);
+
+    public Task<InnovationDraft?> GetInnovationAsync(Guid id, CancellationToken ct = default) =>
+        GetOrNullAsync<InnovationDraft>($"api/analyses/{id}/innovation", ct);
+
+    // 404 = missing or not yours → null; any other error throws
+    private async Task<T?> GetOrNullAsync<T>(string url, CancellationToken ct) where T : class
     {
-        using var res = await http.GetAsync($"api/analyses/{id}", ct);
-        if (res.StatusCode == HttpStatusCode.NotFound) return null;   // missing or not yours
+        using var res = await http.GetAsync(url, ct);
+        if (res.StatusCode == HttpStatusCode.NotFound) return null;
         res.EnsureSuccessStatusCode();
-        
-        return await res.Content.ReadFromJsonAsync<AnalysisStatusView>(ct);
+
+        return await res.Content.ReadFromJsonAsync<T>(ct);
     }
 }

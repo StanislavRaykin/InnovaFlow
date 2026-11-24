@@ -1,0 +1,16 @@
+@* Paragraph that grows as the AI writes it. Spinner while empty; Active adds a blinking cursor at the end. *@
+
+@if (string.IsNullOrEmpty(Value))
+{
+    <Loading Ready="false" Block Size="sm" />
+}
+else
+{
+    <p class="font-body-md text-body-md text-on-surface-variant whitespace-pre-line">@Value@if (Active){<span class="animate-pulse text-primary">▍</span>}</p>
+}
+
+@code {
+    [Parameter] public string? Value { get; set; }
+    [Parameter] public bool Active { get; set; }
+    [Parameter] public int Lines { get; set; } = 3;
+}

@@ -26,9 +26,17 @@ public class AnalysisRequestedConsumer(AnalysisDbContext db,
             return;
         }
 
-        if (analysis.Status == AnalysisStatus.Running || analysis.Status == AnalysisStatus.Completed)
+        // Atomic claim: the outbox delivers at-least-once, so with several worker instances the same
+        // message can reach two of them. Only the one whose UPDATE flips the status gets to run it.
+        var claimed = await db.Analyses
+            .Where(a => a.Id == msg.AnalysisId
+                        && a.Status != AnalysisStatus.Running
+                        && a.Status != AnalysisStatus.Completed)
+            .ExecuteUpdateAsync(s => s.SetProperty(a => a.Status, AnalysisStatus.Running), ct);
+
+        if (claimed == 0)
         {
-            logger.LogInformation("Analysis {Id} already {Status} — skipping.", msg.AnalysisId, analysis.Status);
+            logger.LogInformation("Analysis {Id} already claimed or completed — skipping.", msg.AnalysisId);
             return;
         }
         Dictionary<string, int> modules;

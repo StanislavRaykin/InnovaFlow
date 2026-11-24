@@ -1,6 +1,5 @@
 @inherits LayoutComponentBase
 @inject IdentityClient Auth
-@inject JwtAuthenticationStateProvider AuthState
 @inject NavigationManager Navigation
 
 @* Shell for every signed-in page (Dashboard, My Ideas, Create Idea). It owns the
@@ -131,18 +130,9 @@
 </div>
 
 @code {
-
-    protected override async Task OnInitializedAsync()
-    {
-        var authState = await AuthState.GetAuthenticationStateAsync();
-        bool isAuthenticated = authState.User.Identity?.IsAuthenticated ?? false;
-
-        if (!isAuthenticated)
-        {
-            Navigation.NavigateTo("/", replace: true);
-        }
-
-    }
+    // No auth check here: every page using this layout has [Authorize], so AuthorizeRouteView
+    // renders <RedirectToLogin /> for a signed-out user. A redirect here raced with that one and
+    // could send the user to the landing page instead of sign-in.
 
     // Nav-item classes, lifted verbatim from the mock-ups so the rail keeps its
     // look; NavLink swaps in the tinted marker for the current page.

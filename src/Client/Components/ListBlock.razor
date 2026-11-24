@@ -1,0 +1,28 @@
+@* Titled bullet list. Spinner until the first item arrives; items then appear as they stream.
+   Done = nothing more is coming, so an empty list shows a dash instead of spinning forever. *@
+
+<div class="mt-xs">
+    <h5 class="font-label-caps text-[10px] mb-xs @TitleClass">@Title</h5>
+    @if (Done && Items is not { Count: > 0 })
+    {
+        <p class="font-body-md text-[13px] text-on-surface-variant/60">—</p>
+    }
+    else
+    {
+        <Loading Ready="@(Items is { Count: > 0 })" Block Size="sm">
+            <ul class="font-body-md text-[13px] text-on-surface-variant list-disc pl-sm space-y-1">
+                @foreach (var item in Items!)
+                {
+                    <li>@item</li>
+                }
+            </ul>
+        </Loading>
+    }
+</div>
+
+@code {
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public string? TitleClass { get; set; }
+    [Parameter] public List<string>? Items { get; set; }
+    [Parameter] public bool Done { get; set; }
+}

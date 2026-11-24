@@ -1,0 +1,17 @@
+@* Circular loading spinner.
+   Size: "sm" for inline text, "md" (default) for headings and card values, "lg" for big scores. *@
+
+<span class="inline-block shrink-0 align-middle rounded-full border-primary/20 border-t-primary animate-spin @SizeClass @Class"
+      role="status" aria-label="Зареждане"></span>
+
+@code {
+    [Parameter] public string Size { get; set; } = "md";
+    [Parameter] public string? Class { get; set; }
+
+    private string SizeClass => Size switch
+    {
+        "sm" => "w-4 h-4 border-2",
+        "lg" => "w-12 h-12 border-4",
+        _ => "w-7 h-7 border-[3px]"
+    };
+}

@@ -22,7 +22,6 @@
 @code {
     [Parameter, EditorRequired] public Guid AnalysisId { get; set; }
 
-    // Suffixes of /analyses/{AnalysisId}; must match the @page routes in this folder.
     private static readonly (string Path, string Label)[] Sections =
     [
         ("", "Overview"),

@@ -1,0 +1,56 @@
+@* One audience segment, filled in as it streams. Segment = null → full skeleton. *@
+
+<div class="glass-panel p-md rounded-xl flex flex-col gap-sm transition-all duration-300 @(Active ? "ring-1 ring-primary/40" : "")">
+    <div class="flex items-center justify-between border-b border-primary/10 pb-xs">
+        <h4 class="font-label-caps text-label-caps @(Primary ? "text-secondary" : "text-on-surface-variant")">
+            @(Primary ? "Primary Audience" : "Secondary Audience")
+        </h4>
+        <span class="material-symbols-outlined text-sm @(Primary ? "text-secondary" : "text-on-surface-variant")">
+            @(Primary ? "stars" : "accessibility_new")
+        </span>
+    </div>
+
+    <h5 class="font-headline-md text-headline-md mt-xs @(Primary ? "text-primary" : "text-on-surface")">
+        <Loading Ready="@(!string.IsNullOrEmpty(Segment?.Name))">@Segment?.Name</Loading>
+    </h5>
+
+    <StreamText Value="@Segment?.Need" Active="@(Active && Segment?.Motivation is null)" Lines="3" />
+
+    @if (Segment?.Motivation is not null)
+    {
+        <details class="font-body-md text-[13px] text-on-surface-variant">
+            <summary class="cursor-pointer text-secondary font-label-caps text-[10px]">Детайли</summary>
+            <dl class="mt-xs space-y-1">
+                <Detail Title="Мотивация" Value="@Segment.Motivation" />
+                <Detail Title="Контекст" Value="@Segment.UsageContext" />
+                <Detail Title="Възражения" Value="@Segment.Objections" />
+            </dl>
+        </details>
+    }
+
+    <div class="flex flex-wrap gap-xs mt-auto pt-sm border-t border-primary/10">
+        <Loading Ready="ChipsReady" Size="sm">
+            @if (Segment!.IsHypothesis == true)
+            {
+                <Chip Text="Хипотеза" Primary="Primary" />
+            }
+            <Chip Text="@($"Цена: {FirstWord(Segment.PriceSensitivity)}")" Primary="Primary" />
+            <Chip Text="@($"Достъп: {FirstWord(Segment.ReachDifficulty)}")" Primary="Primary" />
+        </Loading>
+    </div>
+</div>
+
+@code {
+    [Parameter] public SegmentDraft? Segment { get; set; }
+    [Parameter] public bool Primary { get; set; }
+    [Parameter] public bool Active { get; set; }
+
+    // While streaming, ReachDifficulty is only complete once the next field (the score) has started,
+    // otherwise the chip would flicker through "с", "ср", "сре"…
+    private bool ChipsReady =>
+        Segment?.ReachDifficulty is not null && (!Active || Segment.AttractivenessScore is not null);
+
+    /// "висока — студентите сравняват цени" → "висока"
+    private static string FirstWord(string? s) =>
+        string.IsNullOrWhiteSpace(s) ? "…" : s.Split([' ', ',', '—', '-', '.'], 2, StringSplitOptions.RemoveEmptyEntries)[0];
+}

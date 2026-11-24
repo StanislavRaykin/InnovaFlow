@@ -36,11 +36,13 @@
                 SYS.ANALYZE.COMPLETE
             </div>
             <h1 class="font-display-lg text-display-lg text-on-surface mb-xs tracking-tight">
-                Анализ на осъществимост: <span class="text-primary glow-text">SmartWear</span>
+                Анализ на осъществимост: <span class="text-primary glow-text"><Loading Ready="loaded" Size="lg">SmartWear</Loading></span>
             </h1>
-            <p class="font-body-lg text-body-lg text-on-surface-variant max-w-3xl">
-                Може ли тази идея реално да проработи? Подробна оценка на техническите и ресурсни изисквания за реализацията на интелигентни облекла с вградена биометрия.
-            </p>
+            <Loading Ready="loaded" Block Size="sm" Class="justify-start">
+                <p class="font-body-lg text-body-lg text-on-surface-variant max-w-3xl">
+                    Може ли тази идея реално да проработи? Подробна оценка на техническите и ресурсни изисквания за реализацията на интелигентни облекла с вградена биометрия.
+                </p>
+            </Loading>
         </div>
         <!-- Scores Bento Grid -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-sm md:gap-md mb-xl">
@@ -51,13 +53,16 @@
                 </div>
                 <span class="font-label-caps text-label-caps text-on-surface-variant uppercase mb-xs">Техническа<br />осъществимост</span>
                 <div class="flex items-end gap-sm mt-auto">
-                    <span class="font-display-lg text-display-lg text-primary glow-text">91</span>
+                    <span class="font-display-lg text-display-lg text-primary glow-text"><Loading Ready="loaded" Size="lg">91</Loading></span>
                     <span class="font-data-mono text-data-mono text-on-surface-variant mb-xs">/100</span>
                 </div>
                 <div class="w-full bg-surface-container-high h-1 rounded-full mt-sm overflow-hidden">
-                    <div class="bg-primary h-full w-[91%] relative">
-                        <div class="absolute inset-0 progress-shimmer"></div>
-                    </div>
+                    @if (loaded)
+                    {
+                        <div class="bg-primary h-full w-[91%] relative">
+                            <div class="absolute inset-0 progress-shimmer"></div>
+                        </div>
+                    }
                 </div>
             </div>
             <!-- Resources -->
@@ -67,13 +72,16 @@
                 </div>
                 <span class="font-label-caps text-label-caps text-on-surface-variant uppercase mb-xs">Ресурсни<br />изисквания</span>
                 <div class="flex items-end gap-sm mt-auto">
-                    <span class="font-display-lg text-display-lg text-secondary">76</span>
+                    <span class="font-display-lg text-display-lg text-secondary"><Loading Ready="loaded" Size="lg">76</Loading></span>
                     <span class="font-data-mono text-data-mono text-on-surface-variant mb-xs">/100</span>
                 </div>
                 <div class="w-full bg-surface-container-high h-1 rounded-full mt-sm overflow-hidden">
-                    <div class="bg-secondary h-full w-[76%] relative">
-                        <div class="absolute inset-0 progress-shimmer"></div>
-                    </div>
+                    @if (loaded)
+                    {
+                        <div class="bg-secondary h-full w-[76%] relative">
+                            <div class="absolute inset-0 progress-shimmer"></div>
+                        </div>
+                    }
                 </div>
             </div>
             <!-- Complexity -->
@@ -83,13 +91,16 @@
                 </div>
                 <span class="font-label-caps text-label-caps text-on-surface-variant uppercase mb-xs">Сложност на<br />изпълнение</span>
                 <div class="flex items-end gap-sm mt-auto">
-                    <span class="font-display-lg text-display-lg text-tertiary">64</span>
+                    <span class="font-display-lg text-display-lg text-tertiary"><Loading Ready="loaded" Size="lg">64</Loading></span>
                     <span class="font-data-mono text-data-mono text-on-surface-variant mb-xs">/100</span>
                 </div>
                 <div class="w-full bg-surface-container-high h-1 rounded-full mt-sm overflow-hidden">
-                    <div class="bg-tertiary h-full w-[64%] relative">
-                        <div class="absolute inset-0 progress-shimmer"></div>
-                    </div>
+                    @if (loaded)
+                    {
+                        <div class="bg-tertiary h-full w-[64%] relative">
+                            <div class="absolute inset-0 progress-shimmer"></div>
+                        </div>
+                    }
                 </div>
             </div>
             <!-- Scalability -->
@@ -99,13 +110,16 @@
                 </div>
                 <span class="font-label-caps text-label-caps text-on-surface-variant uppercase mb-xs">Мащабируемост<br />на пазара</span>
                 <div class="flex items-end gap-sm mt-auto">
-                    <span class="font-display-lg text-display-lg text-primary glow-text">88</span>
+                    <span class="font-display-lg text-display-lg text-primary glow-text"><Loading Ready="loaded" Size="lg">88</Loading></span>
                     <span class="font-data-mono text-data-mono text-on-surface-variant mb-xs">/100</span>
                 </div>
                 <div class="w-full bg-surface-container-high h-1 rounded-full mt-sm overflow-hidden">
-                    <div class="bg-primary h-full w-[88%] relative">
-                        <div class="absolute inset-0 progress-shimmer"></div>
-                    </div>
+                    @if (loaded)
+                    {
+                        <div class="bg-primary h-full w-[88%] relative">
+                            <div class="absolute inset-0 progress-shimmer"></div>
+                        </div>
+                    }
                 </div>
             </div>
         </div>
@@ -118,6 +132,7 @@
                     <h3 class="font-data-mono text-data-mono text-on-surface uppercase">Необходими Технологии</h3>
                 </div>
                 <div class="p-sm flex-1">
+                    <Loading Ready="loaded" Block>
                     <ul class="space-y-sm">
                         <li class="flex items-start gap-xs">
                             <span class="material-symbols-outlined text-primary text-sm mt-1">check_circle</span>
@@ -141,6 +156,7 @@
                             </div>
                         </li>
                     </ul>
+                    </Loading>
                 </div>
             </div>
             <!-- Resources -->
@@ -150,6 +166,7 @@
                     <h3 class="font-data-mono text-data-mono text-on-surface uppercase">Необходими Ресурси</h3>
                 </div>
                 <div class="p-sm flex-1">
+                    <Loading Ready="loaded" Block>
                     <div class="space-y-sm">
                         <div>
                             <div class="flex justify-between mb-xs">
@@ -173,6 +190,7 @@
                             <div class="w-full bg-surface-container-highest h-1 rounded-full"><div class="bg-primary h-full w-[60%] rounded-full"></div></div>
                         </div>
                     </div>
+                    </Loading>
                 </div>
             </div>
             <!-- Challenges -->
@@ -182,6 +200,7 @@
                     <h3 class="font-data-mono text-data-mono text-on-surface uppercase">Потенциални Предизвикателства</h3>
                 </div>
                 <div class="p-sm flex-1">
+                    <Loading Ready="loaded" Block>
                     <ul class="space-y-sm">
                         <li class="flex items-start gap-sm p-xs bg-error-container/20 rounded-lg border border-error/20">
                             <span class="material-symbols-outlined text-error mt-0.5">battery_alert</span>
@@ -198,6 +217,7 @@
                             </div>
                         </li>
                     </ul>
+                    </Loading>
                 </div>
             </div>
         </div>
@@ -214,6 +234,7 @@
                 <h3 class="font-headline-md text-headline-md text-on-surface">AI Оценка &amp; Препоръка</h3>
             </div>
             <div class="bg-surface-container/50 p-md rounded-lg font-data-mono text-data-mono text-on-surface-variant leading-relaxed border border-primary/5">
+                <Loading Ready="loaded" Block Label="Синтезиране на оценката…">
                 <p class="mb-sm">
                     &gt; ИНИЦИАЛИЗИРАНЕ НА СИНТЕЗА...<br />
                     &gt; Проектът "SmartWear" показва <strong class="text-primary glow-text">висока техническа осъществимост (91%)</strong> благодарение на напредъка в гъвкавата електроника.
@@ -225,6 +246,7 @@
                     &gt; РЕШЕНИЕ: ПРОДЪЛЖЕТЕ С MVP.<br />
                     &gt; Фокусирайте се върху един конкретен use-case (напр. спортна биометрия) преди мащабиране. Търсете партньорства с утвърдени текстилни производители за намаляване на Capex.
                 </p>
+                </Loading>
             </div>
             <div class="mt-md flex justify-end">
                 <button class="px-md py-sm bg-transparent border border-primary text-primary hover:bg-primary/10 rounded-DEFAULT font-data-mono text-data-mono uppercase tracking-widest transition-all">
@@ -236,4 +258,7 @@
 
 @code {
     [Parameter] public Guid AnalysisId { get; set; }
+
+    // Every field shows a spinner until this is true. Set it (or give each <Loading> its own condition) once the data/events are wired.
+    private bool loaded;
 }

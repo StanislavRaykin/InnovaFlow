@@ -1,0 +1,8 @@
+@* Small tag. Primary = green, otherwise neutral. *@
+
+<span class="px-xs py-[2px] font-data-mono text-[10px] rounded @(Primary ? "bg-primary/10 text-primary" : "bg-surface-variant text-on-surface-variant")">@Text</span>
+
+@code {
+    [Parameter] public string? Text { get; set; }
+    [Parameter] public bool Primary { get; set; }
+}

@@ -1,0 +1,88 @@
+@* One competitor (or competitor category), filled in as it streams.
+   Fields arrive in order: name, description, websiteUrl?, industry, pricingModel?, strengths, weaknesses, similarityScore,
+   so a field is complete once the next one has started, or once the card isn't Active any more. *@
+
+<div class="glass-card rounded-xl p-md flex flex-col gap-sm @(Active ? "ring-1 ring-primary/40" : "")">
+    <div class="flex items-start justify-between gap-sm border-b border-primary/10 pb-sm">
+        <div class="min-w-0">
+            <h4 class="font-headline-md text-[20px] text-on-surface">
+                <Loading Ready="@(!string.IsNullOrEmpty(Competitor.Name))">@Competitor.Name</Loading>
+            </h4>
+            <p class="font-data-mono text-[12px] text-on-surface-variant">
+                <Loading Ready="@(Competitor.Industry is not null)" Size="sm">@Competitor.Industry</Loading>
+            </p>
+        </div>
+        @if (Website is { } url)
+        {
+            <a href="@url" target="_blank" rel="noopener noreferrer" title="@url"
+               class="shrink-0 p-xs rounded-lg text-on-surface-variant hover:text-primary hover:bg-primary/10 transition-colors">
+                <span class="material-symbols-outlined text-[18px]">open_in_new</span>
+            </a>
+        }
+    </div>
+
+    <div class="flex flex-wrap gap-xs">
+        @if (Kind is not null)
+        {
+            <Chip Text="@Kind" Primary="@(Kind == "Пряк")" />
+        }
+        @if (Competitor.PricingModel is not null && (!Active || Competitor.Strengths is not null))
+        {
+            <Chip Text="@Competitor.PricingModel" />
+        }
+    </div>
+
+    <StreamText Value="@Description" Active="DescriptionActive" />
+
+    <div class="grid grid-cols-2 gap-sm">
+        <ListBlock Title="Силни страни" TitleClass="text-primary" Items="Competitor.Strengths" Done="!Active" />
+        <ListBlock Title="Слаби страни" TitleClass="text-error" Items="Competitor.Weaknesses" Done="!Active" />
+    </div>
+
+    <div class="flex flex-col gap-xs mt-auto pt-sm border-t border-primary/10">
+        <div class="flex justify-between font-data-mono text-[12px] text-on-surface-variant">
+            <span>Сходство с идеята</span>
+            <Loading Ready="SimilarityReady" Size="sm"><span class="text-on-surface">@Competitor.SimilarityScore/100</span></Loading>
+        </div>
+        <div class="w-full h-1 bg-surface-container-highest rounded-full overflow-hidden">
+            <div class="h-full bg-tertiary transition-[width] duration-500" style="width: @(SimilarityReady ? Competitor.SimilarityScore : 0)%"></div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public CompetitorDraft Competitor { get; set; } = default!;
+
+    /// <summary>The AI is writing this competitor right now.</summary>
+    [Parameter] public bool Active { get; set; }
+
+    /// <summary>The AI is writing the description right now.</summary>
+    [Parameter] public bool DescriptionActive { get; set; }
+
+    private const string Direct = "Пряк конкурент.";
+    private const string Indirect = "Косвен конкурент.";
+
+    // The prompt makes every description start with one of the two; show it as a chip instead
+    private string? Kind =>
+        Competitor.Description?.StartsWith(Direct) == true ? "Пряк"
+        : Competitor.Description?.StartsWith(Indirect) == true ? "Косвен"
+        : null;
+
+    private string? Description => Kind switch
+    {
+        "Пряк" => Competitor.Description![Direct.Length..].TrimStart(),
+        "Косвен" => Competitor.Description![Indirect.Length..].TrimStart(),
+        _ => Competitor.Description
+    };
+
+    private bool SimilarityReady => Competitor.SimilarityScore is not null && !Active;
+
+    // Only a finished http(s) URL becomes a link: it comes from the AI, so never trust the scheme
+    private string? Website =>
+        Competitor.WebsiteUrl is { } url
+        && (!Active || Competitor.Industry is not null)
+        && Uri.TryCreate(url, UriKind.Absolute, out var uri)
+        && (uri.Scheme == Uri.UriSchemeHttps || uri.Scheme == Uri.UriSchemeHttp)
+            ? uri.AbsoluteUri
+            : null;
+}

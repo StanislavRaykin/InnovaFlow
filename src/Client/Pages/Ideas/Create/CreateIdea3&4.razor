@@ -2,22 +2,14 @@
 @layout AccountLayout
 @attribute [Authorize]
 @inject IdeaDraft Draft
-@inject DraftAutosave Autosave
+@* @inject DraftAutosave Autosave *@
 @inject IdeaClient Ideas
 @inject AnalysisClient Analyses
 @inject NavigationManager Navigation
-@implements IAsyncDisposable
 
 @* Steps 03 Audience / 04 Review of the create-idea wizard — the continuation of
    /ideas/create (CreateIdea1&2.razor, next to this file).
-
-   The side nav, the mobile top bar and the footer now live in AccountLayout, as
-   does the css/createidea.css link behind .glass-panel, .glass-subcard,
-   .cyber-glow, .neon-glow-btn and .shimmer-progress. The TopAppBar stays here
-   because it marks step 03 as the current one.
-
-   The old ~/js/createidea3&4_js.js was only another copy of the Tailwind config,
-   which index.html already loads from js/tailwind.config.js — so it is gone. *@
+*@
 
 <PageTitle>InnovaFlow - Създаване на Идея</PageTitle>
 
@@ -180,18 +172,17 @@
     private bool submitting;
     private string? error;
 
-    // set once the idea is created, so a retry after a failed analysis start
-    // doesn't try to create it a second time
+    
     private Guid? createdIdeaId;
 
-    protected override void OnInitialized()
-    {
+    // protected override void OnInitialized()
+    // {
 
-      Autosave.Start();
-    }
+    //   Autosave.Start();
+    // }
 
 
-    public async ValueTask DisposeAsync() => await Autosave.StopAsync();
+    // public async ValueTask DisposeAsync() => await Autosave.StopAsync();
 
     private static string Show(string value) => string.IsNullOrWhiteSpace(value) ? "—" : value;
 
@@ -222,7 +213,7 @@
                 return;
             }
 
-            await Autosave.ResetAsync();
+            // await Autosave.ResetAsync();
             Navigation.NavigateTo($"start-analysis/{started.AnalysisId}");
         }
         finally

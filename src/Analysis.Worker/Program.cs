@@ -19,9 +19,17 @@ var rabbitConnection = builder.Configuration.GetConnectionString("messaging")
 
 builder.Services.AddAnalysisData(dbConnection);
 
-// AI
-builder.Services.AddAIClient<ClaudeOptions, ClaudeAiClient>(builder.Configuration, "Claude");
-builder.Services.AddAIClient<KimiOptions, KimiClient>(builder.Configuration, "Kimi");
+// AI. Ai:UseFake = true swaps in FakeAiClient under the same names: dummy results, no API calls, no balance used
+var useFakeAi = builder.Configuration.GetValue<bool>("Ai:UseFake");
+if (useFakeAi)
+{
+    builder.Services.AddFakeAIClients(builder.Configuration, "Claude", "Kimi");
+}
+else
+{
+    builder.Services.AddAIClient<ClaudeOptions, ClaudeAiClient>(builder.Configuration, "Claude");
+    builder.Services.AddAIClient<KimiOptions, KimiClient>(builder.Configuration, "Kimi");
+}
 
 builder.Services.AddSingleton<IAIClientFactory, AIClientFactory>();
 
@@ -36,7 +44,15 @@ builder.Services.AddScoped<IAnalysisModule, InnovationAnalysisModule>();
 builder.Services.AddMassTransit(x =>
 {
     x.SetKebabCaseEndpointNameFormatter();
-    x.AddConsumer<AnalysisRequestedConsumer>();
+    // Analyses are long-running, so each instance only takes what it can run right now.
+    // With the default prefetch (CPU count * 2) one instance would grab a batch of jobs while other replicas sit idle.
+    var concurrentAnalyses = builder.Configuration.GetValue("Worker:ConcurrentAnalyses", 4);
+    x.AddConsumer<AnalysisRequestedConsumer>()
+     .Endpoint(e =>
+     {
+         e.ConcurrentMessageLimit = concurrentAnalyses;
+         e.PrefetchCount = concurrentAnalyses;
+     });
 
     x.UsingRabbitMq((context, cfg) =>
     {
@@ -50,5 +66,8 @@ builder.Services.AddScoped<PartialPublisher>();
 builder.Services.AddScoped<ProgressPublisher>();
 
 var host = builder.Build();
-host.Services.GetRequiredService<ILogger<Program>>().LogInformation("Analysis.Worker starting");
+var startupLogger = host.Services.GetRequiredService<ILogger<Program>>();
+startupLogger.LogInformation("Analysis.Worker starting");
+if (useFakeAi)
+    startupLogger.LogWarning("Ai:UseFake is on: AI clients return DUMMY data and make no API calls");
 host.Run();

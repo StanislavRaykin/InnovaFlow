@@ -1,0 +1,38 @@
+@* Shows a spinner until Ready is true, then the content.
+   The content isn't rendered (or evaluated) while not ready, so it can safely use data that is still null:
+       <Loading Ready="market is not null" Size="lg">@market!.MarketOpportunity</Loading>
+   Inline (default) = just the spinner, for single values. Block = centered spinner + label, for paragraphs and lists. *@
+
+@if (Ready)
+{
+    @ChildContent
+}
+else if (Block)
+{
+    <div class="flex items-center justify-center gap-sm py-md font-data-mono text-data-mono text-on-surface-variant @Class">
+        <Spinner Size="@Size" />
+        @if (!string.IsNullOrEmpty(Label))
+        {
+            <span class="animate-pulse">@Label</span>
+        }
+    </div>
+}
+else
+{
+    <Spinner Size="@Size" Class="@Class" />
+}
+
+@code {
+    [Parameter] public bool Ready { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>"sm", "md" or "lg", see <see cref="Spinner"/></summary>
+    [Parameter] public string Size { get; set; } = "md";
+
+    [Parameter] public bool Block { get; set; }
+
+    /// <summary>Text next to the spinner, only in Block mode</summary>
+    [Parameter] public string? Label { get; set; } = "Зареждане…";
+
+    [Parameter] public string? Class { get; set; }
+}

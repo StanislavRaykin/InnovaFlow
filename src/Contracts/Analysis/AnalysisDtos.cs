@@ -19,13 +19,77 @@ public record AnalysisStatusDto(
 
 public sealed record ScoreDto(string ScoreType, decimal Score, string? Explanation);
 
-/// <summary>Market Analyzer output — one row per analysis</summary>
+/// <summary>
+/// GET /api/analyses/{id}/market — the saved market result. Same shape (camelCase) as the AI's JSON,
+/// so the client reads it into the same draft type it fills from the live snapshots.
+/// </summary>
 public sealed record MarketAnalysisDto(
     string? MarketSize,
     string? MarketTrend,
-    decimal MarketOpportunity,
-    string Summary);
+    int? MarketOpportunity,
+    string? Summary,
+    string? MarketOpportunityExplanation,
+    int? CompetitionIntensity,
+    string? CompetitionExplanation,
+    List<CompetitorDto> Competitors);
 
+public sealed record CompetitorDto(
+    string Name,
+    string? Description,
+    string? WebsiteUrl,
+    string? Industry,
+    string? PricingModel,
+    List<string> Strengths,
+    List<string> Weaknesses,
+    int? SimilarityScore);
+
+/// <summary>GET /api/analyses/{id}/innovation — the saved innovation result, in the AI's JSON shape.</summary>
+public sealed record InnovationAnalysisDto(
+    int OriginalityScore,
+    string OriginalityExplanation,
+    int TechnologicalInnovationScore,
+    string TechnologicalInnovationExplanation,
+    int BusinessInnovationScore,
+    string BusinessInnovationExplanation,
+    int GrowthPotentialScore,
+    string GrowthPotentialExplanation,
+    string Summary,
+    int? OverallScore,
+    string? OverallExplanation);
+
+
+/// <summary>
+/// GET /api/analyses/{id}/audience — the saved audience result. Same shape (camelCase) as the AI's JSON,
+/// so the client reads it into the same draft type it fills from the live snapshots.
+/// </summary>
+public sealed record AudienceAnalysisDto(
+    int? OverallScore,
+    string? OverallExplanation,
+    AudienceSegmentDto? PrimarySegment,
+    List<AudienceSegmentDto> SecondarySegments,
+    List<PersonaDto> Personas,
+    string? Description);
+
+public sealed record AudienceSegmentDto(
+    string Name,
+    bool IsHypothesis,
+    string? Need,
+    string? Motivation,
+    string? UsageContext,
+    string? Objections,
+    string? PriceSensitivity,
+    string? ReachDifficulty,
+    int? AttractivenessScore,
+    string? AttractivenessExplanation);
+
+public sealed record PersonaDto(
+    string Name,
+    string? AgeRange,
+    string? Occupation,
+    string? Description,
+    List<string> Goals,
+    List<string> PainPoints,
+    List<string> Behaviors);
 
 public sealed record AnalysisRequested(
     Guid AnalysisId,
@@ -85,13 +149,16 @@ public enum ProgressStage
 }
 
 /// <summary>One event for the client. Milestones go over RabbitMQ, Partial over Redis pub/sub.</summary>
+/// <param name="Seq">Only for Partial: the snapshot's number within one run (1, 2, …), so the client can drop
+/// snapshots that arrive out of order. 0 = not numbered.</param>
 public record AnalysisEvent(
     Guid AnalysisId,
     Guid UserId,
     string Module,
     ProgressStage Stage,
     string? Message = null,
-    JsonElement? Partial = null);
+    JsonElement? Partial = null,
+    int Seq = 0);
 
     public record AnalysisPartial(
     Guid AnalysisId,

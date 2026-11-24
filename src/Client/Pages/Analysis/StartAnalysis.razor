@@ -1,0 +1,303 @@
+@using Microsoft.AspNetCore.SignalR.Client
+@using Client.Views
+
+@page "/start-analysis/{Id:guid}"
+@implements IAsyncDisposable
+@inject JwtAuthenticationStateProvider Auth;
+@inject NavigationManager Nav
+@inject AnalysisClient analyses;
+@inject HubClient hubClient;
+@layout AccountLayout
+@attribute [Authorize]
+@using Contracts.AnalysisDtos
+
+
+
+<!-- Main Content Canvas -->
+<!-- TopAppBar (Hidden Navigation Context - Linear/Transactional Override applied to TopNavBar) -->
+<header class="flex flex-col gap-sm p-md bg-surface-dim/50 backdrop-blur-xl border-b border-primary/20 shadow-lg shadow-primary/5 sticky top-0 z-30">
+    <div class="flex justify-between items-center">
+        <div class="flex items-center gap-sm">
+            <span class="material-symbols-outlined text-primary text-3xl" data-icon="analytics" style="font-variation-settings: 'FILL' 1;">analytics</span>
+            <h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg font-bold text-primary">Анализ на Идеята</h1>
+        </div>
+        <div class="flex gap-sm">
+            <button class="p-xs text-on-surface-variant hover:bg-primary/10 rounded-lg transition-colors group relative">
+                <span class="material-symbols-outlined group-hover:text-primary" data-icon="refresh">refresh</span>
+            </button>
+            <button class="p-xs text-on-surface-variant hover:bg-primary/10 rounded-lg transition-colors group relative">
+                <span class="material-symbols-outlined group-hover:text-primary" data-icon="ios_share">ios_share</span>
+            </button>
+        </div>
+    </div>
+</header>
+<!-- Main Body -->
+<div class="flex-1 p-md md:p-xl flex flex-col items-center justify-center relative">
+    <!-- Central Processing UI -->
+    <div class="w-full max-w-4xl grid grid-cols-1 lg:grid-cols-2 gap-md items-start">
+        <!-- Left Column: Status & Progress -->
+        <div class="flex flex-col gap-lg bg-surface-container/80 backdrop-blur-xl border border-primary/10 rounded-xl p-md md:p-xl shadow-[0_0_15px_rgba(74,222,128,0.05)]">
+            <div class="text-center lg:text-left">
+                <h2 class="font-display-lg text-display-lg text-primary mb-xs">Анализиране...</h2>
+                <p class="font-body-lg text-body-lg text-on-surface-variant">Нашите AI агенти оценяват вашата идея от множество перспективи в реално време.</p>
+            </div>
+            <!-- Progress Section -->
+            <div class="space-y-sm">
+                <div class="flex justify-between font-data-mono text-data-mono text-secondary">
+                    <span>ПРОГРЕС НА АНАЛИЗА</span>
+                    <span>@(status?.Done ?? 0) / @(status?.Total ?? 0) МОДУЛА</span>
+                </div>
+              <div class="w-full h-1 bg-surface-container-highest rounded-full overflow-hidden">
+    <div class="h-full bg-primary shimmer-bar shadow-[0_0_10px_rgba(74,222,128,0.5)] transition-[width] duration-500 ease-out"
+         style="width: @Percent%"></div>
+</div>
+            </div>
+            <!-- Process List -->
+            <div class="space-y-sm font-data-mono text-data-mono mt-sm max-h-[280px] overflow-y-auto pr-xs [scrollbar-width:thin] [scrollbar-color:rgba(74,222,128,0.3)_transparent]">
+                @if (status is not null)
+                {
+                    @foreach (var m in status.Modules)
+                    {
+                        @switch (m.Status)
+                        {
+                            case "Completed":
+                                <a href="@ModuleHref(m)" title="Към резултатите" class="state-in group flex items-center gap-sm p-xs rounded-DEFAULT border border-transparent text-on-surface-variant opacity-70 hover:opacity-100 hover:bg-primary/5 hover:border-primary/20 transition-all">
+                                    <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                                    <span>@m.Title</span>
+                                    <span class="material-symbols-outlined ml-auto text-[18px] text-primary opacity-0 group-hover:opacity-100 transition-opacity">chevron_right</span>
+                                </a>
+                                break;
+                            case "Failed":
+                                <div class="state-in flex items-center gap-sm p-xs border border-transparent text-error opacity-80">
+                                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">error</span>
+                                    <span>@m.Title</span>
+                                </div>
+                                break;
+                            case "Running":
+                                <a href="@ModuleHref(m)" title="Към резултатите" class="state-in group flex items-center gap-sm text-primary font-bold p-xs rounded-DEFAULT bg-primary/5 border border-primary/20 hover:bg-primary/10 hover:border-primary/40 transition-all">
+                                    <span class="material-symbols-outlined text-primary animate-pulse-glow rounded-full">pending</span>
+                                    <span>@m.Title</span>
+                                    <span class="ml-auto text-label-caps font-label-caps text-secondary-fixed-dim animate-pulse">
+                                        <span @key="m.Label" class="label-swap">@(m.Label ?? "ОБРАБОТКА...")</span>
+                                    </span>
+                                    <span class="material-symbols-outlined text-[18px] opacity-0 group-hover:opacity-100 transition-opacity">chevron_right</span>
+                                </a>
+                                break;
+                            default:
+                                <a href="@ModuleHref(m)" title="Към резултатите" class="group flex items-center gap-sm p-xs rounded-DEFAULT border border-transparent text-surface-bright hover:text-on-surface-variant hover:bg-primary/5 hover:border-primary/10 transition-all">
+                                    <span class="material-symbols-outlined">radio_button_unchecked</span>
+                                    <span>@m.Title</span>
+                                    <span class="material-symbols-outlined ml-auto text-[18px] opacity-0 group-hover:opacity-100 transition-opacity">chevron_right</span>
+                                </a>
+                                break;
+                        }
+                    }
+                }
+            </div>
+        </div>
+        <!-- Right Column: AI Agent Swarm -->
+        <div class="flex flex-col gap-md bg-surface-container-low/50 backdrop-blur-xl border border-primary/10 rounded-xl p-md relative overflow-hidden h-full min-h-[400px]">
+            <!-- Subtle background decoration -->
+            <div class="absolute inset-0 opacity-10 flex items-center justify-center pointer-events-none">
+                <span class="material-symbols-outlined text-[200px] text-primary" data-icon="memory">memory</span>
+            </div>
+            <h3 class="font-label-caps text-label-caps text-on-surface-variant mb-xs z-10">АКТИВНИ AI АГЕНТИ</h3>
+            <div class="grid grid-cols-2 gap-sm z-10 flex-1 content-start">
+                @if (status != null)
+                {
+                    @foreach (var m in status.Modules)
+                    {
+                        var icon = m.MiIcon ?? "smart_toy";
+                        var name = $"{m.Key} Агент";
+                        @switch (m.Status)
+                        {
+                            case "Running":
+                                <a href="@ModuleHref(m)" title="Към резултатите" class="group bg-surface-container border border-primary/40 hover:border-primary rounded-lg p-3 flex items-center gap-sm agent-active relative overflow-hidden transition-colors">
+                                    <div class="absolute inset-0 bg-primary/5"></div>
+                                    <div class="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center border border-primary relative z-10">
+                                        <span class="material-symbols-outlined text-base text-primary">@icon</span>
+                                    </div>
+                                    <div class="relative z-10">
+                                        <div class="font-label-caps text-label-caps text-primary shadow-primary">@name</div>
+                                        <div class="font-data-mono text-[13px] text-secondary">
+                                            <span @key="m.Label" class="label-swap">@(m.Label ?? "СКАНИРАНЕ...")</span>
+                                        </div>
+                                    </div>
+                                    <span class="material-symbols-outlined ml-auto text-[18px] text-primary relative z-10 opacity-0 group-hover:opacity-100 transition-opacity">chevron_right</span>
+                                </a>
+                                break;
+                            case "Completed":
+                                <a href="@ModuleHref(m)" title="Към резултатите" class="state-in group bg-surface-container border border-primary/10 hover:border-primary/40 hover:bg-primary/5 rounded-lg p-3 flex items-center gap-sm transition-colors">
+                                    <div class="w-9 h-9 rounded-full bg-surface-variant flex items-center justify-center">
+                                        <span class="material-symbols-outlined text-base text-primary">@icon</span>
+                                    </div>
+                                    <div>
+                                        <div class="font-label-caps text-label-caps text-primary">@name</div>
+                                        <div class="font-data-mono text-[13px] text-on-surface-variant">ПРИКЛЮЧЕН</div>
+                                    </div>
+                                    <span class="material-symbols-outlined ml-auto text-[18px] text-primary opacity-0 group-hover:opacity-100 transition-opacity">chevron_right</span>
+                                </a>
+                                break;
+                            case "Failed":
+                                <div class="state-in bg-surface-container border border-error/40 rounded-lg p-3 flex items-center gap-sm">
+                                    <div class="w-9 h-9 rounded-full bg-surface-variant flex items-center justify-center">
+                                        <span class="material-symbols-outlined text-base text-error">@icon</span>
+                                    </div>
+                                    <div>
+                                        <div class="font-label-caps text-label-caps text-error">@name</div>
+                                        <div class="font-data-mono text-[13px] text-on-surface-variant">ГРЕШКА</div>
+                                    </div>
+                                </div>
+                                break;
+                            default:
+                                <a href="@ModuleHref(m)" title="Към резултатите" class="group bg-surface-container border border-surface-bright hover:border-primary/30 rounded-lg p-3 flex items-center gap-sm opacity-50 hover:opacity-80 transition-all">
+                                    <div class="w-9 h-9 rounded-full bg-surface-bright flex items-center justify-center">
+                                        <span class="material-symbols-outlined text-base text-on-surface-variant">@icon</span>
+                                    </div>
+                                    <div>
+                                        <div class="font-label-caps text-label-caps text-on-surface-variant">@name</div>
+                                        <div class="font-data-mono text-[13px] text-surface-bright">ИЗЧАКВАНЕ</div>
+                                    </div>
+                                    <span class="material-symbols-outlined ml-auto text-[18px] text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity">chevron_right</span>
+                                </a>
+                                break;
+                        }
+                    }
+                }
+            </div>
+            <!-- Network Visualizer Output Box -->
+            <div class="mt-auto bg-[#040812] border border-primary/20 rounded-DEFAULT font-data-mono z-10 relative overflow-hidden">
+                <div class="flex items-center justify-between px-sm py-2 border-b border-primary/10 text-[11px] text-on-surface-variant">
+                    <span class="flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+                        ЛОГ НА СЪБИТИЯТА
+                    </span>
+                    <span>@logs.Count</span>
+                </div>
+                <!-- flex-col-reverse keeps the view pinned to the newest line without JS -->
+                <div class="h-64 md:h-72 overflow-y-auto flex flex-col-reverse p-sm [scrollbar-width:thin] [scrollbar-color:rgba(74,222,128,0.3)_transparent]">
+                    <div class="space-y-1 text-[12px] leading-relaxed text-secondary-fixed-dim" id="terminal-output">
+                        @foreach (var l in logs)
+                        {
+                            <div @key="l.Id" class="log-line flex gap-2 px-1">
+                                <span class="shrink-0 text-on-surface-variant/50">@l.Time</span>
+                                <span class="min-w-0 break-words">&gt; @l.Text</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+
+    private AnalysisStatusView? status;// the endpoint's response
+    private HubConnection hub;
+    private record LogLine(int Id, string Time, string Text);
+
+    private readonly List<LogLine> logs = [];
+    private int logSeq;                                  // stable @key so only new lines animate
+    private IDisposable? subscription;
+
+    private void AddLog(string text)
+    {
+        logs.Add(new LogLine(++logSeq, DateTime.Now.ToString("HH:mm:ss"), text));
+        if (logs.Count > 100)
+        {
+          logs.RemoveAt(0);
+        } 
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        hub = hubClient.Connection;
+        // the hub is shared across pages (scoped = app lifetime in WASM), so subscribe here and unsubscribe on dispose
+        subscription = hub.On<AnalysisEvent>("AnalysisEvent", OnEventAsync);
+        hub.Reconnected += OnReconnectedAsync;   // catch up after a dropped connection
+
+        await hubClient.EnsureStartedAsync();
+        AddLog("Свързано. Изчакване на събития…");
+
+        // load the current state
+        await LoadStatusAsync();
+    }
+
+    private async Task LoadStatusAsync()
+    {
+        status = await analyses.GetStatusAsync(Id);
+        if(status == null)
+        {
+          Nav.NavigateTo("/not-found");
+          return;
+        }
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task OnEventAsync(AnalysisEvent e)
+    {
+        if (e.AnalysisId != Id || status is null) return;
+
+        if (e.Stage == ProgressStage.Log)
+        {
+            AddLog(e.Message);
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        var module = status.Modules.FirstOrDefault(m => m.Key == e.Module);
+        if (module is null || module.Status is "Completed" or "Failed") return;   // already done
+
+        switch (e.Stage)
+        {
+            case ProgressStage.Completed:
+            case ProgressStage.Failed:
+                module.Status = e.Stage.ToString();
+                status.Done++;
+                if (status.Done == status.Total) Nav.NavigateTo($"/analyses/{Id}");   // results page
+                break;
+            default:
+                module.Status = "Running";
+                module.Label = e.Stage switch
+                {
+                    ProgressStage.ResearchStarted => "ПРОУЧВАНЕ…",
+                    ProgressStage.Searching       => "ТЪРСЕНЕ…",
+                    ProgressStage.ScoringStarted  => "ОЦЕНЯВАНЕ…",
+                    ProgressStage.Partial         => "ПИШЕ…",
+                    _ => module.Label
+                };
+                break;
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private Task OnReconnectedAsync(string? _) => LoadStatusAsync();
+
+    public ValueTask DisposeAsync()
+    {
+        // don't dispose the shared connection; the next visit would get a disposed hub
+        subscription?.Dispose();
+        hub.Reconnected -= OnReconnectedAsync;
+        return ValueTask.CompletedTask;
+    }
+
+    private int Percent => status is { Total: > 0 } ? (int)Math.Round(100.0 * status.Done / status.Total) : 0;
+
+    // Module key -> result page, as a suffix of /analyses/{Id}. Must match the @page routes in this folder
+    // (same as AnalysisTabs). Modules without their own page (e.g. Classifier, Recommendations) open the overview.
+    private static readonly Dictionary<string, string> ModulePages = new(StringComparer.Ordinal)
+    {
+        ["Market"] = "/market",
+        ["Competitor"] = "/market",
+        ["Innovation"] = "/innovation",
+        ["Audience"] = "/audience",
+        ["Feasibility"] = "/feasibility",
+        ["Risk"] = "/risks",
+    };
+
+    private string ModuleHref(ModuleView m) => $"analyses/{Id}{ModulePages.GetValueOrDefault(m.Key, "")}";
+}

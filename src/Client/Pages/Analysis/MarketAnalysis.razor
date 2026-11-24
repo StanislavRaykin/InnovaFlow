@@ -1,0 +1,159 @@
+@page "/analyses/{AnalysisId:guid}/market"
+@layout AccountLayout
+@attribute [Authorize]
+@inherits LiveModulePage
+
+<PageTitle>Пазарен анализ | InnovaFlow</PageTitle>
+
+@{
+    // The AI writes: marketSize, marketTrend, marketOpportunity, summary, marketOpportunityExplanation,
+    // competitionIntensity, competitionExplanation, competitors
+    var card = Live.Market;
+    var d = card.Draft;
+    var opportunityReady = d?.MarketOpportunity is not null && card.Done("marketOpportunity");
+    var trends = Trends(d?.MarketTrend);
+}
+
+<!-- TopAppBar -->
+<header class="bg-surface-dim/50 backdrop-blur-xl full-width border-b border-primary/20 shadow-lg shadow-primary/5 flex flex-col gap-sm p-md sticky top-16 md:top-0 z-30">
+    <div class="flex justify-between items-center">
+        <div class="flex items-center gap-sm">
+            <span class="material-symbols-outlined text-primary text-3xl">analytics</span>
+            <h1 class="font-headline-lg text-headline-lg font-bold text-primary">Пазарен Анализ</h1>
+        </div>
+        <div class="flex items-center gap-md">
+            @if (!card.IsDone)
+            {
+                <span class="font-label-caps text-label-caps text-secondary-container bg-secondary-container/10 px-3 py-1 rounded-full border border-secondary-container/30 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-secondary-container animate-pulse"></span>
+                    @(card.Label ?? "ИЗЧАКВАНЕ…")
+                </span>
+            }
+            <button class="p-2 rounded-lg text-on-surface-variant hover:bg-primary/10 hover:text-primary transition-colors flex items-center justify-center relative overflow-hidden group">
+                <span class="material-symbols-outlined">refresh</span>
+                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-primary/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1s_infinite]"></div>
+            </button>
+            <button class="p-2 rounded-lg text-on-surface-variant hover:bg-primary/10 hover:text-primary transition-colors flex items-center justify-center relative overflow-hidden group">
+                <span class="material-symbols-outlined">ios_share</span>
+                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-primary/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1s_infinite]"></div>
+            </button>
+        </div>
+    </div>
+    <AnalysisTabs AnalysisId="AnalysisId" />
+</header>
+
+@if (card.Status == "Failed")
+{
+    <div class="p-md max-w-container-max mx-auto w-full">
+        <div class="glass-panel p-md rounded-xl text-error">Пазарният анализ не успя. Опитайте отново.</div>
+    </div>
+}
+else
+{
+    <!-- Canvas -->
+    <div class="p-md lg:p-xl flex-1 flex flex-col gap-xl max-w-[1440px] mx-auto w-full">
+
+        <!-- Opportunity + market -->
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-md">
+            <!-- Big Score Card -->
+            <div class="lg:col-span-4 glass-card rounded-xl p-md flex flex-col gap-md relative overflow-hidden @(card.IsActive("marketOpportunityExplanation") ? "ring-1 ring-primary/40" : "")">
+                <div class="absolute -top-20 -right-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div>
+                    <h2 class="font-label-caps text-label-caps text-on-surface-variant mb-2">Market Opportunity</h2>
+                    <div class="flex items-end gap-sm">
+                        <span class="font-display-lg text-display-lg text-primary"><Loading Ready="opportunityReady" Size="lg">@d?.MarketOpportunity</Loading></span>
+                        <span class="font-headline-md text-headline-md text-on-surface-variant mb-2">/100</span>
+                    </div>
+                </div>
+                <div class="w-full h-1 bg-surface-container-high rounded-full overflow-hidden">
+                    <div class="h-full bg-primary shimmer-progress transition-[width] duration-500"
+                         style="width: @(opportunityReady ? d?.MarketOpportunity : 0)%"></div>
+                </div>
+                <StreamText Value="@d?.MarketOpportunityExplanation" Active="@card.IsActive("marketOpportunityExplanation")" />
+            </div>
+
+            <!-- Market size & trends -->
+            <div class="lg:col-span-8 glass-card rounded-xl p-md flex flex-col gap-md">
+                <div class="flex flex-col gap-sm">
+                    <h2 class="font-label-caps text-label-caps text-on-surface-variant border-b border-primary/10 pb-sm flex items-center gap-xs">
+                        <span class="material-symbols-outlined text-primary text-[18px]">monitoring</span> Размер на пазара
+                    </h2>
+                    <StreamText Value="@d?.MarketSize" Active="@card.IsActive("marketSize")" />
+                </div>
+                <div class="flex flex-col gap-sm">
+                    <h2 class="font-label-caps text-label-caps text-on-surface-variant border-b border-primary/10 pb-sm flex items-center gap-xs">
+                        <span class="material-symbols-outlined text-secondary text-[18px]">trending_up</span> Тенденции
+                    </h2>
+                    <Loading Ready="@(trends.Count > 0)" Block Size="sm">
+                        <ul class="flex flex-col gap-xs">
+                            @foreach (var t in trends)
+                            {
+                                <li class="flex gap-xs font-body-md text-body-md text-on-surface-variant">
+                                    <span class="material-symbols-outlined text-secondary text-[18px] shrink-0 mt-[2px]">arrow_right</span>
+                                    <span>@t</span>
+                                </li>
+                            }
+                        </ul>
+                    </Loading>
+                </div>
+            </div>
+        </section>
+
+        <!-- Competition + summary -->
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-md items-start">
+            <ScoreCard Class="lg:col-span-4" Title="Интензивност на конкуренцията" Icon="swords" Color="tertiary"
+                       Score="d?.CompetitionIntensity" ScoreDone="@card.Done("competitionIntensity")"
+                       Explanation="@d?.CompetitionExplanation" ExplanationActive="@card.IsActive("competitionExplanation")" />
+
+            <div class="lg:col-span-8 glass-card rounded-xl p-md flex flex-col gap-sm @(card.IsActive("summary") ? "ring-1 ring-primary/40" : "")">
+                <h2 class="font-label-caps text-label-caps text-on-surface-variant border-b border-primary/10 pb-sm flex items-center gap-xs">
+                    <span class="material-symbols-outlined text-primary text-[18px]">summarize</span> Обобщение
+                </h2>
+                <StreamText Value="@d?.Summary" Active="@card.IsActive("summary")" />
+            </div>
+        </section>
+
+        <!-- Competitors -->
+        <section class="flex flex-col gap-md">
+            <div class="flex items-center justify-between border-b border-primary/20 pb-xs">
+                <h3 class="font-headline-md text-headline-md text-on-surface font-semibold flex items-center gap-xs">
+                    <span class="material-symbols-outlined text-primary">groups</span> Конкуренти
+                </h3>
+                @if (card.Done("competitors") && d?.Competitors is { Count: > 0 } found)
+                {
+                    <span class="font-data-mono text-[12px] text-on-surface-variant">@found.Count</span>
+                }
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-md">
+                @if (d?.Competitors is { } competitors)
+                {
+                    @for (var i = 0; i < competitors.Count; i++)
+                    {
+                        <CompetitorCard Competitor="competitors[i]"
+                                        Active="@card.IsActive($"competitors[{i}]")"
+                                        DescriptionActive="@card.IsActive($"competitors[{i}].description")" />
+                    }
+                }
+                @if (!card.Done("competitors") || d?.Competitors is null)
+                {
+                    <Loading Ready="false" Block Size="lg" Label="Търсене на конкуренти…" Class="py-xl" />
+                }
+                else if (card.IsDone && d.Competitors.Count == 0)
+                {
+                    <p class="font-body-md text-body-md text-on-surface-variant">Не са открити конкуренти.</p>
+                }
+            </div>
+        </section>
+    </div>
+}
+
+@code {
+    /// "- тренд 1\n- тренд 2" → ["тренд 1", "тренд 2"]; the last line may still be growing
+    private static List<string> Trends(string? text) =>
+        string.IsNullOrWhiteSpace(text)
+            ? []
+            : [.. text.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                  .Select(l => l.TrimStart('-', '•', '*', ' '))
+                  .Where(l => l.Length > 0)];
+}
