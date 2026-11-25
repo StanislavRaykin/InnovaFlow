@@ -58,16 +58,16 @@
             <nav class="flex flex-col gap-xs px-sm" @onclick="CloseDrawer">
                 <NavLink class="@NavItem" ActiveClass="@NavItemActive" href="home" Match="NavLinkMatch.All">
                     <span class="material-symbols-outlined">dashboard</span>
-                    Dashboard
+                    Табло
                 </NavLink>
                 @* Exact match, otherwise /ideas/create would light up My Ideas too. *@
                 <NavLink class="@NavItem" ActiveClass="@NavItemActive" href="ideas" Match="NavLinkMatch.All">
                     <span class="material-symbols-outlined">lightbulb</span>
-                    My Ideas
+                    Моите идеи
                 </NavLink>
                 <NavLink class="@NavItem" ActiveClass="@NavItemActive" href="ideas/create">
                     <span class="material-symbols-outlined">add_circle</span>
-                    Create Idea
+                    Създай идея
                 </NavLink>
             </nav>
         </div>
@@ -89,21 +89,21 @@
             <button
                 class="w-full py-sm mb-md bg-primary-container text-surface font-label-caps text-label-caps font-bold rounded-DEFAULT hover:opacity-90 transition-opacity"
                 type="button">
-                Deploy Agent
+                Стартирай агент
             </button>
 
             <nav class="flex flex-col gap-xs" @onclick="CloseDrawer">
                 <NavLink class="@NavItem" ActiveClass="@NavItemActive" href="settings">
                     <span class="material-symbols-outlined">settings</span>
-                    Settings
+                    Настройки
                 </NavLink>
                 <NavLink class="@NavItem" ActiveClass="@NavItemActive" href="support">
                     <span class="material-symbols-outlined">help</span>
-                    Support
+                    Поддръжка
                 </NavLink>
                 <button class="@NavItem w-full text-left" type="button" @onclick="SignOutAsync">
                     <span class="material-symbols-outlined">logout</span>
-                    Logout
+                    Изход
                 </button>
             </nav>
         </div>
@@ -116,14 +116,14 @@
         <!-- Footer -->
         <footer
             class="flex flex-wrap gap-sm justify-between items-center px-md py-sm bg-surface-container-lowest border-t border-primary/10 mt-auto">
-            <div class="font-label-caps text-label-caps text-primary">© 2024 Innovation Studio. AI OS v2.4</div>
+            <div class="font-label-caps text-label-caps text-primary">© 2024 InnovaFlow. AI OS v2.4</div>
             <div class="flex gap-md font-label-caps text-label-caps text-on-surface-variant">
                 <a class="hover:text-secondary-fixed-dim transition-colors flex items-center gap-xs" href="#">
                     <span class="w-2 h-2 rounded-full bg-primary animate-pulse cyber-glow"></span>
-                    System Status: Optimal
+                    Състояние на системата: Оптимално
                 </a>
-                <a class="hover:text-secondary-fixed-dim transition-colors hidden md:block" href="#">Privacy Policy</a>
-                <a class="hover:text-secondary-fixed-dim transition-colors hidden md:block" href="#">API Docs</a>
+                <a class="hover:text-secondary-fixed-dim transition-colors hidden md:block" href="#">Политика за поверителност</a>
+                <a class="hover:text-secondary-fixed-dim transition-colors hidden md:block" href="#">API документация</a>
             </div>
         </footer>
     </main>
