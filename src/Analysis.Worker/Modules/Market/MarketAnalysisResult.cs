@@ -17,13 +17,14 @@ public class MarketAnalysisResult
     public int MarketOpportunity { get; set; }
 
     [SchemaProperty("""
-        Summary in Bulgarian, short paragraphs separated by blank lines. Must contain, in this order:
+        Summary in Bulgarian, short paragraphs separated by blank lines(6 paragraphs max, each 2-3 sentences). The summary should not exceed 420 characters(excluding spaces and punctuation). Must contain, in this order:
         1) whether this is a preliminary assessment;
         2) possible niches and the niche opportunity, with rationale;
         3) differentiation potential, with rationale;
         4) what is known, what is assumed, which important data is missing and how to collect it;
         5) the most promising market segment hypothesis;
         6) exactly three concrete checks to do before investing.
+       
         """)]
     public string Summary { get; set; } = "";
 

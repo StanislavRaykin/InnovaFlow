@@ -1,7 +1,7 @@
 using Client.Analyses;
 using Microsoft.AspNetCore.Components;
 
-namespace Client.Pages.AnalysisResult;
+namespace Client.Pages.Analysis;
 
 /// <summary>
 /// Base for the module result pages (@inherits LiveModulePage). Follows the analysis in the route through the

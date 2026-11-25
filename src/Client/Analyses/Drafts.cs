@@ -50,6 +50,8 @@ public sealed class MarketDraft
     public int? CompetitionIntensity { get; set; }
     public string? CompetitionExplanation { get; set; }
     public List<CompetitorDraft>? Competitors { get; set; }
+
+    
 }
 
 public sealed class CompetitorDraft

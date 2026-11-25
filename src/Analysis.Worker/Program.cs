@@ -67,7 +67,7 @@ builder.Services.AddScoped<ProgressPublisher>();
 
 var host = builder.Build();
 var startupLogger = host.Services.GetRequiredService<ILogger<Program>>();
-startupLogger.LogInformation("Analysis.Worker starting");
 if (useFakeAi)
     startupLogger.LogWarning("Ai:UseFake is on: AI clients return DUMMY data and make no API calls");
+
 host.Run();

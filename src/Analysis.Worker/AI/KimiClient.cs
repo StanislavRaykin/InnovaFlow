@@ -32,12 +32,20 @@ public  class KimiClient : IAiClient
     private const string WebSearchToolName = "web_search";
     private const int MaxCharsPerResult = 1500;
 
+    private const string SearchPolicy = """
+
+    Search policy: issue ALL web_search calls together in your first reply (up to 5 in parallel),
+    then answer. Do not search again after the results arrive.
+    """;
+
+    // private string additionalPromp = "Make all researches in the first round"
+
     private const string WebSearchToolJson = """
         [{
           "type": "function",
           "function": {
             "name": "web_search",
-            "description": "Search the web. Returns numbered results with title, URL and relevant excerpts. Cite results by their number, e.g. [3]. Numbers stay the same across searches.",
+            "description": "Search the web. Returns numbered results with title, URL and relevant excerpts. Numbers stay the same across searches.",
             "parameters": {
               "type": "object",
               "properties": {
@@ -132,7 +140,7 @@ public  class KimiClient : IAiClient
 
         var messages = new JsonArray
         {
-            new JsonObject { ["role"] = "system", ["content"] = systemPrompt },
+            new JsonObject { ["role"] = "system", ["content"] = systemPrompt + SearchPolicy },
             new JsonObject { ["role"] = "user", ["content"] = userPrompt }
         };
 
@@ -156,6 +164,8 @@ public  class KimiClient : IAiClient
                 _logger.LogInformation("Kimi search budget ({Budget}s) used up after {Rounds} rounds, forcing an answer", _options.SearchBudgetSeconds, round);
 
             var roundStart = sw.Elapsed;
+
+            
 
             var body = new JsonObject
             {

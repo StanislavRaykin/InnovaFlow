@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Analysis.Worker.Modules;
 using Contracts;
 using Contracts.AnalysisDtos;
@@ -52,9 +53,10 @@ public class AnalysisRequestedConsumer(AnalysisDbContext db,
         await bus.Publish(new AnalysisStarted(msg.AnalysisId, msg.IdeaId), ct);
 
         var completed = 0;
-
+        Stopwatch sw = Stopwatch.StartNew();
         try
         {
+
             foreach (var stage in modules.GroupBy(m => m.Value).OrderBy(g => g.Key))
             {
                 await Task.WhenAll(stage.Select(async module =>
@@ -81,13 +83,13 @@ public class AnalysisRequestedConsumer(AnalysisDbContext db,
             await bus.Publish(new AnalysisCompleted(
                 msg.AnalysisId, msg.IdeaId, analysis.OverallScore ?? 0), ct);
 
-            logger.LogInformation("Analysis {Id} completed with score {Score}",
-                msg.AnalysisId, analysis.OverallScore);
+            logger.LogInformation("Analysis {Id} completed with score {Score} and took {Elapsed}",
+                msg.AnalysisId, analysis.OverallScore, sw.Elapsed);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Analysis {Id} failed after {Done}/{Total} modules",
-                msg.AnalysisId, completed, modules.Count());
+            logger.LogError(ex, "Analysis {Id} failed after {Done}/{Total} modules and took {Elapsed}",
+                msg.AnalysisId, completed, modules.Count(), sw.Elapsed);
 
             // A failed module leaves its rejected entities tracked on this shared context,
             // and saving them again would throw here and strand the analysis as Running

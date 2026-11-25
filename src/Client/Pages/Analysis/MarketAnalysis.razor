@@ -2,6 +2,7 @@
 @layout AccountLayout
 @attribute [Authorize]
 @inherits LiveModulePage
+@using Client.Pages.Analysis.Components
 
 <PageTitle>Пазарен анализ | InnovaFlow</PageTitle>
 
@@ -149,7 +150,6 @@ else
 }
 
 @code {
-    /// "- тренд 1\n- тренд 2" → ["тренд 1", "тренд 2"]; the last line may still be growing
     private static List<string> Trends(string? text) =>
         string.IsNullOrWhiteSpace(text)
             ? []

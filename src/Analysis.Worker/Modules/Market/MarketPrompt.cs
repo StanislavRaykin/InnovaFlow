@@ -47,4 +47,6 @@ internal static class MarketPrompt
         + AnalyzerPromptRules.WithResearch;
 
     public const string ScoreTask = "Направи анализ на пазара и конкурентната среда за тази идея.";
+
+   
 }

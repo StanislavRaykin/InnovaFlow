@@ -110,6 +110,7 @@ public class MarketAnalysisModule(AnalysisDbContext db, PartialPublisher partial
             ? typed.Value
             : StructuredOutput.Parse<MarketAnalysisResult>(scoreResult.Json);
         await progress.LogAsync(req, Name, "Записване на резултатите от пазарния анализ...", ct);
+        
         var execStrategy = db.Database.CreateExecutionStrategy();
         await execStrategy.ExecuteAsync(async () =>
         {

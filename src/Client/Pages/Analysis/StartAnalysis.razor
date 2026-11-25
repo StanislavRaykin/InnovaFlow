@@ -244,7 +244,10 @@
         if (e.Stage == ProgressStage.Log)
         {
             AddLog(e.Message);
+
             await InvokeAsync(StateHasChanged);
+            Task.Delay(200);
+
             return;
         }
 
@@ -287,8 +290,6 @@
 
     private int Percent => status is { Total: > 0 } ? (int)Math.Round(100.0 * status.Done / status.Total) : 0;
 
-    // Module key -> result page, as a suffix of /analyses/{Id}. Must match the @page routes in this folder
-    // (same as AnalysisTabs). Modules without their own page (e.g. Classifier, Recommendations) open the overview.
     private static readonly Dictionary<string, string> ModulePages = new(StringComparer.Ordinal)
     {
         ["Market"] = "/market",
