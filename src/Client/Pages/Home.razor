@@ -3,13 +3,17 @@
 @attribute [Authorize]
 @* for logged in users *@
 
+<HeadContent>
+    <link rel="stylesheet" href="css/home.css" />
+</HeadContent>
 
 <div class="fixed inset-0 grid-background pointer-events-none z-[-1]"></div>
-    <header class="flex flex-col md:flex-row md:items-end justify-between gap-md border-b border-primary/20 pb-md">
+<div class="w-full p-md md:p-xl flex flex-col gap-xl">
+    <header class="w-full flex flex-col md:flex-row md:items-end justify-between gap-md border-b border-primary/20 pb-md">
         <div>
             <p class="font-label-caps text-label-caps text-on-surface-variant mb-2">ОБЩ ПРЕГЛЕД НА СИСТЕМАТА</p>
-            <h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg font-bold text-on-surface">Good
-                morning, Alex <span class="text-2xl">👋</span></h2>
+            <h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg font-bold text-on-surface">Добро
+                утро, Денис <span class="text-2xl">👋</span></h2>
                 <p class="font-body-md text-body-md text-on-surface-variant mt-2 max-w-2xl">
                     Разгледайте идеите си и открийте техния потенциал. Телеметрия в реално време и състояние на агентите.
                 </p>
@@ -234,3 +238,4 @@
                                                         </article>
                                                     </div>
                                                 </section>
+    </div>
