@@ -1,4 +1,6 @@
+using Client.Notifications;
 using Client.Views;
+using Contracts.Notifications;
 using Contracts.AnalysisDtos;
 using Microsoft.AspNetCore.SignalR.Client;
 
@@ -8,7 +10,7 @@ namespace Client.Analyses;
 /// Live results of the analysis that's open, shared by all result tabs, so switching tabs keeps what has
 /// streamed so far. Scoped = app lifetime in WASM.
 /// </summary>
-public sealed class AnalysisLiveState(HubClient hubClient, AnalysisClient api) : IAsyncDisposable
+public sealed class AnalysisLiveState(HubClient hubClient, AnalysisClient api, NotificationHubClient notifications) : IAsyncDisposable
 {
     public Guid? AnalysisId { get; private set; }
     public AnalysisStatusView? Status { get; private set; }
@@ -16,6 +18,8 @@ public sealed class AnalysisLiveState(HubClient hubClient, AnalysisClient api) :
     public ModuleCard<MarketDraft> Market { get; } = new(id => api.GetMarketAsync(id));
     public ModuleCard<InnovationDraft> Innovation { get; } = new(id => api.GetInnovationAsync(id));
     public ModuleCard<AudienceDraft> Audience { get; } = new(id => api.GetAudienceAsync(id));
+    public ModuleCard<FeasibilityDraft> Feasibility { get; } = new(id => api.GetFeasibilityAsync(id));
+    public ModuleCard<RiskDraft> Risk { get; } = new(id => api.GetRisksAsync(id));
 
     /// <summary>Module key (Contracts.AnalysisModules) → card</summary>
     private Dictionary<string, IModuleCard> Cards => cards ??= new()
@@ -23,6 +27,8 @@ public sealed class AnalysisLiveState(HubClient hubClient, AnalysisClient api) :
         ["Market"] = Market,
         ["Innovation"] = Innovation,
         ["Audience"] = Audience,
+        ["Feasibility"] = Feasibility,
+        ["Risk"] = Risk,
     };
     private Dictionary<string, IModuleCard>? cards;
 
@@ -59,6 +65,8 @@ public sealed class AnalysisLiveState(HubClient hubClient, AnalysisClient api) :
             handler ??= Hub.On<AnalysisEvent>("AnalysisEvent", OnEvent);
             Hub.Reconnected -= OnReconnected;
             Hub.Reconnected += OnReconnected;
+            notifications.Received -= OnNotification;
+            notifications.Received += OnNotification;
 
             await hubClient.EnsureStartedAsync();   // listen first…
             await LoadStatusAsync();                // …then load the state, so nothing falls in between
@@ -93,6 +101,25 @@ public sealed class AnalysisLiveState(HubClient hubClient, AnalysisClient api) :
     }
 
     private Task OnReconnected(string? _) => LoadStatusAsync();
+
+    // The overall score is computed after the last module, so it only arrives with the "analysis done" push
+    private void OnNotification(PushNotification n)
+    {
+        if (n.Type == "AnalysisCompleted" && n.SubjectId is { } id && id == AnalysisId)
+            _ = ReloadStatusQuietlyAsync();
+    }
+
+    private async Task ReloadStatusQuietlyAsync()
+    {
+        try
+        {
+            await LoadStatusAsync();
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+        {
+            // shown on the next tab switch or reconnect instead
+        }
+    }
 
     /// <summary>Swap every completed module's draft for its saved result (clamped scores, and the only data
     /// there is when the analysis is opened after it finished; snapshots aren't stored).</summary>
@@ -166,6 +193,7 @@ public sealed class AnalysisLiveState(HubClient hubClient, AnalysisClient api) :
         // the connection itself is shared (HubClient), so only drop what this class added
         handler?.Dispose();
         Hub.Reconnected -= OnReconnected;
+        notifications.Received -= OnNotification;
         return ValueTask.CompletedTask;
     }
 }

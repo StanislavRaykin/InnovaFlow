@@ -1,217 +1,259 @@
 @page "/analyses/{AnalysisId:guid}/risks"
 @layout AccountLayout
 @attribute [Authorize]
+@inherits LiveModulePage
 
 <PageTitle>Анализ на риска | InnovaFlow</PageTitle>
 
-        <!-- TopAppBar (Shared Component) -->
-        <header class="flex flex-col gap-sm p-md bg-surface-dim/50 backdrop-blur-xl text-primary font-headline-lg text-headline-lg full-width border-b border-primary/20 shadow-lg shadow-primary/5 sticky top-16 md:top-0 z-30">
-            <div class="flex justify-between items-center w-full max-w-container-max mx-auto">
-                <div class="flex items-center gap-sm">
-                    <span class="material-symbols-outlined text-4xl">analytics</span>
-                    <h1 class="font-headline-lg text-headline-lg font-bold text-primary neon-glow">Анализ на риска</h1>
-                </div>
-                <div class="flex gap-sm">
-                    <button class="p-xs rounded hover:bg-primary/10 text-on-surface-variant hover:text-primary transition-all relative overflow-hidden group">
-                        <div class="absolute inset-0 shimmer-bg opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                        <span class="material-symbols-outlined relative z-10">refresh</span>
-                    </button>
-                    <button class="p-xs rounded hover:bg-primary/10 text-on-surface-variant hover:text-primary transition-all relative overflow-hidden group">
-                        <div class="absolute inset-0 shimmer-bg opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                        <span class="material-symbols-outlined relative z-10">ios_share</span>
-                    </button>
-                </div>
-            </div>
+@{
+    // The AI writes: risks (most serious first), riskScore, riskScoreExplanation, summary
+    var card = Live.Risk;
+    var d = card.Draft;
+    var risks = d?.Risks ?? [];
+    var scoreReady = d?.RiskScore is not null && card.Done("riskScore");
+    var level = Level(scoreReady ? d!.RiskScore : null);
+}
+
+<!-- TopAppBar -->
+<header class="flex flex-col gap-sm p-md bg-surface-dim/50 backdrop-blur-xl text-primary font-headline-lg text-headline-lg full-width border-b border-primary/20 shadow-lg shadow-primary/5 sticky top-16 md:top-0 z-30">
+    <div class="flex justify-between items-center w-full max-w-container-max mx-auto">
+        <div class="flex items-center gap-sm">
+            <span class="material-symbols-outlined text-4xl">analytics</span>
+            <h1 class="font-headline-lg text-headline-lg font-bold text-primary neon-glow">Анализ на риска</h1>
+            @if (!card.IsDone)
+            {
+                <span class="font-data-mono text-[12px] text-secondary animate-pulse">@(card.Label ?? "ИЗЧАКВАНЕ…")</span>
+            }
+        </div>
+    </div>
     <AnalysisTabs AnalysisId="AnalysisId" />
-        </header>
-        <!-- Content Canvas -->
-        <div class="flex-1 p-md max-w-container-max mx-auto w-full flex flex-col gap-md">
-            <div class="flex items-center gap-sm mb-sm">
-                <span class="font-data-mono text-data-mono text-on-surface-variant">Проект:</span>
-                <span class="font-headline-md text-headline-md font-bold text-on-surface"><Loading Ready="loaded">SmartWear</Loading></span>
-            </div>
-            <!-- Dashboard Grid -->
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-md">
-                <!-- Main Score Card (Span 4) -->
-                <div class="glass-card rounded-lg p-sm lg:col-span-4 flex flex-col items-center justify-center text-center relative overflow-hidden">
-                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-container via-primary to-primary-container opacity-50"></div>
-                    <h2 class="font-label-caps text-label-caps text-on-surface-variant uppercase mb-sm tracking-widest">Общ Риск</h2>
-                    <div class="relative w-32 h-32 flex items-center justify-center my-md">
-                        <svg class="absolute inset-0 w-full h-full transform -rotate-90" viewbox="0 0 100 100">
-                            <circle cx="50" cy="50" fill="none" r="45" stroke="#131b2e" stroke-width="8"></circle>
-                            @if (loaded)
-                            {
-                                <circle class="transition-all duration-1000 ease-out" cx="50" cy="50" fill="none" r="45" stroke="#4ade80" stroke-dasharray="283" stroke-dashoffset="192.44" stroke-width="8"></circle> <!-- 32% of 283 -->
-                            }
-                        </svg>
-                        <div class="flex flex-col items-center">
-                            <span class="font-display-lg text-display-lg font-bold text-primary neon-glow"><Loading Ready="loaded" Size="lg">32</Loading></span>
-                            <span class="font-data-mono text-data-mono text-on-surface-variant">/100</span>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-xs mt-sm">
-                        <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-                        <span class="font-body-md text-body-md text-primary font-bold"><Loading Ready="loaded" Size="sm">Нисък общ риск</Loading></span>
+</header>
+
+@if (card.Status == "Failed")
+{
+    <div class="p-md max-w-container-max mx-auto w-full">
+        <div class="glass-card p-md rounded-lg text-error">Анализът на риска не успя. Опитайте отново.</div>
+    </div>
+}
+else
+{
+    <!-- Content Canvas -->
+    <div class="flex-1 p-md max-w-container-max mx-auto w-full flex flex-col gap-md">
+        <!-- Dashboard Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-md">
+            <!-- Main Score Card (Span 4) -->
+            <div class="glass-card rounded-lg p-sm lg:col-span-4 flex flex-col items-center justify-center text-center relative overflow-hidden @(card.IsActive("riskScoreExplanation") ? "ring-1 ring-primary/40" : "")">
+                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-container via-primary to-primary-container opacity-50"></div>
+                <h2 class="font-label-caps text-label-caps text-on-surface-variant uppercase mb-sm tracking-widest">Общ Риск</h2>
+                <div class="relative w-32 h-32 flex items-center justify-center my-md">
+                    <svg class="absolute inset-0 w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" fill="none" r="45" stroke="#131b2e" stroke-width="8"></circle>
+                        <circle class="text-@level.Color transition-[stroke-dashoffset] duration-1000 ease-out" cx="50" cy="50" fill="none" r="45"
+                                stroke="currentColor" stroke-width="8"
+                                stroke-dasharray="@Css(Ring)" stroke-dashoffset="@Css(RingOffset(scoreReady ? d!.RiskScore : 0))"></circle>
+                    </svg>
+                    <div class="flex flex-col items-center">
+                        <span class="font-display-lg text-display-lg font-bold text-@level.Color"><Loading Ready="scoreReady" Size="lg">@d?.RiskScore</Loading></span>
+                        <span class="font-data-mono text-data-mono text-on-surface-variant">/100</span>
                     </div>
                 </div>
-                <!-- Radar Chart Area (Span 8) -->
-                <div class="glass-card rounded-lg p-sm lg:col-span-8 flex flex-col h-full">
-                    <div class="flex justify-between items-center mb-md border-b border-primary/10 pb-xs">
-                        <h2 class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">Разпределение на Риска</h2>
-                        <span class="material-symbols-outlined text-on-surface-variant text-sm">radar</span>
-                    </div>
-                    <div class="flex-1 relative min-h-[250px] flex items-end gap-sm pb-xl px-sm">
-                        <!-- Pseudo Bar Chart for Visual representation without heavy JS -->
-                        <Loading Ready="loaded" Block Size="lg" Label="Изчисляване на рисковете…" Class="flex-1 self-center">
-                        <!-- Competition -->
-                        <div class="flex-1 flex flex-col items-center justify-end h-full relative group">
-                            <div class="w-full max-w-[40px] bg-primary/20 border border-primary/50 rounded-t-sm relative transition-all group-hover:bg-primary/40 group-hover:border-primary" style="height: 65%;">
-                                <div class="absolute top-0 left-0 w-full h-1 bg-primary"></div>
-                                <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 font-data-mono text-data-mono text-primary opacity-0 group-hover:opacity-100 transition-opacity">65%</span>
-                            </div>
-                            <span class="absolute -bottom-8 font-label-caps text-[10px] text-on-surface-variant whitespace-nowrap">Конкуренция</span>
-                        </div>
-                        <!-- Financial -->
-                        <div class="flex-1 flex flex-col items-center justify-end h-full relative group">
-                            <div class="w-full max-w-[40px] bg-tertiary/20 border border-tertiary/50 rounded-t-sm relative transition-all group-hover:bg-tertiary/40 group-hover:border-tertiary" style="height: 30%;">
-                                <div class="absolute top-0 left-0 w-full h-1 bg-tertiary"></div>
-                                <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 font-data-mono text-data-mono text-tertiary opacity-0 group-hover:opacity-100 transition-opacity">30%</span>
-                            </div>
-                            <span class="absolute -bottom-8 font-label-caps text-[10px] text-on-surface-variant whitespace-nowrap">Финансов</span>
-                        </div>
-                        <!-- Technical -->
-                        <div class="flex-1 flex flex-col items-center justify-end h-full relative group">
-                            <div class="w-full max-w-[40px] bg-error/20 border border-error/50 rounded-t-sm relative transition-all group-hover:bg-error/40 group-hover:border-error" style="height: 80%;">
-                                <div class="absolute top-0 left-0 w-full h-1 bg-error"></div>
-                                <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 font-data-mono text-data-mono text-error opacity-0 group-hover:opacity-100 transition-opacity">80%</span>
-                            </div>
-                            <span class="absolute -bottom-8 font-label-caps text-[10px] text-on-surface-variant whitespace-nowrap">Технически</span>
-                        </div>
-                        <!-- Market -->
-                        <div class="flex-1 flex flex-col items-center justify-end h-full relative group">
-                            <div class="w-full max-w-[40px] bg-primary/20 border border-primary/50 rounded-t-sm relative transition-all group-hover:bg-primary/40 group-hover:border-primary" style="height: 45%;">
-                                <div class="absolute top-0 left-0 w-full h-1 bg-primary"></div>
-                                <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 font-data-mono text-data-mono text-primary opacity-0 group-hover:opacity-100 transition-opacity">45%</span>
-                            </div>
-                            <span class="absolute -bottom-8 font-label-caps text-[10px] text-on-surface-variant whitespace-nowrap">Пазарен</span>
-                        </div>
-                        <!-- Legal -->
-                        <div class="flex-1 flex flex-col items-center justify-end h-full relative group">
-                            <div class="w-full max-w-[40px] bg-primary/20 border border-primary/50 rounded-t-sm relative transition-all group-hover:bg-primary/40 group-hover:border-primary" style="height: 15%;">
-                                <div class="absolute top-0 left-0 w-full h-1 bg-primary"></div>
-                                <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 font-data-mono text-data-mono text-primary opacity-0 group-hover:opacity-100 transition-opacity">15%</span>
-                            </div>
-                            <span class="absolute -bottom-8 font-label-caps text-[10px] text-on-surface-variant whitespace-nowrap">Правен</span>
-                        </div>
-                        </Loading>
-                        <!-- Grid Lines -->
-                        <div class="absolute left-0 bottom-xl w-full border-t border-surface-variant/50 pointer-events-none"></div>
-                        <div class="absolute left-0 bottom-[calc(64px+25%)] w-full border-t border-surface-variant/30 pointer-events-none"></div>
-                        <div class="absolute left-0 bottom-[calc(64px+50%)] w-full border-t border-surface-variant/30 pointer-events-none"></div>
-                        <div class="absolute left-0 bottom-[calc(64px+75%)] w-full border-t border-surface-variant/30 pointer-events-none"></div>
-                    </div>
+                <div class="flex items-center gap-xs mt-sm">
+                    <span class="w-2 h-2 rounded-full bg-@level.Color @(card.IsDone ? "" : "animate-pulse")"></span>
+                    <span class="font-body-md text-body-md text-@level.Color font-bold"><Loading Ready="scoreReady" Size="sm">@level.Text</Loading></span>
+                </div>
+                <div class="mt-sm text-left w-full">
+                    <StreamText Value="@d?.RiskScoreExplanation" Active="@card.IsActive("riskScoreExplanation")" />
                 </div>
             </div>
-            <!-- Risk Cards Section -->
-            <div class="mt-md">
-                <h3 class="font-headline-md text-headline-md font-bold text-on-surface mb-sm flex items-center gap-xs">
-                    <span class="material-symbols-outlined text-primary">warning</span>
-                    Детайлен Анализ на Рисковете
-                </h3>
-                <Loading Ready="loaded" Block Size="lg" Label="Анализиране на рисковете…" Class="py-xl">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-md">
-                    <!-- Risk Card 1: Technical -->
-                    <div class="glass-card rounded-lg flex flex-col overflow-hidden transition-all duration-300">
-                        <div class="p-sm border-b border-primary/10 flex justify-between items-start bg-error/5">
-                            <div class="flex items-center gap-sm">
-                                <div class="w-10 h-10 rounded-full bg-error/20 flex items-center justify-center border border-error/30 text-error">
-                                    <span class="material-symbols-outlined">memory</span>
-                                </div>
-                                <div>
-                                    <h4 class="font-headline-md text-[20px] font-bold text-on-surface">Технически Риск</h4>
-                                    <span class="font-label-caps text-error">Висока Тежест</span>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <div class="font-data-mono text-display-lg text-error">80<span class="text-body-md">%</span></div>
-                                <div class="font-label-caps text-on-surface-variant">Вероятност</div>
-                            </div>
-                        </div>
-                        <div class="p-sm flex-1 flex flex-col gap-sm">
-                            <p class="font-body-md text-body-md text-on-surface-variant">
-                                Проблеми с интеграцията на биометричните сензори с основния софтуер. Възможно забавяне на хардуерните доставки.
-                            </p>
-                            <div class="grid grid-cols-2 gap-sm mt-auto">
-                                <div class="bg-surface p-xs rounded border border-surface-variant">
-                                    <span class="block font-label-caps text-on-surface-variant mb-1">Въздействие</span>
-                                    <span class="font-data-mono text-error">Високо</span>
-                                </div>
-                                <div class="bg-surface p-xs rounded border border-surface-variant">
-                                    <span class="block font-label-caps text-on-surface-variant mb-1">Статус</span>
-                                    <span class="font-data-mono text-tertiary">Наблюдение</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="p-sm bg-surface-container-low border-t border-primary/10">
-                            <div class="flex items-center gap-xs mb-xs">
-                                <span class="material-symbols-outlined text-secondary text-sm">smart_toy</span>
-                                <span class="font-label-caps text-secondary uppercase">AI Смекчаване</span>
-                            </div>
-                            <p class="font-body-md text-sm text-on-surface">
-                                Установете паралелна разработка със симулатори на сензори. Подпишете предварителни договори с алтернативни доставчици на компоненти.
-                            </p>
-                        </div>
-                    </div>
-                    <!-- Risk Card 2: Competition -->
-                    <div class="glass-card rounded-lg flex flex-col overflow-hidden transition-all duration-300">
-                        <div class="p-sm border-b border-primary/10 flex justify-between items-start bg-primary/5">
-                            <div class="flex items-center gap-sm">
-                                <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30 text-primary">
-                                    <span class="material-symbols-outlined">group</span>
-                                </div>
-                                <div>
-                                    <h4 class="font-headline-md text-[20px] font-bold text-on-surface">Конкуренция</h4>
-                                    <span class="font-label-caps text-primary">Средна Тежест</span>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <div class="font-data-mono text-display-lg text-primary">65<span class="text-body-md">%</span></div>
-                                <div class="font-label-caps text-on-surface-variant">Вероятност</div>
-                            </div>
-                        </div>
-                        <div class="p-sm flex-1 flex flex-col gap-sm">
-                            <p class="font-body-md text-body-md text-on-surface-variant">
-                                Големи технологични компании може да пуснат подобни продукти преди нас на по-ниска цена.
-                            </p>
-                            <div class="grid grid-cols-2 gap-sm mt-auto">
-                                <div class="bg-surface p-xs rounded border border-surface-variant">
-                                    <span class="block font-label-caps text-on-surface-variant mb-1">Въздействие</span>
-                                    <span class="font-data-mono text-on-surface">Средно</span>
-                                </div>
-                                <div class="bg-surface p-xs rounded border border-surface-variant">
-                                    <span class="block font-label-caps text-on-surface-variant mb-1">Статус</span>
-                                    <span class="font-data-mono text-primary">Активен</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="p-sm bg-surface-container-low border-t border-primary/10">
-                            <div class="flex items-center gap-xs mb-xs">
-                                <span class="material-symbols-outlined text-secondary text-sm">smart_toy</span>
-                                <span class="font-label-caps text-secondary uppercase">AI Смекчаване</span>
-                            </div>
-                            <p class="font-body-md text-sm text-on-surface">
-                                Фокусирайте се върху нишови функционалности, които големите играчи пренебрегват. Изградете силна общност от ранни потребители.
-                            </p>
-                        </div>
-                    </div>
+
+            <!-- Distribution (Span 8) -->
+            <div class="glass-card rounded-lg p-sm lg:col-span-8 flex flex-col h-full">
+                <div class="flex justify-between items-center mb-md border-b border-primary/10 pb-xs">
+                    <h2 class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">Разпределение на Риска</h2>
+                    <span class="font-data-mono text-[11px] text-on-surface-variant" title="Вероятност × въздействие">вероятност × въздействие</span>
                 </div>
-                </Loading>
+                <div class="flex-1 relative min-h-[250px] flex items-end gap-sm pb-xl px-sm">
+                    @foreach (var r in risks)
+                    {
+                        var exposure = Exposure(r);
+                        var color = SeverityColor(r.Severity);
+                        <div class="flex-1 flex flex-col items-center justify-end h-full relative group">
+                            <div class="w-full max-w-[40px] bg-@color/20 border border-@color/50 rounded-t-sm relative transition-all duration-700 group-hover:bg-@color/40 group-hover:border-@color" style="height: @(exposure ?? 0)%;">
+                                <div class="absolute top-0 left-0 w-full h-1 bg-@color"></div>
+                                <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 font-data-mono text-data-mono text-@color opacity-0 group-hover:opacity-100 transition-opacity">@exposure%</span>
+                            </div>
+                            <span class="absolute -bottom-8 font-label-caps text-[10px] text-on-surface-variant whitespace-nowrap">@TypeText(r.Type)</span>
+                        </div>
+                    }
+                    @if (!card.Done("risks") || d?.Risks is null)
+                    {
+                        <Loading Ready="false" Block Size="lg" Label="Изчисляване на рисковете…" Class="flex-1 self-center" />
+                    }
+                    <!-- Grid Lines -->
+                    <div class="absolute left-0 bottom-xl w-full border-t border-surface-variant/50 pointer-events-none"></div>
+                    <div class="absolute left-0 bottom-[calc(64px+25%)] w-full border-t border-surface-variant/30 pointer-events-none"></div>
+                    <div class="absolute left-0 bottom-[calc(64px+50%)] w-full border-t border-surface-variant/30 pointer-events-none"></div>
+                    <div class="absolute left-0 bottom-[calc(64px+75%)] w-full border-t border-surface-variant/30 pointer-events-none"></div>
+                </div>
             </div>
         </div>
 
-@code {
-    [Parameter] public Guid AnalysisId { get; set; }
+        <!-- Summary -->
+        <section class="glass-card rounded-lg flex flex-col @(card.IsActive("summary") ? "ring-1 ring-primary/40" : "")">
+            <div class="px-md py-sm border-b border-primary/10 flex items-center gap-xs">
+                <span class="material-symbols-outlined text-secondary text-sm">smart_toy</span>
+                <h3 class="font-label-caps text-label-caps text-secondary uppercase">AI Оценка: готовност за старт</h3>
+            </div>
+            <div class="p-md">
+                <StreamText Value="@d?.Summary" Active="@card.IsActive("summary")" Lines="4" />
+            </div>
+        </section>
 
-    // Every field shows a spinner until this is true. Set it (or give each <Loading> its own condition) once the data/events are wired.
-    private bool loaded;
+        <!-- Risk Cards Section -->
+        <div class="mt-md">
+            <h3 class="font-headline-md text-headline-md font-bold text-on-surface mb-sm flex items-center gap-xs">
+                <span class="material-symbols-outlined text-primary">warning</span>
+                Детайлен Анализ на Рисковете
+            </h3>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-md">
+                @for (var i = 0; i < risks.Count; i++)
+                {
+                    var r = risks[i];
+                    var color = SeverityColor(r.Severity);
+                    var active = card.IsActive($"risks[{i}]");
+                    <div class="glass-card rounded-lg flex flex-col overflow-hidden transition-all duration-300 @(active ? "ring-1 ring-primary/40" : "")">
+                        <div class="p-sm border-b border-primary/10 flex justify-between items-start bg-@color/5">
+                            <div class="flex items-center gap-sm min-w-0">
+                                <div class="w-10 h-10 shrink-0 rounded-full bg-@color/20 flex items-center justify-center border border-@color/30 text-@color">
+                                    <span class="material-symbols-outlined">@TypeIcon(r.Type)</span>
+                                </div>
+                                <div class="min-w-0">
+                                    <h4 class="font-headline-md text-[20px] font-bold text-on-surface">@r.Title</h4>
+                                    <span class="font-label-caps text-@color">@SeverityText(r.Severity)</span>
+                                </div>
+                            </div>
+                            <div class="text-right shrink-0">
+                                <div class="font-data-mono text-display-lg text-@color">
+                                    <Loading Ready="@(r.Probability is not null && card.Done($"risks[{i}].probability"))" Size="sm">@r.Probability<span class="text-body-md">%</span></Loading>
+                                </div>
+                                <div class="font-label-caps text-on-surface-variant">Вероятност</div>
+                            </div>
+                        </div>
+                        <div class="p-sm flex-1 flex flex-col gap-sm">
+                            <p class="font-body-md text-body-md text-on-surface-variant">@r.Description</p>
+                            <div class="grid grid-cols-2 gap-sm mt-auto">
+                                <div class="bg-surface p-xs rounded border border-surface-variant">
+                                    <span class="block font-label-caps text-on-surface-variant mb-1">Въздействие</span>
+                                    @if (r.Impact is { } impact && card.Done($"risks[{i}].impact"))
+                                    {
+                                        <span class="font-data-mono text-@ImpactColor(impact)">@ImpactText(impact) · @impact</span>
+                                    }
+                                </div>
+                                <div class="bg-surface p-xs rounded border border-surface-variant">
+                                    <span class="block font-label-caps text-on-surface-variant mb-1">Статус</span>
+                                    <span class="font-data-mono @(r.Status == "active" ? "text-primary" : "text-tertiary")">@StatusText(r.Status)</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-sm bg-surface-container-low border-t border-primary/10">
+                            <div class="flex items-center gap-xs mb-xs">
+                                <span class="material-symbols-outlined text-secondary text-sm">smart_toy</span>
+                                <span class="font-label-caps text-secondary uppercase">AI Обобщение</span>
+                            </div>
+                            <StreamText Value="@r.Mitigation" Active="@card.IsActive($"risks[{i}].mitigation")" Lines="2" />
+                        </div>
+                    </div>
+                }
+            </div>
+            @if (!card.Done("risks") || d?.Risks is null)
+            {
+                <Loading Ready="false" Block Size="lg" Label="Анализиране на рисковете…" Class="py-xl" />
+            }
+        </div>
+    </div>
+}
+
+@code {
+    private const double Ring = 2 * Math.PI * 45;     // circumference of the r=45 circle
+
+    private static double RingOffset(int? score) => Ring * (1 - Math.Clamp(score ?? 0, 0, 100) / 100.0);
+
+    // SVG needs "282.74"; a bg-BG browser would format it as "282,74"
+    private static string Css(double v) => v.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+
+    // Same bands as the schema: 1-33 low, 34-66 medium, 67-100 high
+    private static (string Text, string Color) Level(int? score) => score switch
+    {
+        null => ("", "primary"),
+        <= 33 => ("Нисък общ риск", "primary"),
+        <= 66 => ("Среден общ риск", "tertiary"),
+        _ => ("Висок общ риск", "error")
+    };
+
+    /// <summary>Probability × impact on a 0-100 scale; null until both are in.</summary>
+    private static int? Exposure(RiskItemDraft r) =>
+        r.Probability is { } p && r.Impact is { } i
+            ? (int)Math.Round(Math.Clamp(p, 0, 100) * Math.Clamp(i, 0, 100) / 100.0)
+            : null;
+
+    private static string SeverityText(string? severity) => severity switch
+    {
+        "low" => "Ниска Тежест",
+        "medium" => "Средна Тежест",
+        "high" => "Висока Тежест",
+        "critical" => "Критична Тежест",
+        _ => ""
+    };
+
+    private static string SeverityColor(string? severity) => severity switch
+    {
+        "critical" or "high" => "error",
+        "medium" => "tertiary",
+        _ => "primary"
+    };
+
+    private static string ImpactText(int impact) => impact switch
+    {
+        <= 33 => "Ниско",
+        <= 66 => "Средно",
+        _ => "Високо"
+    };
+
+    private static string ImpactColor(int impact) => impact switch
+    {
+        <= 33 => "on-surface",
+        <= 66 => "tertiary",
+        _ => "error"
+    };
+
+    private static string StatusText(string? status) => status switch
+    {
+        "active" => "Активен",
+        "monitoring" => "Наблюдение",
+        _ => ""
+    };
+
+    private static string TypeText(string? type) => type switch
+    {
+        "market" => "Пазарен",
+        "financial" => "Финансов",
+        "technical" => "Технически",
+        "legal" => "Правен",
+        "security" => "Сигурност",
+        "competition" => "Конкуренция",
+        "scalability" => "Мащабиране",
+        _ => "…"
+    };
+
+    private static string TypeIcon(string? type) => type switch
+    {
+        "market" => "storefront",
+        "financial" => "payments",
+        "technical" => "memory",
+        "legal" => "gavel",
+        "security" => "shield_lock",
+        "competition" => "group",
+        "scalability" => "trending_up",
+        _ => "help"
+    };
 }

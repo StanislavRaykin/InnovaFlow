@@ -19,6 +19,8 @@ builder.Services.AddMassTransit(x =>
     x.SetKebabCaseEndpointNameFormatter();
     x.AddConsumer<AnalysisProgressConsumer>();
     x.AddConsumer<AnalysisPartialConsumer>();
+    x.AddConsumer<AnalysisCompletedNotificationConsumer>();
+    x.AddConsumer<AnalysisModuleCompletedNotificationConsumer>();
 
     x.UsingRabbitMq((ctx, cfg) =>
     {
@@ -38,6 +40,7 @@ if (app.Configuration.GetValue<bool>("RunMigrationsOnStartup"))
 }
 
 app.MapHub<AnalysisHub>("/hubs/analysis");
+app.MapHub<NotificationHub>("/hubs/notifications");
 app.MapDefaultEndpoints();
 app.MapGet("/", () => "Hello World!");
 

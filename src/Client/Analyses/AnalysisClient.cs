@@ -40,6 +40,10 @@ public class AnalysisClient(HttpClient http, ILogger<AnalysisClient> logger)
         }
     }
 
+    /// <summary>All the user's analyses, newest first. Throws HttpRequestException if the API can't be reached.</summary>
+    public async Task<List<AnalysisSummaryDto>> GetAnalysesAsync(CancellationToken ct = default) =>
+        await http.GetFromJsonAsync<List<AnalysisSummaryDto>>("api/analyses", ct) ?? [];
+
     public Task<AnalysisStatusView?> GetStatusAsync(Guid id, CancellationToken ct = default) =>
         GetOrNullAsync<AnalysisStatusView>($"api/analyses/{id}", ct);
 
@@ -53,6 +57,12 @@ public class AnalysisClient(HttpClient http, ILogger<AnalysisClient> logger)
 
     public Task<InnovationDraft?> GetInnovationAsync(Guid id, CancellationToken ct = default) =>
         GetOrNullAsync<InnovationDraft>($"api/analyses/{id}/innovation", ct);
+
+    public Task<FeasibilityDraft?> GetFeasibilityAsync(Guid id, CancellationToken ct = default) =>
+        GetOrNullAsync<FeasibilityDraft>($"api/analyses/{id}/feasibility", ct);
+
+    public Task<RiskDraft?> GetRisksAsync(Guid id, CancellationToken ct = default) =>
+        GetOrNullAsync<RiskDraft>($"api/analyses/{id}/risks", ct);
 
     // 404 = missing or not yours → null; any other error throws
     private async Task<T?> GetOrNullAsync<T>(string url, CancellationToken ct) where T : class

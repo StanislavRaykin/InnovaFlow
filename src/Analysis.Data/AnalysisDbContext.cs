@@ -180,6 +180,29 @@ public class AnalysisDbContext(DbContextOptions<AnalysisDbContext> options) : Db
 
             e.HasIndex(x => x.AnalysisId).IsUnique();
 
+        e.Property(x => x.Summary).HasColumnType("text");
+        e.Property(x => x.ScalabilityScore).HasPrecision(5, 2);
+
+        e.OwnsMany(x => x.Technologies, o =>
+        {
+            o.ToJson("Technologies");
+            o.Property(p => p.Status).HasConversion<string>();
+        });
+
+        e.OwnsMany(x => x.Resources, o =>
+        {
+            o.ToJson("Resources");
+            o.Property(p => p.Level).HasConversion<string>();
+        });
+
+        e.OwnsMany(x => x.Challenges, o =>
+        {
+            o.ToJson("Challenges");
+            o.Property(p => p.Severity).HasConversion<string>();
+            o.Property(p => p.Category).HasConversion<string>();
+        });
+
+
             e.HasOne(x => x.Analysis).WithMany()
              .HasForeignKey(x => x.AnalysisId)
              .OnDelete(DeleteBehavior.Cascade);
@@ -274,9 +297,10 @@ public class AnalysisDbContext(DbContextOptions<AnalysisDbContext> options) : Db
             e.HasKey(x => x.Id);
             e.Property(x => x.Id).HasDefaultValueSql("gen_random_uuid()");
 
-            e.Property(x => x.Type).HasMaxLength(50).IsRequired();
+            e.Property(x => x.Type).HasConversion<string>().HasMaxLength(50).IsRequired();
             e.Property(x => x.Title).HasMaxLength(200).IsRequired();
             e.Property(x => x.Severity).HasConversion<string>().HasMaxLength(16);
+            e.Property(x => x.Status).HasConversion<string>().HasMaxLength(16);
             e.Property(x => x.Probability).HasPrecision(5, 2);
             e.Property(x => x.Impact).HasPrecision(5, 2);
 

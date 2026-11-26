@@ -1,0 +1,109 @@
+@using Contracts.Notifications
+@implements IDisposable
+@inject NotificationHubClient Notifications
+@inject NavigationManager Nav
+@inject ILogger<ToastHost> Logger
+
+@* Push notifications as toasts, top right. Each slides in, stays VisibleMs, then slides off to the right.
+   Placed once in AccountLayout, so it covers every signed-in page. *@
+
+<div class="toast-stack fixed right-md top-[72px] md:top-md z-[60] flex flex-col gap-sm items-end pointer-events-none"
+     role="status" aria-live="polite">
+    @foreach (var t in toasts)
+    {
+        <button type="button" @key="t.Notification.Id" @onclick="() => Open(t)"
+                class="toast @(t.Leaving ? "leaving" : "") pointer-events-auto w-[320px] max-w-[calc(100vw-2rem)] text-left
+                       glass-panel rounded-xl border border-primary/30 shadow-lg shadow-primary/10 bg-surface-container/90 backdrop-blur-xl
+                       overflow-hidden">
+            <div class="flex items-start gap-sm p-sm">
+                <span class="material-symbols-outlined text-primary shrink-0" style="font-variation-settings: 'FILL' 1;">@(t.Notification.Icon ?? Icon(t.Notification.Type))</span>
+                <div class="min-w-0">
+                    <div class="font-headline-md text-[15px] font-bold text-on-surface">@t.Notification.Title</div>
+                    @if (!string.IsNullOrEmpty(t.Notification.Message))
+                    {
+                        <div class="font-body-md text-[13px] text-on-surface-variant mt-[2px] break-words">@t.Notification.Message</div>
+                    }
+                </div>
+            </div>
+            @* drains over VisibleMs, so it's clear when the toast will go *@
+            <div class="toast-timer h-[2px] bg-primary/70" style="animation-duration: @(VisibleMs)ms"></div>
+        </button>
+    }
+</div>
+
+@code {
+    private const int VisibleMs = 7500;
+    private const int LeaveMs = 300;           // keep in step with .toast.leaving in ToastHost.razor.css
+
+    private sealed class Toast(PushNotification n)
+    {
+        public PushNotification Notification { get; } = n;
+        public bool Leaving { get; set; }
+    }
+
+    private readonly List<Toast> toasts = [];
+    private readonly CancellationTokenSource disposed = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Notifications.Received += OnReceived;
+        try
+        {
+            await Notifications.EnsureStartedAsync();
+        }
+        catch (Exception ex)
+        {
+            // no toasts this time; the next signed-in layout tries again
+            Logger.LogWarning(ex, "Notification hub could not connect");
+        }
+    }
+
+    private void OnReceived(PushNotification n) => _ = InvokeAsync(() => ShowAsync(n));
+
+    private async Task ShowAsync(PushNotification n)
+    {
+        if (toasts.Any(t => t.Notification.Id == n.Id)) return;    // same notification on a reconnect
+
+        var toast = new Toast(n);
+        toasts.Add(toast);
+        StateHasChanged();
+
+        try
+        {
+            await Task.Delay(VisibleMs, disposed.Token);
+            await DismissAsync(toast);
+        }
+        catch (TaskCanceledException) { }
+    }
+
+    private async Task DismissAsync(Toast toast)
+    {
+        if (toast.Leaving) return;
+        toast.Leaving = true;
+        StateHasChanged();
+
+        await Task.Delay(LeaveMs, disposed.Token);
+        toasts.Remove(toast);
+        StateHasChanged();
+    }
+
+    private void Open(Toast toast)
+    {
+        if (toast.Notification.Link is { } link) Nav.NavigateTo(link);
+        _ = DismissAsync(toast);
+    }
+
+    private static string Icon(string type) => type switch
+    {
+        "AnalysisCompleted" => "task_alt",
+        "AnalysisFailed" => "error",
+        _ => "notifications"
+    };
+
+    public void Dispose()
+    {
+        Notifications.Received -= OnReceived;
+        disposed.Cancel();
+        disposed.Dispose();
+    }
+}

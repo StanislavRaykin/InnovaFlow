@@ -8,6 +8,7 @@ using Analysis.Api.Clients;
 using Contracts.AnalysisDtos;
 using AnalysisRequested = Contracts.AnalysisDtos.AnalysisRequested;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace Analysis.Api.Endpoints;
 
@@ -22,6 +23,11 @@ public static class Analysis
         g.MapPost("/", HandleStartAnalysis)
          .WithName("StartAnalysis")
          .WithSummary("Queues an analysis for the worker")
+         .RequireAuthorization();
+
+        g.MapGet("/", HandleListAnalyses)
+         .WithName("ListAnalyses")
+         .WithSummary("The user's analyses, newest first (dashboard and idea list)")
          .RequireAuthorization();
 
         g.MapGet("/{id:guid}", HandleGetAnalysis)
@@ -45,8 +51,90 @@ public static class Analysis
          .WithSummary("Saved innovation result, in the same shape the client streams")
          .RequireAuthorization();
 
+        g.MapGet("/{id:guid}/feasibility", HandleGetFeasibility)
+         .WithName("GetFeasibilityAnalysis")
+         .WithSummary("Saved feasibility result, in the same shape the client streams")
+         .RequireAuthorization();
+
+        g.MapGet("/{id:guid}/risks", HandleGetRisks)
+         .WithName("GetRiskAnalysis")
+         .WithSummary("Saved risk result, in the same shape the client streams")
+         .RequireAuthorization();
+
         return app;
     }
+
+    private static async Task<IResult> HandleListAnalyses(
+        AnalysisDbContext db,
+        ICurrentUser currentUser,
+        CancellationToken ct)
+    {
+        var analyses = await db.Analyses.AsNoTracking()
+            .Where(a => a.UserId == currentUser.Id)
+            .OrderByDescending(a => a.StartedAt)
+            .Take(500)
+            .Select(a => new { a.Id, a.IdeaId, a.Status, a.OverallScore, a.CompletedModules, a.TotalModules, a.StartedAt, a.CompletedAt })
+            .ToListAsync(ct);
+
+        return Results.Ok(analyses.Select(a => new AnalysisSummaryDto(
+            a.Id, a.IdeaId, a.Status,
+            a.Status == AnalysisStatus.Completed ? Score100(a.OverallScore) : null,
+            a.CompletedModules, a.TotalModules, a.StartedAt, a.CompletedAt)).ToList());
+    }
+
+    private static async Task<IResult> HandleGetFeasibility(Guid id,
+        AnalysisDbContext db,
+        ICurrentUser currentUser,
+        CancellationToken ct)
+    {
+        if (!await OwnsAsync(db, id, currentUser, ct)) return Results.NotFound();
+
+        var f = await db.FeasibilityAnalyses.AsNoTracking().FirstOrDefaultAsync(x => x.AnalysisId == id, ct);
+        if (f is null) return Results.NotFound();
+
+        return Results.Ok(new FeasibilityAnalysisDto(
+            f.Summary,
+            Score100(f.TechnicalScore)!.Value,
+            Score100(f.ResourceScore)!.Value,
+            Score100(f.ComplexityScore)!.Value,
+            Score100(f.ScalabilityScore)!.Value,
+            [.. f.Technologies.Select(t => new FeasibilityTechnologyDto(t.Name, t.Description, Wire(t.Status)))],
+            [.. f.Resources.Select(r => new FeasibilityResourceDto(r.Name, Wire(r.Level), Math.Clamp(r.Intensity, 1, 100)))],
+            [.. f.Challenges.Select(c => new FeasibilityChallengeDto(c.Title, c.Description, Wire(c.Severity), Wire(c.Category)))]));
+    }
+
+    private static async Task<IResult> HandleGetRisks(Guid id,
+        AnalysisDbContext db,
+        ICurrentUser currentUser,
+        CancellationToken ct)
+    {
+        if (!await OwnsAsync(db, id, currentUser, ct)) return Results.NotFound();
+
+        var r = await db.RiskAnalyses.AsNoTracking()
+            .Include(x => x.Risks)
+            .FirstOrDefaultAsync(x => x.AnalysisId == id, ct);
+        if (r is null) return Results.NotFound();
+
+        var scores = await ScoresAsync(db, id, ct);
+        var overall = scores.GetValueOrDefault(ScoreType.Risk);
+
+        // rows have no order; the AI listed them most serious first, so rebuild that
+        var risks = r.Risks
+            .OrderByDescending(x => x.Severity)
+            .ThenByDescending(x => (x.Probability ?? 0) * (x.Impact ?? 0));
+
+        return Results.Ok(new RiskAnalysisDto(
+            [.. risks.Select(x => new RiskDto(
+                Wire(x.Type), x.Title, x.Description,
+                Score100(x.Probability), Score100(x.Impact),
+                Wire(x.Severity), Wire(x.Status), x.Mitigation))],
+            Score100(r.RiskScore ?? overall?.Score),
+            overall?.Explanation,
+            r.Summary));
+    }
+
+    // Same naming the AI uses for enums (Anthropic.Helpers.StructuredOutput), so saved and live drafts match
+    private static string Wire(Enum value) => JsonNamingPolicy.SnakeCaseLower.ConvertName(value.ToString());
 
     private static async Task<IResult> HandleGetAudience(Guid id,
         AnalysisDbContext db,
@@ -216,6 +304,9 @@ var list = AnalysisModules.All.Select(m => new
     return Results.Ok(new
     {
         analysis.Id,
+        Status = analysis.Status.ToString(),
+        // set by the worker once every module has finished
+        OverallScore = analysis.Status == AnalysisStatus.Completed ? Score100(analysis.OverallScore) : null,
         Total = list.Count,
         Done = list.Count(m => m.Status is "Completed" or "Failed"),
         Modules = list

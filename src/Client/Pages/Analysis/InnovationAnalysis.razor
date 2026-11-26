@@ -1,7 +1,7 @@
 @page "/analyses/{AnalysisId:guid}/innovation"
 @layout AccountLayout
 @attribute [Authorize]
-@inherits Client.Pages.AnalysisResult.LiveModulePage
+@inherits Client.Pages.Analysis.LiveModulePage
 
 <PageTitle>Иновации | InnovaFlow</PageTitle>
 
@@ -22,16 +22,6 @@
             {
                 <span class="font-data-mono text-[12px] text-secondary animate-pulse">@(card.Label ?? "ИЗЧАКВАНЕ…")</span>
             }
-        </div>
-        <div class="flex gap-sm">
-            <button class="p-2 text-on-surface-variant hover:bg-primary/10 rounded-lg transition-all relative overflow-hidden group">
-                <span class="material-symbols-outlined relative z-10">refresh</span>
-                <div class="absolute inset-0 hidden group-hover:block animate-scan z-0"></div>
-            </button>
-            <button class="p-2 text-on-surface-variant hover:bg-primary/10 rounded-lg transition-all relative overflow-hidden group">
-                <span class="material-symbols-outlined relative z-10">ios_share</span>
-                <div class="absolute inset-0 hidden group-hover:block animate-scan z-0"></div>
-            </button>
         </div>
     </div>
     <AnalysisTabs AnalysisId="AnalysisId" />

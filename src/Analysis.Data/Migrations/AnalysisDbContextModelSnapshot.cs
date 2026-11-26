@@ -357,18 +357,22 @@ namespace Analysis.Data.Migrations
                     b.Property<Guid>("AnalysisId")
                         .HasColumnType("uuid");
 
-                    b.Property<decimal?>("ComplexityScore")
+                    b.Property<decimal>("ComplexityScore")
                         .HasPrecision(5, 2)
                         .HasColumnType("numeric(5,2)");
 
-                    b.Property<decimal?>("ResourceScore")
+                    b.Property<decimal>("ResourceScore")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("numeric(5,2)");
+
+                    b.Property<decimal>("ScalabilityScore")
                         .HasPrecision(5, 2)
                         .HasColumnType("numeric(5,2)");
 
                     b.Property<string>("Summary")
                         .HasColumnType("text");
 
-                    b.Property<decimal?>("TechnicalScore")
+                    b.Property<decimal>("TechnicalScore")
                         .HasPrecision(5, 2)
                         .HasColumnType("numeric(5,2)");
 
@@ -640,6 +644,11 @@ namespace Analysis.Data.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("Severity")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
+                    b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(16)
                         .HasColumnType("character varying(16)");
@@ -980,7 +989,99 @@ namespace Analysis.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.OwnsMany("InnovaFlow.Analysis.Data.FeasibilityChallenge", "Challenges", b1 =>
+                        {
+                            b1.Property<Guid>("FeasibilityAnalysisId");
+
+                            b1.Property<int>("__synthesizedOrdinal")
+                                .ValueGeneratedOnAdd();
+
+                            b1.Property<string>("Category")
+                                .IsRequired();
+
+                            b1.Property<string>("Description")
+                                .IsRequired();
+
+                            b1.Property<string>("Severity")
+                                .IsRequired();
+
+                            b1.Property<string>("Title")
+                                .IsRequired();
+
+                            b1.HasKey("FeasibilityAnalysisId", "__synthesizedOrdinal");
+
+                            b1.ToTable("FeasibilityAnalyses", "Analysis");
+
+                            b1
+                                .ToJson("Challenges")
+                                .HasColumnType("jsonb");
+
+                            b1.WithOwner()
+                                .HasForeignKey("FeasibilityAnalysisId");
+                        });
+
+                    b.OwnsMany("InnovaFlow.Analysis.Data.FeasibilityResource", "Resources", b1 =>
+                        {
+                            b1.Property<Guid>("FeasibilityAnalysisId");
+
+                            b1.Property<int>("__synthesizedOrdinal")
+                                .ValueGeneratedOnAdd();
+
+                            b1.Property<int>("Intensity");
+
+                            b1.Property<string>("Level")
+                                .IsRequired();
+
+                            b1.Property<string>("Name")
+                                .IsRequired();
+
+                            b1.HasKey("FeasibilityAnalysisId", "__synthesizedOrdinal");
+
+                            b1.ToTable("FeasibilityAnalyses", "Analysis");
+
+                            b1
+                                .ToJson("Resources")
+                                .HasColumnType("jsonb");
+
+                            b1.WithOwner()
+                                .HasForeignKey("FeasibilityAnalysisId");
+                        });
+
+                    b.OwnsMany("InnovaFlow.Analysis.Data.FeasibilityTechnology", "Technologies", b1 =>
+                        {
+                            b1.Property<Guid>("FeasibilityAnalysisId");
+
+                            b1.Property<int>("__synthesizedOrdinal")
+                                .ValueGeneratedOnAdd();
+
+                            b1.Property<string>("Description")
+                                .IsRequired();
+
+                            b1.Property<string>("Name")
+                                .IsRequired();
+
+                            b1.Property<string>("Status")
+                                .IsRequired();
+
+                            b1.HasKey("FeasibilityAnalysisId", "__synthesizedOrdinal");
+
+                            b1.ToTable("FeasibilityAnalyses", "Analysis");
+
+                            b1
+                                .ToJson("Technologies")
+                                .HasColumnType("jsonb");
+
+                            b1.WithOwner()
+                                .HasForeignKey("FeasibilityAnalysisId");
+                        });
+
                     b.Navigation("Analysis");
+
+                    b.Navigation("Challenges");
+
+                    b.Navigation("Resources");
+
+                    b.Navigation("Technologies");
                 });
 
             modelBuilder.Entity("InnovaFlow.Analysis.Data.InnovationAnalysis", b =>

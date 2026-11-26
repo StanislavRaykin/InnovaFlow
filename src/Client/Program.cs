@@ -5,6 +5,7 @@ using Client;
 using Client.Auth;
 using Client.Ideas;
 using Client.Analyses;
+using Client.Notifications;
 using Microsoft.AspNetCore.SignalR.Client;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
@@ -32,6 +33,9 @@ builder.Services.AddScoped(sp => new HubConnectionBuilder()
   .Build());
 
 builder.Services.AddScoped<HubClient>();
+
+// push notifications: own hub (/hubs/notifications), own connection
+builder.Services.AddScoped(sp => new NotificationHubClient(gatewayUrl, sp.GetRequiredService<JwtAuthenticationStateProvider>()));
   
 // used only by JwtAuthenticationStateProvider to check the session; it sets the token itself
 builder.Services.AddHttpClient(JwtAuthenticationStateProvider.SessionClientName, c => c.BaseAddress = gatewayUrl);
@@ -46,6 +50,7 @@ builder.Services.AddScoped<IdentityClient>();
 builder.Services.AddScoped<IdeaDraft>();
 builder.Services.AddScoped<DraftAutosave>();
 builder.Services.AddScoped<IdeaClient>();
+builder.Services.AddScoped<IdeaBoard>();
 builder.Services.AddScoped<AnalysisClient>();
 builder.Services.AddScoped<AnalysisLiveState>();
 

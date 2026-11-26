@@ -2,6 +2,9 @@ namespace InnovaFlow.Analysis.Data;
 
 public enum RiskSeverity { Low, Medium, High, Critical }
 
+public enum RiskType { Market, Financial, Technical, Legal, Security, Competition, Scalability }
+public enum RiskStatus { Active, Monitoring }
+
 public enum Priority { Low, Medium, High }
 
 /// <summary>The twelve DAG nodes. The value is also the queue-visible name.</summary>

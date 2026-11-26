@@ -15,6 +15,9 @@ public interface IModuleCard
 
     /// <summary>Swaps the draft for the saved result if the module has completed. True if it did.</summary>
     Task<bool> LoadFinalAsync(Guid analysisId);
+
+    /// <summary>The field at <paramref name="path"/> isn't being written any more.</summary>
+    bool Done(string path);
 }
 
 /// <summary>

@@ -66,7 +66,7 @@ public class AnalysisRequestedConsumer(AnalysisDbContext db,
 
                     var done = Interlocked.Increment(ref completed);
                     await bus.Publish(new AnalysisModuleCompleted(
-                        msg.AnalysisId, msg.IdeaId, module.Key, done, modules.Count()), ct);
+                        msg.AnalysisId, msg.IdeaId, module.Key, done, modules.Count(), msg.UserId), ct);
                 }));
 
                 // Persist progress after each stage so polling clients see movement.
@@ -81,7 +81,7 @@ public class AnalysisRequestedConsumer(AnalysisDbContext db,
             await db.SaveChangesAsync(ct);
 
             await bus.Publish(new AnalysisCompleted(
-                msg.AnalysisId, msg.IdeaId, analysis.OverallScore ?? 0), ct);
+                msg.AnalysisId, msg.IdeaId, analysis.OverallScore ?? 0, msg.UserId, msg.Title), ct);
 
             logger.LogInformation("Analysis {Id} completed with score {Score} and took {Elapsed}",
                 msg.AnalysisId, analysis.OverallScore, sw.Elapsed);

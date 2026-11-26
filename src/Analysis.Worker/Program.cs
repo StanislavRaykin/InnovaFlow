@@ -7,6 +7,8 @@ using Analysis.Worker.Modules.Market;
 using InnovaFlow.Analysis.Data;
 using MassTransit;
 using Analysis.Worker.Modules.Audience;
+using Analysis.Worker.Modules.Feasibility;
+using Analysis.Worker.Modules.Risk;
 using Analysis.Worker.Publishers;
 
 var builder = Host.CreateApplicationBuilder(args);
@@ -39,6 +41,8 @@ builder.Services.AddScoped<ModuleRunTracker>();
 builder.Services.AddScoped<IAnalysisModule, MarketAnalysisModule>();
 builder.Services.AddScoped<IAnalysisModule, AudienceAnalysisModule>();
 builder.Services.AddScoped<IAnalysisModule, InnovationAnalysisModule>();
+builder.Services.AddScoped<IAnalysisModule, FeasibilityAnalysisModule>();
+builder.Services.AddScoped<IAnalysisModule, RiskAnalysisModule>();
 
 // Messaging
 builder.Services.AddMassTransit(x =>

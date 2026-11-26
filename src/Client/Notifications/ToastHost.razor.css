@@ -1,0 +1,39 @@
+/* In from the right edge, then back out the same way. Off-screen = own width + the right-md gap. */
+.toast {
+    animation: toast-in 280ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+/* duration must match LeaveMs in ToastHost.razor */
+.toast.leaving {
+    animation: toast-out 300ms cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+.toast-timer {
+    transform-origin: left;
+    animation-name: toast-timer;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+}
+
+@keyframes toast-in {
+    from { transform: translateX(calc(100% + 2rem)); opacity: 0; }
+    to   { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes toast-out {
+    from { transform: translateX(0); opacity: 1; }
+    to   { transform: translateX(calc(100% + 2rem)); opacity: 0; }
+}
+
+@keyframes toast-timer {
+    from { transform: scaleX(1); }
+    to   { transform: scaleX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .toast         { animation: toast-fade-in 150ms ease-out both; }
+    .toast.leaving { animation: toast-fade-out 300ms ease-in forwards; }
+
+    @keyframes toast-fade-in  { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes toast-fade-out { from { opacity: 1; } to { opacity: 0; } }
+}

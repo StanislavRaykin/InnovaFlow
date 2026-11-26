@@ -26,6 +26,11 @@ public static class IdeaPromptBuilder
         sb.AppendLine("</idea>");
         return sb.ToString();
     }
+   
+    public static string Tag(string tagName, string content)
+    {
+        return $"<{tagName}>\n{content}\n</{tagName}>";
+    }
     private static void Append(this StringBuilder sb, string label, string? value)
     {
         var text = string.IsNullOrWhiteSpace(value)

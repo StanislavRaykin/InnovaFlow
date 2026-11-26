@@ -19,6 +19,17 @@ public record AnalysisStatusDto(
 
 public sealed record ScoreDto(string ScoreType, decimal Score, string? Explanation);
 
+/// <summary>GET /api/analyses — one of the user's analyses, for the dashboard and the idea list.</summary>
+public sealed record AnalysisSummaryDto(
+    Guid Id,
+    Guid IdeaId,
+    AnalysisStatus Status,
+    int? OverallScore,
+    int CompletedModules,
+    int TotalModules,
+    DateTimeOffset? StartedAt,
+    DateTimeOffset? CompletedAt);
+
 /// <summary>
 /// GET /api/analyses/{id}/market — the saved market result. Same shape (camelCase) as the AI's JSON,
 /// so the client reads it into the same draft type it fills from the live snapshots.
@@ -57,6 +68,45 @@ public sealed record InnovationAnalysisDto(
     int? OverallScore,
     string? OverallExplanation);
 
+/// <summary>
+/// GET /api/analyses/{id}/feasibility — the saved feasibility result, in the AI's JSON shape.
+/// Enums are snake_case strings ("needs_work", "critical"), the same as in the AI's JSON.
+/// </summary>
+public sealed record FeasibilityAnalysisDto(
+    string? Summary,
+    int TechnicalScore,
+    int ResourceScore,
+    int ComplexityScore,
+    int ScalabilityScore,
+    List<FeasibilityTechnologyDto> Technologies,
+    List<FeasibilityResourceDto> Resources,
+    List<FeasibilityChallengeDto> Challenges);
+
+public sealed record FeasibilityTechnologyDto(string Name, string Description, string Status);
+
+public sealed record FeasibilityResourceDto(string Name, string Level, int Intensity);
+
+public sealed record FeasibilityChallengeDto(string Title, string Description, string Severity, string Category);
+
+/// <summary>
+/// GET /api/analyses/{id}/risks — the saved risk result, in the AI's JSON shape (snake_case enums).
+/// Risks are most serious first.
+/// </summary>
+public sealed record RiskAnalysisDto(
+    List<RiskDto> Risks,
+    int? RiskScore,
+    string? RiskScoreExplanation,
+    string? Summary);
+
+public sealed record RiskDto(
+    string Type,
+    string Title,
+    string? Description,
+    int? Probability,
+    int? Impact,
+    string Severity,
+    string Status,
+    string? Mitigation);
 
 /// <summary>
 /// GET /api/analyses/{id}/audience — the saved audience result. Same shape (camelCase) as the AI's JSON,
@@ -108,19 +158,23 @@ public sealed record AnalysisStarted(
     Guid AnalysisId,
     Guid IdeaId);
 
-/// <summary>One module finished. Drives the progress UI (SignalR in week 2, polling for now).</summary>
+/// <summary>One module finished. Notifier pushes a toast for it to <paramref name="UserId"/>.</summary>
 public sealed record AnalysisModuleCompleted(
     Guid AnalysisId,
     Guid IdeaId,
     string Module,
     int Completed,
-    int Total);
+    int Total,
+    Guid UserId);
 
 /// <summary>All modules finished. Projects sets idea_status = Analyzed; Notifier emails the user.</summary>
+/// <remarks>UserId and IdeaTitle let Notifier push "analysis ready" without calling back into other services.</remarks>
 public sealed record AnalysisCompleted(
     Guid AnalysisId,
     Guid IdeaId,
-    decimal OverallScore);
+    decimal OverallScore,
+    Guid UserId,
+    string IdeaTitle);
 
 /// <summary>Pipeline failed. Projects returns idea_status to Draft so the user can retry.</summary>
 public sealed record AnalysisFailed(

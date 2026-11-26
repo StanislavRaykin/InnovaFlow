@@ -1,3 +1,5 @@
+using Contracts.Analysis;
+
 namespace InnovaFlow.Analysis.Data;
 
 public class FeasibilityAnalysis
@@ -39,7 +41,3 @@ public class FeasibilityChallenge
     public SeverityLevel Severity { get; set; }
     public ChallengeCategory Category { get; set; }
 }
-
-public enum TechnologyStatus { Available, NeedsWork }
-public enum SeverityLevel { Low, Medium, High, Critical }
-public enum ChallengeCategory { Technical, Hardware, Energy, Durability, Operational, Financial, Legal, Market, Other }

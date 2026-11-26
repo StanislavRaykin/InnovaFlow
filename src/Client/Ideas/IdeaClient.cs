@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using Contracts.Ideas;
 
 namespace Client.Ideas;
 
@@ -13,6 +14,10 @@ public class IdeaClient(HttpClient http, IdeaDraft draft, ILogger<IdeaClient> lo
     private readonly HttpClient http = http;
     private readonly IdeaDraft draft = draft;
     private readonly ILogger<IdeaClient> logger = logger;
+
+    /// <summary>The user's ideas (drafts included). Throws HttpRequestException if the API can't be reached.</summary>
+    public async Task<List<IdeaDto>> GetIdeasAsync(CancellationToken ct = default) =>
+        await http.GetFromJsonAsync<List<IdeaDto>>("api/ideas", ct) ?? [];
 
     // submits the wizard's draft; the server promotes the autosaved draft with the same id
     public async Task<IdeaCreatedResult> CreateIdeaAsync()

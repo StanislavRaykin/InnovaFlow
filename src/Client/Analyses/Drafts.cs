@@ -81,3 +81,61 @@ public sealed class InnovationDraft
     public int? OverallScore { get; set; }
     public string? OverallExplanation { get; set; }
 }
+
+// Enums arrive as snake_case strings ("needs_work", "critical"), live and saved alike.
+
+/// <summary>Mirrors FeasibilityAnalysisResult in Analysis.Worker.</summary>
+public sealed class FeasibilityDraft
+{
+    public string? Summary { get; set; }
+    public int? TechnicalScore { get; set; }
+    public int? ResourceScore { get; set; }
+    public int? ComplexityScore { get; set; }
+    public int? ScalabilityScore { get; set; }
+    public List<TechnologyDraft>? Technologies { get; set; }
+    public List<ResourceDraft>? Resources { get; set; }
+    public List<ChallengeDraft>? Challenges { get; set; }
+}
+
+public sealed class TechnologyDraft
+{
+    public string? Name { get; set; }
+    public string? Description { get; set; }
+    public string? Status { get; set; }        // available | needs_work
+}
+
+public sealed class ResourceDraft
+{
+    public string? Name { get; set; }
+    public string? Level { get; set; }         // low | medium | high | critical
+    public int? Intensity { get; set; }
+}
+
+public sealed class ChallengeDraft
+{
+    public string? Title { get; set; }
+    public string? Description { get; set; }
+    public string? Severity { get; set; }      // low | medium | high | critical
+    public string? Category { get; set; }      // technical | hardware | energy | durability | operational | financial | legal | market | other
+}
+
+/// <summary>Mirrors RiskAnalysisResult in Analysis.Worker.</summary>
+public sealed class RiskDraft
+{
+    public List<RiskItemDraft>? Risks { get; set; }
+    public int? RiskScore { get; set; }
+    public string? RiskScoreExplanation { get; set; }
+    public string? Summary { get; set; }
+}
+
+public sealed class RiskItemDraft
+{
+    public string? Type { get; set; }          // market | financial | technical | legal | security | competition | scalability
+    public string? Title { get; set; }
+    public string? Description { get; set; }
+    public int? Probability { get; set; }
+    public int? Impact { get; set; }
+    public string? Severity { get; set; }      // low | medium | high | critical
+    public string? Status { get; set; }        // active | monitoring
+    public string? Mitigation { get; set; }
+}

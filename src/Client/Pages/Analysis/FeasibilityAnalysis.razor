@@ -1,264 +1,231 @@
 @page "/analyses/{AnalysisId:guid}/feasibility"
 @layout AccountLayout
 @attribute [Authorize]
+@inherits LiveModulePage
 
 <PageTitle>Осъществимост | InnovaFlow</PageTitle>
 
-    <!-- TopAppBar (Shared Component) -->
-    <header class="flex flex-col gap-sm p-md full-width border-b border-primary/20 bg-surface-dim/50 backdrop-blur-xl shadow-lg shadow-primary/5 sticky top-16 md:top-0 z-30">
-        <div class="flex justify-between items-center w-full max-w-container-max mx-auto">
-            <div class="flex items-center gap-md">
-                <span class="material-symbols-outlined text-primary text-4xl" style="font-variation-settings: 'FILL' 1;">analytics</span>
-                <div>
-                    <h2 class="font-headline-lg text-headline-lg font-bold text-primary hidden md:block">Анализ на идеята</h2>
-                    <h2 class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary md:hidden">Анализ на идеята</h2>
-                </div>
+@{
+    // The AI writes: summary, technicalScore, resourceScore, complexityScore, scalabilityScore,
+    // technologies, resources, challenges
+    var card = Live.Feasibility;
+    var d = card.Draft;
+}
+
+<!-- TopAppBar -->
+<header class="flex flex-col gap-sm p-md full-width border-b border-primary/20 bg-surface-dim/50 backdrop-blur-xl shadow-lg shadow-primary/5 sticky top-16 md:top-0 z-30">
+    <div class="flex justify-between items-center w-full max-w-container-max mx-auto">
+        <div class="flex items-center gap-md">
+            <span class="material-symbols-outlined text-primary text-4xl" style="font-variation-settings: 'FILL' 1;">analytics</span>
+            <div>
+                <h2 class="font-headline-lg text-headline-lg font-bold text-primary hidden md:block">Анализ на осъществимост</h2>
+                <h2 class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary md:hidden">Осъществимост</h2>
             </div>
-            <div class="flex items-center gap-sm">
-                <button class="p-xs text-on-surface-variant hover:bg-primary/10 rounded-lg transition-colors group relative overflow-hidden">
-                    <span class="material-symbols-outlined">refresh</span>
-                    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-primary/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
-                </button>
-                <button class="p-xs text-on-surface-variant hover:bg-primary/10 rounded-lg transition-colors group relative overflow-hidden">
-                    <span class="material-symbols-outlined">ios_share</span>
-                    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-primary/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
-                </button>
-            </div>
+            @if (!card.IsDone)
+            {
+                <span class="font-data-mono text-[12px] text-secondary animate-pulse">@(card.Label ?? "ИЗЧАКВАНЕ…")</span>
+            }
         </div>
+    </div>
     <AnalysisTabs AnalysisId="AnalysisId" />
-    </header>
+</header>
+
+@if (card.Status == "Failed")
+{
+    <div class="p-md max-w-container-max mx-auto w-full">
+        <div class="glass-card p-md rounded-xl text-error">Анализът на осъществимост не успя. Опитайте отново.</div>
+    </div>
+}
+else
+{
     <!-- Canvas -->
     <div class="flex-1 p-md md:p-xl w-full max-w-container-max mx-auto overflow-y-auto">
-        <!-- Page Header -->
+        <!-- Summary -->
         <div class="mb-lg">
             <div class="inline-flex items-center gap-xs px-sm py-1 rounded-full bg-primary/10 border border-primary/20 text-primary font-label-caps text-label-caps mb-sm">
-                <span class="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_8px_#4ADE80]"></span>
-                SYS.ANALYZE.COMPLETE
+                <span class="w-2 h-2 rounded-full bg-primary @(card.IsDone ? "" : "animate-pulse") shadow-[0_0_8px_#4ADE80]"></span>
+                @(card.IsDone ? "SYS.ANALYZE.COMPLETE" : "SYS.ANALYZE.RUNNING")
             </div>
             <h1 class="font-display-lg text-display-lg text-on-surface mb-xs tracking-tight">
-                Анализ на осъществимост: <span class="text-primary glow-text"><Loading Ready="loaded" Size="lg">SmartWear</Loading></span>
+                Може ли идеята реално да проработи?
             </h1>
-            <Loading Ready="loaded" Block Size="sm" Class="justify-start">
-                <p class="font-body-lg text-body-lg text-on-surface-variant max-w-3xl">
-                    Може ли тази идея реално да проработи? Подробна оценка на техническите и ресурсни изисквания за реализацията на интелигентни облекла с вградена биометрия.
-                </p>
-            </Loading>
+            <div class="max-w-3xl font-body-lg text-body-lg text-on-surface-variant">
+                <StreamText Value="@d?.Summary" Active="@card.IsActive("summary")" />
+            </div>
         </div>
+
         <!-- Scores Bento Grid -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-sm md:gap-md mb-xl">
-            <!-- Tech Feasibility -->
-            <div class="glass-card rounded-xl p-md flex flex-col relative overflow-hidden group">
-                <div class="absolute top-0 right-0 p-sm opacity-20 group-hover:opacity-100 transition-opacity">
-                    <span class="material-symbols-outlined text-primary text-4xl">memory</span>
-                </div>
-                <span class="font-label-caps text-label-caps text-on-surface-variant uppercase mb-xs">Техническа<br />осъществимост</span>
-                <div class="flex items-end gap-sm mt-auto">
-                    <span class="font-display-lg text-display-lg text-primary glow-text"><Loading Ready="loaded" Size="lg">91</Loading></span>
-                    <span class="font-data-mono text-data-mono text-on-surface-variant mb-xs">/100</span>
-                </div>
-                <div class="w-full bg-surface-container-high h-1 rounded-full mt-sm overflow-hidden">
-                    @if (loaded)
-                    {
-                        <div class="bg-primary h-full w-[91%] relative">
+            @foreach (var s in Scores)
+            {
+                var score = s.Get(d);
+                var ready = score is not null && card.Done(s.Key);
+                <div class="glass-card rounded-xl p-md flex flex-col relative overflow-hidden group @(card.IsActive(s.Key) ? "ring-1 ring-primary/40" : "")">
+                    <div class="absolute top-0 right-0 p-sm opacity-20 group-hover:opacity-100 transition-opacity">
+                        <span class="material-symbols-outlined text-@s.Color text-4xl">@s.Icon</span>
+                    </div>
+                    <span class="font-label-caps text-label-caps text-on-surface-variant uppercase mb-xs">@s.Line1<br />@s.Line2</span>
+                    <div class="flex items-end gap-sm mt-auto">
+                        <span class="font-display-lg text-display-lg text-@s.Color"><Loading Ready="ready" Size="lg">@score</Loading></span>
+                        <span class="font-data-mono text-data-mono text-on-surface-variant mb-xs">/100</span>
+                    </div>
+                    <div class="w-full bg-surface-container-high h-1 rounded-full mt-sm overflow-hidden">
+                        <div class="bg-@s.Color h-full relative transition-[width] duration-700" style="width: @(ready ? score : 0)%">
                             <div class="absolute inset-0 progress-shimmer"></div>
                         </div>
-                    }
+                    </div>
+                    <span class="font-data-mono text-[11px] text-on-surface-variant mt-xs">@s.Hint</span>
                 </div>
-            </div>
-            <!-- Resources -->
-            <div class="glass-card rounded-xl p-md flex flex-col relative overflow-hidden group">
-                <div class="absolute top-0 right-0 p-sm opacity-20 group-hover:opacity-100 transition-opacity">
-                    <span class="material-symbols-outlined text-secondary text-4xl">precision_manufacturing</span>
-                </div>
-                <span class="font-label-caps text-label-caps text-on-surface-variant uppercase mb-xs">Ресурсни<br />изисквания</span>
-                <div class="flex items-end gap-sm mt-auto">
-                    <span class="font-display-lg text-display-lg text-secondary"><Loading Ready="loaded" Size="lg">76</Loading></span>
-                    <span class="font-data-mono text-data-mono text-on-surface-variant mb-xs">/100</span>
-                </div>
-                <div class="w-full bg-surface-container-high h-1 rounded-full mt-sm overflow-hidden">
-                    @if (loaded)
-                    {
-                        <div class="bg-secondary h-full w-[76%] relative">
-                            <div class="absolute inset-0 progress-shimmer"></div>
-                        </div>
-                    }
-                </div>
-            </div>
-            <!-- Complexity -->
-            <div class="glass-card rounded-xl p-md flex flex-col relative overflow-hidden group">
-                <div class="absolute top-0 right-0 p-sm opacity-20 group-hover:opacity-100 transition-opacity">
-                    <span class="material-symbols-outlined text-tertiary text-4xl">schema</span>
-                </div>
-                <span class="font-label-caps text-label-caps text-on-surface-variant uppercase mb-xs">Сложност на<br />изпълнение</span>
-                <div class="flex items-end gap-sm mt-auto">
-                    <span class="font-display-lg text-display-lg text-tertiary"><Loading Ready="loaded" Size="lg">64</Loading></span>
-                    <span class="font-data-mono text-data-mono text-on-surface-variant mb-xs">/100</span>
-                </div>
-                <div class="w-full bg-surface-container-high h-1 rounded-full mt-sm overflow-hidden">
-                    @if (loaded)
-                    {
-                        <div class="bg-tertiary h-full w-[64%] relative">
-                            <div class="absolute inset-0 progress-shimmer"></div>
-                        </div>
-                    }
-                </div>
-            </div>
-            <!-- Scalability -->
-            <div class="glass-card rounded-xl p-md flex flex-col relative overflow-hidden group">
-                <div class="absolute top-0 right-0 p-sm opacity-20 group-hover:opacity-100 transition-opacity">
-                    <span class="material-symbols-outlined text-primary text-4xl">trending_up</span>
-                </div>
-                <span class="font-label-caps text-label-caps text-on-surface-variant uppercase mb-xs">Мащабируемост<br />на пазара</span>
-                <div class="flex items-end gap-sm mt-auto">
-                    <span class="font-display-lg text-display-lg text-primary glow-text"><Loading Ready="loaded" Size="lg">88</Loading></span>
-                    <span class="font-data-mono text-data-mono text-on-surface-variant mb-xs">/100</span>
-                </div>
-                <div class="w-full bg-surface-container-high h-1 rounded-full mt-sm overflow-hidden">
-                    @if (loaded)
-                    {
-                        <div class="bg-primary h-full w-[88%] relative">
-                            <div class="absolute inset-0 progress-shimmer"></div>
-                        </div>
-                    }
-                </div>
-            </div>
+            }
         </div>
+
         <!-- Detail Sections -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-md mb-xl">
-            <!-- Tech -->
-            <div class="glass-card rounded-xl border border-primary/10 hover:border-primary/40 flex flex-col">
+            <!-- Technologies -->
+            <div class="glass-card rounded-xl border border-primary/10 hover:border-primary/40 flex flex-col @(card.IsActive("technologies") ? "ring-1 ring-primary/40" : "")">
                 <div class="border-b border-primary/10 p-sm flex items-center gap-xs">
                     <span class="material-symbols-outlined text-primary text-sm">code</span>
                     <h3 class="font-data-mono text-data-mono text-on-surface uppercase">Необходими Технологии</h3>
                 </div>
                 <div class="p-sm flex-1">
-                    <Loading Ready="loaded" Block>
                     <ul class="space-y-sm">
-                        <li class="flex items-start gap-xs">
-                            <span class="material-symbols-outlined text-primary text-sm mt-1">check_circle</span>
-                            <div>
-                                <h4 class="font-body-md text-body-md text-on-surface font-semibold">Гъвкави сензори (E-textiles)</h4>
-                                <p class="font-body-md text-body-md text-on-surface-variant text-sm mt-1">Висока наличност, но изисква R&amp;D за интеграция без загуба на комфорт.</p>
-                            </div>
-                        </li>
-                        <li class="flex items-start gap-xs">
-                            <span class="material-symbols-outlined text-primary text-sm mt-1">check_circle</span>
-                            <div>
-                                <h4 class="font-body-md text-body-md text-on-surface font-semibold">BLE 5.0 Комуникация</h4>
-                                <p class="font-body-md text-body-md text-on-surface-variant text-sm mt-1">Стандартизиран протокол. Ниска консумация на енергия.</p>
-                            </div>
-                        </li>
-                        <li class="flex items-start gap-xs">
-                            <span class="material-symbols-outlined text-secondary text-sm mt-1">pending</span>
-                            <div>
-                                <h4 class="font-body-md text-body-md text-on-surface font-semibold">Edge AI обработка</h4>
-                                <p class="font-body-md text-body-md text-on-surface-variant text-sm mt-1">Изисква оптимизация на моделите за микроконтролери.</p>
-                            </div>
-                        </li>
+                        @foreach (var t in d?.Technologies ?? [])
+                        {
+                            var needsWork = t.Status == "needs_work";
+                            <li class="flex items-start gap-xs">
+                                <span class="material-symbols-outlined @(needsWork ? "text-secondary" : "text-primary") text-sm mt-1"
+                                      title="@(needsWork ? "Изисква разработка" : "Налична")">@(needsWork ? "pending" : "check_circle")</span>
+                                <div>
+                                    <h4 class="font-body-md text-body-md text-on-surface font-semibold">@t.Name</h4>
+                                    <p class="font-body-md text-body-md text-on-surface-variant text-sm mt-1">@t.Description</p>
+                                </div>
+                            </li>
+                        }
                     </ul>
-                    </Loading>
+                    @if (!card.Done("technologies") || d?.Technologies is null)
+                    {
+                        <Loading Ready="false" Block Label="Определяне на технологиите…" Class="py-md" />
+                    }
                 </div>
             </div>
+
             <!-- Resources -->
-            <div class="glass-card rounded-xl border border-primary/10 hover:border-primary/40 flex flex-col">
+            <div class="glass-card rounded-xl border border-primary/10 hover:border-primary/40 flex flex-col @(card.IsActive("resources") ? "ring-1 ring-primary/40" : "")">
                 <div class="border-b border-primary/10 p-sm flex items-center gap-xs">
                     <span class="material-symbols-outlined text-secondary text-sm">inventory_2</span>
                     <h3 class="font-data-mono text-data-mono text-on-surface uppercase">Необходими Ресурси</h3>
                 </div>
                 <div class="p-sm flex-1">
-                    <Loading Ready="loaded" Block>
                     <div class="space-y-sm">
-                        <div>
-                            <div class="flex justify-between mb-xs">
-                                <span class="font-label-caps text-label-caps text-on-surface-variant">Капитал за R&amp;D</span>
-                                <span class="font-data-mono text-data-mono text-secondary">Висок</span>
+                        @foreach (var r in d?.Resources ?? [])
+                        {
+                            var color = LevelColor(r.Level);
+                            <div>
+                                <div class="flex justify-between gap-sm mb-xs">
+                                    <span class="font-label-caps text-label-caps text-on-surface-variant">@r.Name</span>
+                                    <span class="font-data-mono text-data-mono text-@color shrink-0">@LevelText(r.Level)</span>
+                                </div>
+                                <div class="w-full bg-surface-container-highest h-1 rounded-full overflow-hidden">
+                                    <div class="bg-@color h-full rounded-full transition-[width] duration-500" style="width: @Math.Clamp(r.Intensity ?? 0, 0, 100)%"></div>
+                                </div>
                             </div>
-                            <div class="w-full bg-surface-container-highest h-1 rounded-full"><div class="bg-secondary h-full w-[85%] rounded-full"></div></div>
-                        </div>
-                        <div>
-                            <div class="flex justify-between mb-xs">
-                                <span class="font-label-caps text-label-caps text-on-surface-variant">Специалисти Хардуер</span>
-                                <span class="font-data-mono text-data-mono text-tertiary">Критичен</span>
-                            </div>
-                            <div class="w-full bg-surface-container-highest h-1 rounded-full"><div class="bg-tertiary h-full w-[95%] rounded-full"></div></div>
-                        </div>
-                        <div>
-                            <div class="flex justify-between mb-xs">
-                                <span class="font-label-caps text-label-caps text-on-surface-variant">Партньори Производство</span>
-                                <span class="font-data-mono text-data-mono text-primary">Среден</span>
-                            </div>
-                            <div class="w-full bg-surface-container-highest h-1 rounded-full"><div class="bg-primary h-full w-[60%] rounded-full"></div></div>
-                        </div>
+                        }
                     </div>
-                    </Loading>
+                    @if (!card.Done("resources") || d?.Resources is null)
+                    {
+                        <Loading Ready="false" Block Label="Оценяване на ресурсите…" Class="py-md" />
+                    }
                 </div>
             </div>
+
             <!-- Challenges -->
-            <div class="glass-card rounded-xl border border-primary/10 hover:border-primary/40 flex flex-col">
+            <div class="glass-card rounded-xl border border-primary/10 hover:border-primary/40 flex flex-col @(card.IsActive("challenges") ? "ring-1 ring-primary/40" : "")">
                 <div class="border-b border-primary/10 p-sm flex items-center gap-xs">
                     <span class="material-symbols-outlined text-error text-sm">warning</span>
                     <h3 class="font-data-mono text-data-mono text-on-surface uppercase">Потенциални Предизвикателства</h3>
                 </div>
                 <div class="p-sm flex-1">
-                    <Loading Ready="loaded" Block>
                     <ul class="space-y-sm">
-                        <li class="flex items-start gap-sm p-xs bg-error-container/20 rounded-lg border border-error/20">
-                            <span class="material-symbols-outlined text-error mt-0.5">battery_alert</span>
-                            <div>
-                                <h4 class="font-data-mono text-data-mono text-error font-semibold text-sm uppercase">Живот на батерията</h4>
-                                <p class="font-body-md text-body-md text-on-surface-variant text-xs mt-1">Ограничено пространство за батерии. Нужда от енергийно ефективен дизайн.</p>
-                            </div>
-                        </li>
-                        <li class="flex items-start gap-sm p-xs bg-tertiary/10 rounded-lg border border-tertiary/20">
-                            <span class="material-symbols-outlined text-tertiary mt-0.5">wash</span>
-                            <div>
-                                <h4 class="font-data-mono text-data-mono text-tertiary font-semibold text-sm uppercase">Издръжливост при пране</h4>
-                                <p class="font-body-md text-body-md text-on-surface-variant text-xs mt-1">Капсуловане на електрониката за издържане на машинно пране.</p>
-                            </div>
-                        </li>
+                        @foreach (var c in d?.Challenges ?? [])
+                        {
+                            var color = SeverityColor(c.Severity);
+                            <li class="flex items-start gap-sm p-xs bg-@color/10 rounded-lg border border-@color/20">
+                                <span class="material-symbols-outlined text-@color mt-0.5">@CategoryIcon(c.Category)</span>
+                                <div class="min-w-0">
+                                    <div class="flex items-center justify-between gap-xs">
+                                        <h4 class="font-data-mono text-data-mono text-@color font-semibold text-sm uppercase">@c.Title</h4>
+                                        @if (c.Severity is not null)
+                                        {
+                                            <span class="font-label-caps text-[10px] text-@color shrink-0">@LevelText(c.Severity)</span>
+                                        }
+                                    </div>
+                                    <p class="font-body-md text-body-md text-on-surface-variant text-xs mt-1">@c.Description</p>
+                                </div>
+                            </li>
+                        }
                     </ul>
-                    </Loading>
+                    @if (!card.Done("challenges") || d?.Challenges is null)
+                    {
+                        <Loading Ready="false" Block Label="Търсене на затруднения…" Class="py-md" />
+                    }
                 </div>
-            </div>
-        </div>
-        <!-- AI Assessment Block -->
-        <div class="glass-card rounded-xl p-md border-l-4 border-primary relative overflow-hidden">
-            <div class="absolute -right-10 -top-10 opacity-5 pointer-events-none">
-                <span class="material-symbols-outlined text-[150px]">psychology</span>
-            </div>
-            <div class="flex items-center gap-sm mb-md">
-                <div class="relative flex h-3 w-3">
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-3 w-3 bg-primary shadow-[0_0_8px_#4ADE80]"></span>
-                </div>
-                <h3 class="font-headline-md text-headline-md text-on-surface">AI Оценка &amp; Препоръка</h3>
-            </div>
-            <div class="bg-surface-container/50 p-md rounded-lg font-data-mono text-data-mono text-on-surface-variant leading-relaxed border border-primary/5">
-                <Loading Ready="loaded" Block Label="Синтезиране на оценката…">
-                <p class="mb-sm">
-                    &gt; ИНИЦИАЛИЗИРАНЕ НА СИНТЕЗА...<br />
-                    &gt; Проектът "SmartWear" показва <strong class="text-primary glow-text">висока техническа осъществимост (91%)</strong> благодарение на напредъка в гъвкавата електроника.
-                </p>
-                <p class="mb-sm">
-                    Въпреки това, бариерата за навлизане е сложна поради високите <strong class="text-secondary">ресурсни изисквания (76%)</strong> за R&amp;D и специфично производство. Основният риск се крие в хардуерната издръжливост (пране/огъване) и живота на батерията.
-                </p>
-                <p>
-                    &gt; РЕШЕНИЕ: ПРОДЪЛЖЕТЕ С MVP.<br />
-                    &gt; Фокусирайте се върху един конкретен use-case (напр. спортна биометрия) преди мащабиране. Търсете партньорства с утвърдени текстилни производители за намаляване на Capex.
-                </p>
-                </Loading>
-            </div>
-            <div class="mt-md flex justify-end">
-                <button class="px-md py-sm bg-transparent border border-primary text-primary hover:bg-primary/10 rounded-DEFAULT font-data-mono text-data-mono uppercase tracking-widest transition-all">
-                    Експорт Доклад
-                </button>
             </div>
         </div>
     </div>
+}
 
 @code {
-    [Parameter] public Guid AnalysisId { get; set; }
+    private sealed record Score(string Key, string Line1, string Line2, string Icon, string Color, string Hint,
+        Func<FeasibilityDraft?, int?> Get);
 
-    // Every field shows a spinner until this is true. Set it (or give each <Loading> its own condition) once the data/events are wired.
-    private bool loaded;
+    // Key is the JSON field name
+    private static readonly Score[] Scores =
+    [
+        new("technicalScore", "Техническа", "осъществимост", "memory", "primary", "по-високо = по-лесно",
+            d => d?.TechnicalScore),
+        new("resourceScore", "Ресурсни", "изисквания", "precision_manufacturing", "secondary", "по-високо = повече ресурси",
+            d => d?.ResourceScore),
+        new("complexityScore", "Сложност на", "изпълнение", "schema", "tertiary", "по-високо = по-сложно",
+            d => d?.ComplexityScore),
+        new("scalabilityScore", "Мащабируемост", "на пазара", "trending_up", "primary", "по-високо = по-мащабируемо",
+            d => d?.ScalabilityScore),
+    ];
+
+    private static string LevelText(string? level) => level switch
+    {
+        "low" => "Нисък",
+        "medium" => "Среден",
+        "high" => "Висок",
+        "critical" => "Критичен",
+        _ => ""
+    };
+
+    // resources: how demanding the need is
+    private static string LevelColor(string? level) => level switch
+    {
+        "critical" => "tertiary",
+        "high" => "secondary",
+        _ => "primary"
+    };
+
+    // challenges: how badly it hurts feasibility
+    private static string SeverityColor(string? severity) => severity switch
+    {
+        "critical" or "high" => "error",
+        "medium" => "tertiary",
+        _ => "primary"
+    };
+
+    private static string CategoryIcon(string? category) => category switch
+    {
+        "technical" => "code",
+        "hardware" => "memory",
+        "energy" => "battery_alert",
+        "durability" => "shield",
+        "operational" => "factory",
+        "financial" => "payments",
+        "legal" => "gavel",
+        "market" => "storefront",
+        _ => "help"
+    };
 }

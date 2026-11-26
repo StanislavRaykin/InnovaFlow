@@ -1,26 +1,29 @@
 @page "/ideas"
 @layout AccountLayout
 @attribute [Authorize]
+@inherits IdeaBoardPage
+@inject AnalysisClient Analyses
+@inject NavigationManager Nav
+@using Contracts
 
-@* The idea gallery. The side nav, the mobile top bar and the footer now live in
-   AccountLayout; the TopAppBar stays here because it carries this page's own
-   search box, "Нова Идея" action and category filters.
+@* The idea gallery: the user's submitted ideas with their latest analysis. Search and the category chips
+   filter in the browser. Updates itself when a module or an analysis finishes (IdeaBoardPage).
+   css/ideas.css is linked here because only this page uses .glow-border, .circular-chart and .shimmer. *@
 
-   css/ideas.css is linked below rather than from the layout: only this page uses
-   .glow-border, .circular-chart / .circle / .percentage and .shimmer. The old
-   ~/js/myideas_js.js was another copy of the Tailwind config that index.html
-   already loads from js/tailwind.config.js, so it is gone. *@
-
-<PageTitle>Моите идеи | Иновафлоу</PageTitle>
+<PageTitle>Моите идеи | InnovaFlow</PageTitle>
 
 <HeadContent>
     <link rel="stylesheet" href="css/ideas.css" />
 </HeadContent>
 
+@{
+    var ready = Cards is not null;
+    var shown = Filtered().ToList();
+}
+
 <!-- TopAppBar -->
-<header
-    class="bg-surface-dim/50 backdrop-blur-xl text-primary font-headline-lg text-headline-lg border-b border-primary/20 shadow-lg shadow-primary/5 w-full flex flex-col gap-sm p-md sticky top-16 md:top-0 z-30">
-    <div class="flex items-center justify-between">
+<header class="bg-surface-dim/50 backdrop-blur-xl text-primary font-headline-lg text-headline-lg border-b border-primary/20 shadow-lg shadow-primary/5 w-full flex flex-col gap-sm p-md sticky top-16 md:top-0 z-30">
+    <div class="flex items-center justify-between gap-sm">
         <div class="flex items-center gap-sm">
             <span class="material-symbols-outlined text-primary text-4xl" style="font-variation-settings: 'FILL' 1;">analytics</span>
             <h1 class="font-headline-lg text-headline-lg font-bold text-primary">Моите Идеи</h1>
@@ -28,160 +31,199 @@
         <div class="flex items-center gap-md">
             <div class="relative group hidden sm:block w-64">
                 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
-                <input class="w-full bg-surface-container-high border border-primary/20 rounded pl-10 pr-4 py-2 text-on-surface font-data-mono text-data-mono focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all placeholder:text-on-surface-variant/50" placeholder="Търсене на идеи..." type="text"/>
-                <div class="absolute inset-0 rounded pointer-events-none border border-transparent group-focus-within:border-primary/40 group-focus-within:shadow-[0_0_10px_rgba(107,251,154,0.15)] transition-all"></div>
+                <input class="w-full bg-surface-container-high border border-primary/20 rounded pl-10 pr-4 py-2 text-on-surface font-data-mono text-data-mono focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all placeholder:text-on-surface-variant/50"
+                       placeholder="Търсене на идеи..." type="search" @bind="search" @bind:event="oninput" />
             </div>
             <a class="bg-primary text-surface font-bold px-4 py-2 rounded flex items-center gap-2 hover:bg-primary-fixed transition-colors font-data-mono text-data-mono"
                href="ideas/create">
                 <span class="material-symbols-outlined">add</span>
                 <span class="hidden sm:inline">Нова Идея</span>
             </a>
-            <div class="flex gap-2">
-                <button class="p-2 text-on-surface-variant hover:bg-primary/10 rounded-lg transition-colors group relative">
-                    <span class="material-symbols-outlined group-hover:text-primary transition-colors">refresh</span>
-                    <div class="absolute inset-0 rounded-lg bg-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity shimmer pointer-events-none"></div>
-                </button>
-                <button class="p-2 text-on-surface-variant hover:bg-primary/10 rounded-lg transition-colors group relative">
-                    <span class="material-symbols-outlined group-hover:text-primary transition-colors">ios_share</span>
-                    <div class="absolute inset-0 rounded-lg bg-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity shimmer pointer-events-none"></div>
-                </button>
-            </div>
+            <button type="button" title="Обнови" @onclick="ReloadAsync" disabled="@Reloading"
+                    class="p-2 text-on-surface-variant hover:bg-primary/10 rounded-lg transition-colors group relative">
+                <span class="material-symbols-outlined group-hover:text-primary transition-colors @(Reloading ? "animate-spin" : "")">refresh</span>
+            </button>
         </div>
     </div>
-    <!-- Filters -->
-    <div class="flex gap-4 overflow-x-auto pb-2 mt-4 scrollbar-hide">
-        <button class="whitespace-nowrap px-4 py-1 rounded-full border border-primary text-primary bg-primary/10 font-label-caps text-label-caps">Всички</button>
-        <button class="whitespace-nowrap px-4 py-1 rounded-full border border-primary/20 text-on-surface-variant hover:border-primary/50 hover:text-on-surface transition-colors font-label-caps text-label-caps">Бизнес</button>
-        <button class="whitespace-nowrap px-4 py-1 rounded-full border border-primary/20 text-on-surface-variant hover:border-primary/50 hover:text-on-surface transition-colors font-label-caps text-label-caps">Бранд</button>
-        <button class="whitespace-nowrap px-4 py-1 rounded-full border border-primary/20 text-on-surface-variant hover:border-primary/50 hover:text-on-surface transition-colors font-label-caps text-label-caps">Стартъп</button>
-        <button class="whitespace-nowrap px-4 py-1 rounded-full border border-primary/20 text-on-surface-variant hover:border-primary/50 hover:text-on-surface transition-colors font-label-caps text-label-caps">Продукт</button>
-        <button class="whitespace-nowrap px-4 py-1 rounded-full border border-primary/20 text-on-surface-variant hover:border-primary/50 hover:text-on-surface transition-colors font-label-caps text-label-caps">Услуга</button>
-        <button class="whitespace-nowrap px-4 py-1 rounded-full border border-primary/20 text-on-surface-variant hover:border-primary/50 hover:text-on-surface transition-colors font-label-caps text-label-caps">Приложение</button>
+
+    <!-- search on phones -->
+    <div class="relative sm:hidden">
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+        <input class="w-full bg-surface-container-high border border-primary/20 rounded pl-10 pr-4 py-2 text-on-surface font-data-mono text-data-mono focus:border-primary focus:outline-none placeholder:text-on-surface-variant/50"
+               placeholder="Търсене на идеи..." type="search" @bind="search" @bind:event="oninput" />
+    </div>
+
+    <!-- Filters: only the categories the user has -->
+    <div class="flex gap-4 overflow-x-auto pb-2 mt-2 scrollbar-hide">
+        <button type="button" class="@Chip(category is null)" @onclick="() => category = null">Всички</button>
+        @foreach (var c in Categories())
+        {
+            <button type="button" class="@Chip(category == c)" @onclick="() => category = c">@IdeaText.Category(c).Label</button>
+        }
     </div>
 </header>
 
 <!-- Content Area -->
 <div class="p-md flex-1 overflow-y-auto">
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-md">
-        <!-- Card 1 -->
-        <div class="bg-surface-container-high rounded border border-primary/10 p-sm glow-border transition-all duration-300 relative group overflow-hidden flex flex-col h-full backdrop-blur-xl">
-            <div class="flex justify-between items-start mb-4 border-b border-primary/10 pb-2">
-                <div>
-                    <h3 class="font-headline-md text-headline-md font-bold text-on-surface">NeoBank OS</h3>
-                    <p class="font-label-caps text-label-caps text-on-surface-variant mt-1">Финанси • Стартъп</p>
-                </div>
-                <div class="flex items-center gap-1 bg-surface-container border border-primary/20 px-2 py-1 rounded">
-                    <div class="w-2 h-2 rounded-full bg-primary shadow-[0_0_5px_#6bfb9a]"></div>
-                    <span class="font-label-caps text-label-caps text-primary">Анализирана</span>
-                </div>
-            </div>
-            <p class="font-body-md text-body-md text-on-surface-variant mb-6 flex-1">
-                Децентрализирана банкова платформа за микро-транзакции в web3 екосистеми с интегриран AI финансов съветник.
-            </p>
-            <div class="flex items-center justify-between mt-auto">
-                <div class="flex flex-col gap-1 w-1/3">
-                    <span class="font-label-caps text-label-caps text-on-surface-variant">Резултат</span>
-                    <div class="w-16 h-16">
-                        <svg class="circular-chart text-primary" viewBox="0 0 36 36">
-                            <path class="circle-bg" d="M18 2.0845
-                                a 15.9155 15.9155 0 0 1 0 31.831
-                                a 15.9155 15.9155 0 0 1 0 -31.831"></path>
-                            <path class="circle text-primary" d="M18 2.0845
-                                a 15.9155 15.9155 0 0 1 0 31.831
-                                a 15.9155 15.9155 0 0 1 0 -31.831" stroke="#6bfb9a" stroke-dasharray="87, 100"></path>
-                            <text class="percentage" x="18" y="20.35">87</text>
-                        </svg>
+    @if (LoadFailed)
+    {
+        <div class="mb-md flex items-center justify-between gap-sm p-sm rounded border border-error/30 bg-error/10 text-error font-data-mono text-data-mono">
+            <span>Идеите не се заредиха.</span>
+            <button type="button" class="underline" @onclick="ReloadAsync">Опитай отново</button>
+        </div>
+    }
+    @if (startError is not null)
+    {
+        <div class="mb-md p-sm rounded border border-error/30 bg-error/10 text-error font-data-mono text-data-mono">@startError</div>
+    }
+
+    @if (!ready)
+    {
+        <Loading Ready="false" Block Size="lg" Label="Зареждане на идеите…" Class="py-xl" />
+    }
+    else if (Cards!.Count == 0)
+    {
+        <div class="border border-dashed border-primary/30 rounded-lg p-xl flex flex-col items-center gap-sm text-center">
+            <span class="material-symbols-outlined text-primary text-4xl">lightbulb</span>
+            <p class="font-body-md text-body-md text-on-surface">Все още нямате идеи.</p>
+            <a href="ideas/create" class="font-data-mono text-data-mono text-primary hover:underline">Създайте първата си идея →</a>
+        </div>
+    }
+    else if (shown.Count == 0)
+    {
+        <p class="py-xl text-center font-data-mono text-data-mono text-on-surface-variant">Няма идеи, които да отговарят на търсенето.</p>
+    }
+    else
+    {
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-md">
+            @foreach (var c in shown)
+            {
+                var (label, _) = IdeaText.Category(c.Idea.Category);
+                var subtitle = string.IsNullOrWhiteSpace(c.Idea.Industry) ? label : $"{c.Idea.Industry} • {label}";
+                var score = c.Score;
+                var color = IdeaText.ScoreColor(score);
+
+                <div @key="c.Idea.Id"
+                     class="bg-surface-container-high rounded border border-primary/10 p-sm glow-border transition-all duration-300 relative group overflow-hidden flex flex-col h-full backdrop-blur-xl">
+                    <div class="flex justify-between items-start gap-sm mb-4 border-b border-primary/10 pb-2">
+                        <div class="min-w-0">
+                            <h3 class="font-headline-md text-headline-md font-bold text-on-surface truncate">@c.Idea.Title</h3>
+                            <p class="font-label-caps text-label-caps text-on-surface-variant mt-1 truncate">@subtitle</p>
+                        </div>
+                        <StatusBadge Card="c" />
+                    </div>
+                    <p class="font-body-md text-body-md text-on-surface-variant mb-6 flex-1 line-clamp-3">@c.Idea.Description</p>
+                    <div class="flex items-center justify-between mt-auto">
+                        <div class="flex flex-col gap-1 w-1/3">
+                            <span class="font-label-caps text-label-caps text-on-surface-variant">Резултат</span>
+                            <div class="w-16 h-16 @(score is null ? "opacity-50" : "")">
+                                <svg class="circular-chart text-@color" viewBox="0 0 36 36">
+                                    <path class="circle-bg" d="@CirclePath"></path>
+                                    @if (score is not null)
+                                    {
+                                        <path class="circle" d="@CirclePath" stroke="@IdeaText.ScoreHex(score)" stroke-dasharray="@score, 100"></path>
+                                    }
+                                    <text class="percentage !text-@color" x="18" y="20.35">@(score?.ToString() ?? "--")</text>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-end gap-1">
+                            @if (c.IsRunning)
+                            {
+                                <span class="font-label-caps text-label-caps text-on-surface-variant">Анализ</span>
+                                <span class="font-data-mono text-data-mono text-tertiary">
+                                    @c.Latest!.CompletedModules/@(c.Latest.TotalModules == 0 ? "?" : c.Latest.TotalModules) модула
+                                </span>
+                            }
+                            else if (c.LastCompleted is { CompletedAt: { } at })
+                            {
+                                <span class="font-label-caps text-label-caps text-on-surface-variant">Последен анализ</span>
+                                <span class="font-data-mono text-data-mono text-on-surface">@When(at)</span>
+                            }
+                            else
+                            {
+                                <span class="font-label-caps text-label-caps text-on-surface-variant">Създадена</span>
+                                <span class="font-data-mono text-data-mono text-on-surface">@When(c.Idea.CreatedAt)</span>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Actions: hover overlay from md up, a plain row on touch screens -->
+                    <div class="hidden md:flex absolute inset-0 bg-surface/90 backdrop-blur-sm items-center justify-center gap-4 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300">
+                        @Actions(c)
+                    </div>
+                    <div class="md:hidden flex justify-end gap-sm mt-sm pt-sm border-t border-primary/10">
+                        @Actions(c)
                     </div>
                 </div>
-                <div class="flex flex-col items-end gap-1">
-                    <span class="font-label-caps text-label-caps text-on-surface-variant">Последен анализ</span>
-                    <span class="font-data-mono text-data-mono text-on-surface">Днес, 14:32</span>
-                </div>
-            </div>
-            <!-- Hover Actions -->
-            <div class="absolute inset-0 bg-surface/90 backdrop-blur-sm flex items-center justify-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <button class="px-4 py-2 bg-transparent border border-primary text-primary font-data-mono text-data-mono rounded hover:bg-primary/10 transition-colors">Преглед</button>
-                <button class="px-4 py-2 bg-primary text-surface font-data-mono text-data-mono font-bold rounded hover:bg-primary-fixed transition-colors">Анализ</button>
-            </div>
+            }
         </div>
-        <!-- Card 2 -->
-        <div class="bg-surface-container-high rounded border border-primary/10 p-sm glow-border transition-all duration-300 relative group overflow-hidden flex flex-col h-full backdrop-blur-xl">
-            <div class="flex justify-between items-start mb-4 border-b border-primary/10 pb-2">
-                <div>
-                    <h3 class="font-headline-md text-headline-md font-bold text-on-surface">AgriTech Sync</h3>
-                    <p class="font-label-caps text-label-caps text-on-surface-variant mt-1">Земеделие • Продукт</p>
-                </div>
-                <div class="flex items-center gap-1 bg-surface-container border border-tertiary/20 px-2 py-1 rounded">
-                    <div class="w-2 h-2 rounded-full bg-tertiary animate-pulse shadow-[0_0_5px_#ffdd75]"></div>
-                    <span class="font-label-caps text-label-caps text-tertiary">Обработка...</span>
-                </div>
-            </div>
-            <p class="font-body-md text-body-md text-on-surface-variant mb-6 flex-1">
-                IoT сензорна мрежа за прецизно земеделие с предиктивни алгоритми за оптимизация на напояването.
-            </p>
-            <div class="flex items-center justify-between mt-auto">
-                <div class="flex flex-col gap-1 w-1/3">
-                    <span class="font-label-caps text-label-caps text-on-surface-variant">Резултат</span>
-                    <div class="w-16 h-16 opacity-50">
-                        <svg class="circular-chart text-tertiary" viewBox="0 0 36 36">
-                            <path class="circle-bg" d="M18 2.0845
-                                a 15.9155 15.9155 0 0 1 0 31.831
-                                a 15.9155 15.9155 0 0 1 0 -31.831"></path>
-                            <text class="percentage !text-tertiary" x="18" y="20.35">--</text>
-                        </svg>
-                    </div>
-                </div>
-                <div class="flex flex-col items-end gap-1">
-                    <span class="font-label-caps text-label-caps text-on-surface-variant">Създадена</span>
-                    <span class="font-data-mono text-data-mono text-on-surface">Вчера, 09:15</span>
-                </div>
-            </div>
-            <!-- Hover Actions -->
-            <div class="absolute inset-0 bg-surface/90 backdrop-blur-sm flex items-center justify-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <button class="px-4 py-2 bg-transparent border border-primary text-primary font-data-mono text-data-mono rounded hover:bg-primary/10 transition-colors">Преглед</button>
-                <button class="px-4 py-2 text-secondary font-data-mono text-data-mono hover:text-secondary-fixed-dim transition-colors">Отказ</button>
-            </div>
-        </div>
-        <!-- Card 3 -->
-        <div class="bg-surface-container-high rounded border border-primary/10 p-sm glow-border transition-all duration-300 relative group overflow-hidden flex flex-col h-full backdrop-blur-xl">
-            <div class="flex justify-between items-start mb-4 border-b border-primary/10 pb-2">
-                <div>
-                    <h3 class="font-headline-md text-headline-md font-bold text-on-surface">Urban Canopy</h3>
-                    <p class="font-label-caps text-label-caps text-on-surface-variant mt-1">Екология • Приложение</p>
-                </div>
-                <div class="flex items-center gap-1 bg-surface-container border border-primary/20 px-2 py-1 rounded">
-                    <div class="w-2 h-2 rounded-full bg-primary shadow-[0_0_5px_#6bfb9a]"></div>
-                    <span class="font-label-caps text-label-caps text-primary">Анализирана</span>
-                </div>
-            </div>
-            <p class="font-body-md text-body-md text-on-surface-variant mb-6 flex-1">
-                Геймифицирано приложение за картиране на градската растителност, използващо сателитни данни и crowdsourcing.
-            </p>
-            <div class="flex items-center justify-between mt-auto">
-                <div class="flex flex-col gap-1 w-1/3">
-                    <span class="font-label-caps text-label-caps text-on-surface-variant">Резултат</span>
-                    <div class="w-16 h-16">
-                        <svg class="circular-chart text-secondary" viewBox="0 0 36 36">
-                            <path class="circle-bg" d="M18 2.0845
-                                a 15.9155 15.9155 0 0 1 0 31.831
-                                a 15.9155 15.9155 0 0 1 0 -31.831"></path>
-                            <path class="circle text-secondary" d="M18 2.0845
-                                a 15.9155 15.9155 0 0 1 0 31.831
-                                a 15.9155 15.9155 0 0 1 0 -31.831" stroke="#5de6ff" stroke-dasharray="64, 100"></path>
-                            <text class="percentage !text-secondary" x="18" y="20.35">64</text>
-                        </svg>
-                    </div>
-                </div>
-                <div class="flex flex-col items-end gap-1">
-                    <span class="font-label-caps text-label-caps text-on-surface-variant">Последен анализ</span>
-                    <span class="font-data-mono text-data-mono text-on-surface">12 Окт, 11:20</span>
-                </div>
-            </div>
-            <!-- Hover Actions -->
-            <div class="absolute inset-0 bg-surface/90 backdrop-blur-sm flex items-center justify-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <button class="px-4 py-2 bg-transparent border border-primary text-primary font-data-mono text-data-mono rounded hover:bg-primary/10 transition-colors">Преглед</button>
-                <button class="px-4 py-2 bg-primary text-surface font-data-mono text-data-mono font-bold rounded hover:bg-primary-fixed transition-colors">Анализ</button>
-            </div>
-        </div>
-    </div>
+    }
 </div>
+
+@code {
+    private const string CirclePath = "M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831";
+
+    private string search = "";
+    private IdeaCategory? category;
+    private Guid? starting;            // idea whose analysis is being queued
+    private string? startError;
+
+    private RenderFragment Actions(IdeaCard c) => __builder =>
+    {
+        if (c.ViewLink is { } link)
+        {
+            <a href="@link" class="px-4 py-2 bg-transparent border border-primary text-primary font-data-mono text-data-mono rounded hover:bg-primary/10 transition-colors">
+                @(c.IsRunning ? "Прогрес" : "Преглед")
+            </a>
+        }
+        if (!c.IsRunning)
+        {
+            <button type="button" disabled="@(starting is not null)" @onclick="() => StartAsync(c)"
+                    class="px-4 py-2 bg-primary text-surface font-data-mono text-data-mono font-bold rounded hover:bg-primary-fixed transition-colors disabled:opacity-50">
+                @(starting == c.Idea.Id ? "Стартиране…" : c.Latest is null ? "Анализирай" : "Нов анализ")
+            </button>
+        }
+    };
+
+    private IEnumerable<IdeaCard> Filtered()
+    {
+        var q = search.Trim();
+        return (Cards ?? []).Where(c =>
+            (category is null || c.Idea.Category == category) &&
+            (q.Length == 0
+             || c.Idea.Title.Contains(q, StringComparison.CurrentCultureIgnoreCase)
+             || c.Idea.Description.Contains(q, StringComparison.CurrentCultureIgnoreCase)
+             || (c.Idea.Industry?.Contains(q, StringComparison.CurrentCultureIgnoreCase) ?? false)));
+    }
+
+    private IEnumerable<IdeaCategory> Categories() =>
+        (Cards ?? []).Select(c => c.Idea.Category).Distinct().Order();
+
+    private static string Chip(bool active) => active
+        ? "whitespace-nowrap px-4 py-1 rounded-full border border-primary text-primary bg-primary/10 font-label-caps text-label-caps"
+        : "whitespace-nowrap px-4 py-1 rounded-full border border-primary/20 text-on-surface-variant hover:border-primary/50 hover:text-on-surface transition-colors font-label-caps text-label-caps";
+
+    private static string When(DateTimeOffset at)
+    {
+        var local = at.ToLocalTime();
+        var today = DateTimeOffset.Now.Date;
+        return local.Date == today ? $"Днес, {local:HH:mm}"
+             : local.Date == today.AddDays(-1) ? $"Вчера, {local:HH:mm}"
+             : local.ToString("dd.MM.yyyy, HH:mm");
+    }
+
+    private async Task StartAsync(IdeaCard c)
+    {
+        starting = c.Idea.Id;
+        startError = null;
+
+        var result = await Analyses.StartAnalysisAsync(c.Idea.Id);
+        starting = null;
+
+        if (result.Success)
+            Nav.NavigateTo($"start-analysis/{result.AnalysisId}");
+        else
+            startError = $"„{c.Idea.Title}“: {result.Error}";
+    }
+}

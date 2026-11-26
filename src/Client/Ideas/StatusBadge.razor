@@ -1,0 +1,28 @@
+@* The state of an idea's latest analysis: running, done, failed or never analysed. *@
+
+<div class="bg-surface-variant px-2 py-1 rounded border border-@Color/20 flex items-center gap-1 shrink-0">
+    @if (Card.IsRunning)
+    {
+        <span class="material-symbols-outlined text-[12px] text-tertiary animate-spin">sync</span>
+    }
+    else
+    {
+        <span class="w-1.5 h-1.5 rounded-full bg-@Color"></span>
+    }
+    <span class="font-label-caps text-[10px] text-@Color whitespace-nowrap">@Text</span>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public IdeaCard Card { get; set; } = default!;
+
+    private (string Text, string Color) State => Card switch
+    {
+        { IsRunning: true } => ("АНАЛИЗ...", "tertiary"),
+        { LastFailed: true } => ("НЕУСПЕШЕН", "error"),
+        { LastCompleted: not null } => ("ЗАВЪРШЕН", "primary"),
+        _ => ("БЕЗ АНАЛИЗ", "on-surface-variant")
+    };
+
+    private string Text => State.Text;
+    private string Color => State.Color;
+}

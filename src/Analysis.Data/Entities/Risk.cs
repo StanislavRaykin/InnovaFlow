@@ -1,3 +1,5 @@
+using Contracts.Analysis;
+
 namespace InnovaFlow.Analysis.Data;
 
 public class Risk
@@ -7,8 +9,7 @@ public class Risk
     public Guid RiskAnalysisId { get; set; }
     public RiskAnalysis RiskAnalysis { get; set; } = null!;
 
-    /// <summary>Market, financial, technical, legal, security, competitive, scaling.</summary>
-    public string Type { get; set; } = null!;
+    public RiskType Type { get; set; }
 
     public string Title { get; set; } = null!;
     public string? Description { get; set; }
@@ -16,5 +17,8 @@ public class Risk
     public decimal? Probability { get; set; }
     public decimal? Impact { get; set; }
     public RiskSeverity Severity { get; set; }
+
+    public RiskStatus Status {get;set;}
+
     public string? Mitigation { get; set; }
 }

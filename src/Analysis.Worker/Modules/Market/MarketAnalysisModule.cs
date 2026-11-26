@@ -64,7 +64,7 @@ public class MarketAnalysisModule(AnalysisDbContext db, PartialPublisher partial
         try
         {
             await progress.ReportAsync(req, Name, ProgressStage.ResearchStarted, ct: ct);
-            await progress.LogAsync(req, Name, "Проучване на пазара в реално време...", ct);
+            await progress.LogAsync(req, Name, "Проучване на пазара...", ct);
 
             string user = IdeaPromptBuilder.Build(req, MarketPrompt.ResearchTask);
             researchResult = await StreamResearchAsync(req, researcher.StreamTextAsync(MarketPrompt.ResearchSystem, user, ct), ct);
