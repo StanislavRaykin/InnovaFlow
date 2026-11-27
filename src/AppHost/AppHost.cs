@@ -34,7 +34,7 @@ var rabbit = builder.ExecutionContext.IsPublishMode ? builder.AddConnectionStrin
 : builder.AddRabbitMQ("messaging")
                     .WithManagementPlugin();
 
-var cache = builder.ExecutionContext.IsPublishMode ? builder.AddConnectionString(builder.Configuration.GetConnectionString("messaging")!) : builder.AddRedis("cache");
+var cache = builder.ExecutionContext.IsPublishMode ? builder.AddConnectionString(builder.Configuration.GetConnectionString("redis")!) : builder.AddRedis("cache");
 
 
 
