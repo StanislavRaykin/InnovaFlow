@@ -20,7 +20,7 @@ var jwtPubKey = builder.AddParameter("JWT-PUBLIC-KEY");
 
 
 var db = builder.ExecutionContext.IsPublishMode
-    ? builder.AddConnectionString(builder.Configuration.GetConnectionString("InnovaFlow")!)
+    ? builder.AddConnectionString(builder.Configuration.GetConnectionString("Db")!)
     : builder.AddPostgres("postgres")
     .WithHostPort(5432)
     .WithPgWeb()
@@ -30,11 +30,11 @@ var db = builder.ExecutionContext.IsPublishMode
 
 
 
-var rabbit = builder.AddRabbitMQ("messaging")
-                    .WithDataVolume()
-                    .WithManagementPlugin();     // queue UI on :15672
+var rabbit = builder.ExecutionContext.IsPublishMode ? builder.AddConnectionString(builder.Configuration.GetConnectionString("messaging")!)
+: builder.AddRabbitMQ("messaging")
+                    .WithManagementPlugin();
 
-var cache = builder.AddRedis("cache");
+var cache = builder.ExecutionContext.IsPublishMode ? builder.AddConnectionString(builder.Configuration.GetConnectionString("messaging")!) : builder.AddRedis("cache");
 
 
 
