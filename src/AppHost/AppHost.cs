@@ -24,6 +24,7 @@ var db = builder.ExecutionContext.IsPublishMode
     : builder.AddPostgres("postgres")
     .WithHostPort(5432)
     .WithPgWeb()
+    .WithPgAdmin()
     .AddDatabase("InnovaFlow");
 
 

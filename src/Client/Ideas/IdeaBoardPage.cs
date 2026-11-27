@@ -14,7 +14,6 @@ public abstract class IdeaBoardPage : ComponentBase, IDisposable
     [Inject] protected NotificationHubClient Notifications { get; set; } = default!;
     [Inject] protected ILogger<IdeaBoardPage> Logger { get; set; } = default!;
 
-    /// <summary>Null while the first load runs.</summary>
     protected List<IdeaCard>? Cards { get; private set; }
     protected bool LoadFailed { get; private set; }
     protected bool Reloading { get; private set; }

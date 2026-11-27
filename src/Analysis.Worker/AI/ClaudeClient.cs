@@ -67,7 +67,6 @@ public sealed class ClaudeAiClient : IAiClient
             .GetAsyncEnumerator(ct);
         while (true)
         {
-            // yield can't sit inside a try/catch, so only the read is wrapped.
             RawMessageStreamEvent streamEvent;
             try
             {
@@ -109,7 +108,7 @@ public sealed class ClaudeAiClient : IAiClient
             StopReason: message.StopReason?.Raw(),
             InputTokens: message.Usage.InputTokens,
             OutputTokens: message.Usage.OutputTokens,
-            Sources: null, // Claude doesn't search here
+            Sources: null, 
             Duration: sw.Elapsed
         );
 

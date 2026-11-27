@@ -112,11 +112,24 @@ public static class ExternalLogin
             return existing;
         }
 
+        var now = DateTimeOffset.UtcNow;
+        var nameParts = (name ?? "").Trim().Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+        var avatar = principal.FindFirstValue("urn:github:avatar") ?? principal.FindFirstValue("urn:google:picture");
+
         var user = new ApplicationUser
         {
             UserName = email,
             Email = email,
             EmailConfirmed = true,
+            CreatedAt = now,
+            Profile = new Profile
+            {
+                FirstName = nameParts.Length > 0 ? nameParts[0] : null,
+                LastName = nameParts.Length > 1 ? nameParts[1] : null,
+                AvatarUrl = avatar,
+                CreatedAt = now,
+                UpdatedAt = now
+            }
         };
 
         var created = await users.CreateAsync(user);

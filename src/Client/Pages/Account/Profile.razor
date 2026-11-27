@@ -1,90 +1,16 @@
 @page "/profile"
 @layout AccountLayout
 @attribute [Authorize]
+@inject IdentityClient Auth
+@inject NavigationManager Navigation
+
+<PageTitle>Профил - InnovaFlow</PageTitle>
 
 
 
-    <!-- SideNavBar -->
-    <nav class="hidden md:flex flex-col justify-between py-md fixed h-full left-0 w-sidebar-width border-r border-primary/10 flat no shadows bg-surface-container z-40">
-        <div class="px-md flex flex-col gap-xl">
-            <!-- Brand -->
-            <div class="flex items-center gap-xs">
-                <div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center border border-primary/40">
-                    <span class="material-symbols-outlined text-primary" data-icon="memory">memory</span>
-                </div>
-                <div>
-                    <h1 class="font-headline-md text-headline-md font-bold text-primary">InnovaFlow</h1>
-                    <span class="font-data-mono text-data-mono text-on-surface-variant opacity-70">AI OS v2.4</span>
-                </div>
-            </div>
-            <!-- Main Nav -->
-            <ul class="flex flex-col gap-xs font-data-mono text-data-mono">
-                <li>
-                    <a class="flex items-center gap-sm px-sm py-xs rounded-DEFAULT text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-all" href="#">
-                        <span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
-                        Табло
-                    </a>
-                </li>
-                <li>
-                    <a class="flex items-center gap-sm px-sm py-xs rounded-DEFAULT text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-all" href="#">
-                        <span class="material-symbols-outlined" data-icon="lightbulb">lightbulb</span>
-                        Моите идеи
-                    </a>
-                </li>
-                <li>
-                    <a class="flex items-center gap-sm px-sm py-xs rounded-DEFAULT text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-all" href="#">
-                        <span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
-                        Създай идея
-                    </a>
-                </li>
-            </ul>
-            <button class="w-full bg-primary text-surface font-bold py-sm rounded-DEFAULT glow-hover transition-all">
-                Стартирай агент
-            </button>
-        </div>
-        <!-- Footer Nav -->
-        <ul class="flex flex-col gap-xs px-md font-data-mono text-data-mono">
-            <li>
-                <a class="flex items-center gap-sm px-sm py-xs rounded-DEFAULT bg-primary/10 text-primary border-l-4 border-primary transition-all" href="#">
-                    <span class="material-symbols-outlined" data-icon="settings">settings</span>
-                    Настройки
-                </a>
-            </li>
-            <li>
-                <a class="flex items-center gap-sm px-sm py-xs rounded-DEFAULT text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-all" href="#">
-                    <span class="material-symbols-outlined" data-icon="help">help</span>
-                    Поддръжка
-                </a>
-            </li>
-            @* <li>
-                <a class="flex items-center gap-sm px-sm py-xs rounded-DEFAULT text-error hover:bg-error/10 hover:text-error transition-all" href="#">
-                    <span class="material-symbols-outlined" data-icon="logout">logout</span>
-                    Изход<button class="@NavItem w-full text-left" type="button" @onclick="SignOutAsync">
-       <span class="material-symbols-outlined">logout</span>
-       Изход
-   </button>
-                </a>
-            </li> *@
-        </ul>
-    </nav>
+    
 
-        <!-- TopAppBar -->
-        <header class="flex flex-col gap-sm p-md full-width border-b border-primary/20 shadow-lg shadow-primary/5 bg-surface-dim/50 backdrop-blur-xl sticky top-0 z-30">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-sm">
-                    <span class="material-symbols-outlined text-primary text-3xl" data-icon="manage_accounts">manage_accounts</span>
-                    <h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg font-bold text-primary">Настройки на профила</h1>
-                </div>
-                <div class="flex items-center gap-sm">
-                    <button class="p-xs text-on-surface-variant hover:bg-primary/10 rounded-lg transition-colors flex items-center justify-center">
-                        <span class="material-symbols-outlined" data-icon="refresh">refresh</span>
-                    </button>
-                    <button class="p-xs text-on-surface-variant hover:bg-primary/10 rounded-lg transition-colors flex items-center justify-center">
-                        <span class="material-symbols-outlined" data-icon="ios_share">ios_share</span>
-                    </button>
-                </div>
-            </div>
-        </header>
+    
         <!-- Settings Content Grid -->
         <div class="flex-1 p-md grid grid-cols-1 lg:grid-cols-12 gap-md max-w-container-max mx-auto w-full">
             <!-- Left Column: Profile & Avatar -->
@@ -95,43 +21,86 @@
                         <span class="material-symbols-outlined text-secondary" data-icon="person">person</span>
                         Лични Данни
                     </h2>
-                    <div class="flex flex-col md:flex-row gap-md">
-                        <!-- Avatar Uploader -->
-                        <div class="flex-shrink-0 flex flex-col items-center gap-sm">
-                            <div class="w-32 h-32 rounded-full border-2 border-primary/20 bg-surface-container overflow-hidden relative group cursor-pointer">
-                                 <img class="w-full h-full object-cover" data-alt="Детайлен близък план на футуристичен киберпънк аватар със светещи неоновозелени акценти и геометрични черти." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBLJcdUw-6mkjNdIxH7MRWGE-Hot1RbyWu-mU3THNtjRsNHi4KSAy6iozJ27Mom5opY91n9ttQ8hUJ8Le7oXmI4IOunRhy_0ydjnSmNmKE79l9HCWgLzmDQ3ozn03ZlUK7vEJYR7EyOS8QedmzsesvWZiAAbKm3ofEB24MIys3XAqC6ZufkHbZUV2u80bO1gjZgTc1eT7yDuzOlWu1aDVFS7GUKkQQaQ4g7xP5J6IxKWtJKkPHL9zGE" />
-                                <div class="absolute inset-0 bg-surface/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <span class="material-symbols-outlined text-primary" data-icon="photo_camera">photo_camera</span>
+                    @if (loading)
+                    {
+                        <p class="font-data-mono text-data-mono text-on-surface-variant">Зареждане на профила...</p>
+                    }
+                    else if (profile == null)
+                    {
+                        <div class="flex flex-col items-start gap-sm">
+                            <p class="font-data-mono text-data-mono text-error" role="alert">Профилът не можа да бъде зареден.</p>
+                            <button type="button" @onclick="LoadAsync"
+                                    class="bg-transparent border border-primary text-primary font-bold py-xs px-sm rounded-DEFAULT hover:bg-primary/10 transition-colors">
+                                Опитай отново
+                            </button>
+                        </div>
+                    }
+                    else
+                    {
+                        <EditForm Model="model" OnValidSubmit="SaveAsync" FormName="profile">
+                            <DataAnnotationsValidator />
+                            <div class="flex flex-col md:flex-row gap-md">
+                                <!-- Avatar -->
+                                <div class="flex-shrink-0 flex flex-col items-center gap-sm">
+                                    <div class="w-32 h-32 rounded-full border-2 border-primary/20 bg-surface-container overflow-hidden flex items-center justify-center">
+                                        @if (!string.IsNullOrEmpty(profile.AvatarUrl))
+                                        {
+                                            <img class="w-full h-full object-cover" src="@profile.AvatarUrl" alt="Аватар" referrerpolicy="no-referrer" />
+                                        }
+                                        else
+                                        {
+                                            <span class="font-headline-md text-headline-md text-primary">@Initials</span>
+                                        }
+                                    </div>
+                                </div>
+                                <!-- Fields -->
+                                <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-sm">
+                                    <div class="flex flex-col gap-xs">
+                                        <label for="first-name" class="font-label-caps text-label-caps text-on-surface-variant uppercase">Име</label>
+                                        <InputText id="first-name" @bind-Value="model.FirstName" autocomplete="given-name"
+                                                   class="bg-[#0F172A] border border-primary/10 rounded-DEFAULT p-xs font-body-md text-body-md text-on-surface w-full focus:border-primary transition-colors" />
+                                        <ValidationMessage For="() => model.FirstName" class="text-sm text-error" />
+                                    </div>
+                                    <div class="flex flex-col gap-xs">
+                                        <label for="last-name" class="font-label-caps text-label-caps text-on-surface-variant uppercase">Фамилия</label>
+                                        <InputText id="last-name" @bind-Value="model.LastName" autocomplete="family-name"
+                                                   class="bg-[#0F172A] border border-primary/10 rounded-DEFAULT p-xs font-body-md text-body-md text-on-surface w-full focus:border-primary transition-colors" />
+                                        <ValidationMessage For="() => model.LastName" class="text-sm text-error" />
+                                    </div>
+                                    <div class="flex flex-col gap-xs md:col-span-2">
+                                        <label for="email" class="font-label-caps text-label-caps text-on-surface-variant uppercase">Имейл</label>
+                                        @* Read-only: the email is the sign-in name. *@
+                                        <input id="email" type="email" value="@profile.Email" readonly
+                                               class="bg-[#0F172A] border border-primary/10 rounded-DEFAULT p-xs font-body-md text-body-md text-on-surface-variant w-full cursor-not-allowed" />
+                                    </div>
+                                    <div class="flex flex-col gap-xs md:col-span-2">
+                                        <label for="bio" class="font-label-caps text-label-caps text-on-surface-variant uppercase">Био (Терминален Вход)</label>
+                                        <InputTextArea id="bio" @bind-Value="model.Bio" rows="3" maxlength="2000"
+                                                       class="bg-[#0F172A] border border-primary/10 rounded-DEFAULT p-xs font-data-mono text-data-mono text-secondary w-full focus:border-primary transition-colors resize-none" />
+                                        <ValidationMessage For="() => model.Bio" class="text-sm text-error" />
+                                    </div>
                                 </div>
                             </div>
-                            <span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Смени Аватар</span>
-                        </div>
-                        <!-- Fields -->
-                        <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-sm">
-                            <div class="flex flex-col gap-xs">
-                                <label class="font-label-caps text-label-caps text-on-surface-variant uppercase">Име</label>
-                                <input class="bg-[#0F172A] border border-primary/10 rounded-DEFAULT p-xs font-body-md text-body-md text-on-surface w-full focus:border-primary transition-colors" type="text" value="Александър" />
+                            <div class="mt-md flex items-center justify-end gap-sm">
+                                @if (error != null)
+                                {
+                                    <span class="font-data-mono text-data-mono text-sm text-error" role="alert">@error</span>
+                                }
+                                else if (saved)
+                                {
+                                    <span class="font-data-mono text-data-mono text-sm text-primary flex items-center gap-xs" role="status">
+                                        <span class="material-symbols-outlined text-sm">check_circle</span>
+                                        Промените са запазени.
+                                    </span>
+                                }
+                                <button type="submit" disabled="@saving"
+                                        class="bg-transparent border border-primary text-primary font-bold py-xs px-sm rounded-DEFAULT hover:bg-primary/10 transition-colors flex items-center gap-xs disabled:opacity-60">
+                                    <span class="material-symbols-outlined text-sm" data-icon="save">save</span>
+                                    @(saving ? "Запазване..." : "Запази Промените")
+                                </button>
                             </div>
-                            <div class="flex flex-col gap-xs">
-                                <label class="font-label-caps text-label-caps text-on-surface-variant uppercase">Фамилия</label>
-                                <input class="bg-[#0F172A] border border-primary/10 rounded-DEFAULT p-xs font-body-md text-body-md text-on-surface w-full focus:border-primary transition-colors" type="text" value="Иванов" />
-                            </div>
-                            <div class="flex flex-col gap-xs md:col-span-2">
-                                <label class="font-label-caps text-label-caps text-on-surface-variant uppercase">Имейл</label>
-                                <input class="bg-[#0F172A] border border-primary/10 rounded-DEFAULT p-xs font-body-md text-body-md text-on-surface w-full focus:border-primary transition-colors" type="email" value="alexander.ivanov@innovation.studio" />
-                            </div>
-                            <div class="flex flex-col gap-xs md:col-span-2">
-                                <label class="font-label-caps text-label-caps text-on-surface-variant uppercase">Био (Терминален Вход)</label>
-<textarea class="bg-[#0F172A] border border-primary/10 rounded-DEFAULT p-xs font-data-mono text-data-mono text-secondary w-full focus:border-primary transition-colors resize-none" rows="3">&gt; Главен системен архитект. Фокус върху AI интеграции и квантови изчисления.</textarea>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mt-md flex justify-end">
-                        <button class="bg-transparent border border-primary text-primary font-bold py-xs px-sm rounded-DEFAULT hover:bg-primary/10 transition-colors flex items-center gap-xs">
-                            <span class="material-symbols-outlined text-sm" data-icon="save">save</span>
-                            Запази Промените
-                        </button>
-                    </div>
+                        </EditForm>
+                    }
                 </section>
                 <!-- Security Section -->
                 @* <section class="bg-[#1E293B] border border-primary/10 rounded-xl p-md backdrop-blur-md glow-hover transition-all">
@@ -213,11 +182,67 @@
                 <!-- Danger Zone -->
                 <section class="bg-error/5 border border-error/20 rounded-xl p-md mt-auto">
                     <h3 class="font-body-md text-body-md font-bold text-error mb-xs">Опасна Зона</h3>
-                    <p class="font-data-mono text-data-mono text-on-surface-variant text-sm mb-sm">Изход от текущата сесия. Всички незапазени локални данни ще бъдат изчистени от паметта.</p>
-            <button class="w-full bg-error/10 border border-error text-error hover:bg-error hover:text-on-error font-bold py-sm rounded-DEFAULT transition-colors flex items-center justify-center gap-xs">
+                    <button type="button" @onclick="SignOutAsync" class="w-full bg-error/10 border border-error text-error hover:bg-error hover:text-on-error font-bold py-sm rounded-DEFAULT transition-colors flex items-center justify-center gap-xs">
                         <span class="material-symbols-outlined" data-icon="power_settings_new">power_settings_new</span>
                         Изход от Системата
                     </button>
                 </section>
             </div>
         </div>
+
+@code {
+    private ProfileResponse? profile;
+    private UpdateProfileRequest model = new();
+    private bool loading = true;
+    private bool saving;
+    private bool saved;
+    private string? error;
+
+    private string Initials
+    {
+        get
+        {
+            var letters = new[] { profile?.FirstName, profile?.LastName }
+                .Where(n => !string.IsNullOrWhiteSpace(n))
+                .Select(n => char.ToUpper(n!.Trim()[0]));
+            var text = string.Concat(letters);
+            return text.Length > 0 ? text : char.ToUpper(profile?.Email.FirstOrDefault() ?? '?').ToString();
+        }
+    }
+
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        loading = true;
+        profile = await Auth.GetProfileAsync();
+        if (profile != null)
+            model = new UpdateProfileRequest { FirstName = profile.FirstName, LastName = profile.LastName, Bio = profile.Bio };
+        loading = false;
+    }
+
+    private async Task SaveAsync()
+    {
+        saving = true;
+        saved = false;
+        error = null;
+
+        var (updated, err) = await Auth.UpdateProfileAsync(model);
+
+        saving = false;
+        if (updated == null)
+        {
+            error = err ?? "Възникна грешка. Опитайте отново.";
+            return;
+        }
+
+        profile = updated;
+        saved = true;
+    }
+
+    private async Task SignOutAsync()
+    {
+        await Auth.SignOutAsync();
+        Navigation.NavigateTo("signin");
+    }
+}

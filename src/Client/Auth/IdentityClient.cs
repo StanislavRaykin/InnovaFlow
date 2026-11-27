@@ -61,6 +61,38 @@ public class IdentityClient(HttpClient http, JwtAuthenticationStateProvider auth
         }
     }
 
+    public async Task<ProfileResponse?> GetProfileAsync(CancellationToken ct = default)
+    {
+        try
+        {
+            var response = await http.GetAsync("api/auth/profile", ct);
+            return response.IsSuccessStatusCode
+                ? await response.Content.ReadFromJsonAsync<ProfileResponse>(ct)
+                : null;
+        }
+        catch (HttpRequestException ex)
+        {
+            logger.LogWarning(ex, "Loading the profile failed.");
+            return null;
+        }
+    }
+
+    public async Task<(ProfileResponse? Profile, string? Error)> UpdateProfileAsync(UpdateProfileRequest request, CancellationToken ct = default)
+    {
+        try
+        {
+            var response = await http.PutAsJsonAsync("api/auth/profile", request, ct);
+            if (!response.IsSuccessStatusCode)
+                return (null, await ReadErrorAsync(response));
+
+            return (await response.Content.ReadFromJsonAsync<ProfileResponse>(ct), null);
+        }
+        catch (HttpRequestException)
+        {
+            return (null, "Сървърът не е достъпен. Опитайте отново.");
+        }
+    }
+
     private async Task<AuthResult> CompleteSignInAsync(HttpResponseMessage response)
     {
         if (!response.IsSuccessStatusCode)

@@ -13,6 +13,7 @@ public static class EndpointBuilderExtensions
         group.MapRegistration();
         group.MapLogout();
         group.MapSession();
+        group.MapProfile();
         githubGroup.MapExternalLogin();
 
         return app;

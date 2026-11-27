@@ -54,7 +54,6 @@
                           style="font-variation-settings: 'FILL' 1;">lightbulb</span>
                     <span class="font-headline-md text-headline-md font-bold text-primary">InnovaFlow</span>
                 </a>
-                <div class="font-data-mono text-data-mono text-primary/70">AI OS v2.4</div>
             </div>
 
             <nav class="flex flex-col gap-xs px-sm" @onclick="CloseDrawer">
@@ -88,20 +87,10 @@
                 </Authorized>
             </AuthorizeView>
 
-            <button
-                class="w-full py-sm mb-md bg-primary-container text-surface font-label-caps text-label-caps font-bold rounded-DEFAULT hover:opacity-90 transition-opacity"
-                type="button">
-                Стартирай агент
-            </button>
-
             <nav class="flex flex-col gap-xs" @onclick="CloseDrawer">
-                <NavLink class="@NavItem" ActiveClass="@NavItemActive" href="settings">
+                <NavLink class="@NavItem" ActiveClass="@NavItemActive" href="profile">
                     <span class="material-symbols-outlined">settings</span>
                     Настройки
-                </NavLink>
-                <NavLink class="@NavItem" ActiveClass="@NavItemActive" href="support">
-                    <span class="material-symbols-outlined">help</span>
-                    Поддръжка
                 </NavLink>
                 @* <button class="@NavItem w-full text-left" type="button" @onclick="SignOutAsync">
                     <span class="material-symbols-outlined text-danger">logout</span>
