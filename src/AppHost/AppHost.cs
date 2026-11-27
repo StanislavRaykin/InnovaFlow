@@ -82,10 +82,10 @@ var notifier = builder.AddProject<Projects.Notifier>("notifier") //migrations
 
 var identity = builder.AddProject<Projects.Identity>("identity")//migrations
                       .WithEnvironment("RunMigrationsOnStartup", "true")
-                      .WithEnvironment("GH-CLI-SECRET", ghCliSecret)
-                      .WithEnvironment("GH-CLI-ID", ghCliId)
-                      .WithEnvironment("GOOGLE-CLI-SECRET", googleCliSecret)
-                      .WithEnvironment("GOOGLE-CLI-ID", googleCliId)
+                      .WithEnvironment("GH_CLI_SECRET", ghCliSecret)
+                      .WithEnvironment("GH_CLI_ID", ghCliId)
+                      .WithEnvironment("GOOGLE_CLI_SECRET", googleCliSecret)
+                      .WithEnvironment("GOOGLE_CLI_ID", googleCliId)
                       .WithEnvironment("Jwt__PrivateKey", jwtPrivKey)
                       .WithReference(db)
                       .WithReference(cache)

@@ -54,8 +54,8 @@ public static class ServiceCollectionExtensions
     })
     .AddGitHub(o =>
     {
-        o.ClientId = builder.Configuration["GH-CLI-ID"]! ?? throw new InvalidOperationException("Github client id is missing");
-        o.ClientSecret = builder.Configuration["GH-CLI-SECRET"] ?? throw new InvalidOperationException("Github client secret is missing"); ;
+        o.ClientId = builder.Configuration["GH_CLI_ID"]! ?? throw new InvalidOperationException("Github client id is missing");
+        o.ClientSecret = builder.Configuration["GH_CLI_SECRET"] ?? throw new InvalidOperationException("Github client secret is missing"); ;
         o.SignInScheme = "external";
         o.CallbackPath = "/signin-github";
         o.Scope.Add("user:email");               // needed — GitHub hides email otherwise
@@ -64,8 +64,8 @@ public static class ServiceCollectionExtensions
         o.SaveTokens = false;
     }).AddGoogle(o =>
     {
-        o.ClientId     = builder.Configuration["GOOGLE-CLI-ID"]! ??  throw new InvalidOperationException("Google client id is missing");
-        o.ClientSecret = builder.Configuration["GOOGLE-CLI-SECRET"]! ?? throw new InvalidOperationException("Google client secret is missing");
+        o.ClientId     = builder.Configuration["GOOGLE_CLI_ID"]! ??  throw new InvalidOperationException("Google client id is missing");
+        o.ClientSecret = builder.Configuration["GOOGLE_CLI_SECRET"]! ?? throw new InvalidOperationException("Google client secret is missing");
         o.SignInScheme = "external";
         o.CallbackPath = "/signin-google";
         o.SaveTokens   = false;
