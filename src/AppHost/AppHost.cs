@@ -20,7 +20,7 @@ var jwtPubKey = builder.AddParameter("JWT-PUBLIC-KEY");
 
 
 var db = builder.ExecutionContext.IsPublishMode
-    ? builder.AddConnectionString(builder.Configuration.GetConnectionString("Db")!)
+    ? builder.AddConnectionString("InnovaFlow")
     : builder.AddPostgres("postgres")
     .WithHostPort(5432)
     .WithPgWeb()
