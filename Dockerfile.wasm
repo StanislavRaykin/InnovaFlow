@@ -1,0 +1,42 @@
+# ---------------------------------------------------------------------------
+# InnovaFlow — Blazor WebAssembly standalone client, served as static files by nginx
+#
+# On Railway, set on the Client service:
+#   RAILWAY_DOCKERFILE_PATH=Dockerfile.wasm
+#   PROJECT=Client            (optional, Client is the default)
+# ---------------------------------------------------------------------------
+
+ARG DOTNET_VERSION=10.0
+
+# ---------- build ----------
+FROM mcr.microsoft.com/dotnet/sdk:${DOTNET_VERSION} AS build
+ARG PROJECT=Client
+WORKDIR /repo
+COPY . .
+RUN dotnet publish "src/${PROJECT}/${PROJECT}.csproj" -c Release -o /app/publish
+
+# ---------- runtime ----------
+FROM nginx:alpine AS final
+# Railway overrides PORT; nginx's template step substitutes it at startup
+ENV PORT=8080
+
+RUN mkdir -p /etc/nginx/templates \
+ && printf '%s\n' \
+    'server {' \
+    '    listen ${PORT};' \
+    '    listen [::]:${PORT};' \
+    '    root /usr/share/nginx/html;' \
+    '    index index.html;' \
+    '' \
+    '    # SPA routing: unknown paths fall back to index.html' \
+    '    location / {' \
+    '        try_files $uri $uri/ /index.html;' \
+    '    }' \
+    '' \
+    '    # never cache the app shell, so new deploys show up immediately' \
+    '    location = /index.html {' \
+    '        add_header Cache-Control "no-cache";' \
+    '    }' \
+    '}' > /etc/nginx/templates/default.conf.template
+
+COPY --from=build /app/publish/wwwroot /usr/share/nginx/html

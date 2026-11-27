@@ -16,5 +16,6 @@
   <Folder Name="/Solution Items/">
     <File Path=".gitignore"/>
     <File Path="Dockerfile"/>
+    <File Path="Dockerfile.wasm"/>
   </Folder>
 </Solution>
