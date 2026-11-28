@@ -86,3 +86,47 @@ h1:focus {
 code {
     color: #c02d76;
 }
+
+
+
+
+html,
+body,
+#app {
+    min-height: 100%;
+    margin: 0;
+}
+
+body {
+    background-color: #0b1326;
+    color: #dae2fd;
+}
+
+.loading-screen {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background-color: #0b1326;
+    background-image: linear-gradient(to right, rgba(107, 251, 154, 0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(107, 251, 154, 0.04) 1px, transparent 1px);
+    background-size: 24px 24px;
+}
+
+.loading-brand {
+    color: #6bfb9a;
+    font-family: "Hanken Grotesk", sans-serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    text-shadow: 0 0 24px rgba(107, 251, 154, 0.35);
+}
+
+.loading-text {
+    color: #8e9bb8;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
